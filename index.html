@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChordPro Studio</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --bg-light: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            height: 100vh;
+            overflow: hidden;
+        }
+        .editor-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 1fr;
+            height: calc(100vh - 64px);
+        }
+        textarea {
+            font-family: 'Roboto Mono', monospace;
+            resize: none;
+            outline: none;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .fretboard {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 2px;
+            background: #cbd5e1;
+            padding: 4px;
+            border-radius: 4px;
+            width: 120px;
+        }
+        .fret-cell {
+            height: 24px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .fret-cell.active {
+            background: #2563eb;
+            color: white;
+            border-radius: 50%;
+        }
+        .fret-cell.muted {
+            background: #f1f5f9;
+            color: #94a3b8;
+        }
+        #preview-pane {
+            background: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            overflow-y: auto;
+            padding: 40px;
+        }
+        .song-list-item:hover .delete-btn {
+            display: block;
+        }
+        .delete-btn {
+            display: none;
+        }
+        /* Songsheet Specific Styles - Dynamic */
+        .song-title { margin-bottom: 0.1rem; font-weight: bold; }
+        .song-subtitle { margin-bottom: 0.8rem; opacity: 0.8; }
+        .section-header, .line, .spacer { 
+            display: flex; 
+            align-items: flex-end;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            transition: height 0.2s;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .chorus-block, .section-block {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .page-break {
+            break-before: page;
+            page-break-before: always;
+            height: 0;
+            margin: 0;
+            padding: 0;
+        }
+        .section-header { font-weight: bold; }
+        .word-group { display: flex; flex-direction: column; margin-right: 0.3em; position: relative; }
+        .chord { height: 1.2em; font-weight: bold; position: absolute; top: -1.0em; white-space: nowrap; }
+        .lyrics { white-space: pre; }
+
+        .spacer { min-width: 1px; }
+
+        @media print {
+            .no-print { display: none; }
+            #preview-pane { box-shadow: none; padding: 0; }
+        }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <!-- Header -->
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 no-print">
+        <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+            </svg>
+            <h1 class="text-xl font-bold text-slate-800">ChordPro Studio</h1>
+        </div>
+        <button onclick="exportPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd" />
+            </svg>
+            PDF Export
+        </button>
+    </header>
+
+    <main class="editor-container flex-1 overflow-hidden">
+        <!-- Sidebar Controls -->
+        <aside class="bg-white border-r border-slate-200 p-6 overflow-y-auto no-print">
+            <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-6">Formatierung</h2>
+            
+            <!-- Title Settings -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Titel</label>
+                <select id="font-title" class="w-full border border-slate-300 rounded p-2 mb-2 text-sm">
+                    <option value="Inter">Inter</option>
+                    <option value="Montserrat" selected>Montserrat</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Open Sans">Open Sans</option>
+                    <option value="Lato">Lato</option>
+                </select>
+                <div class="flex gap-2">
+                    <input type="number" id="size-title" value="28" class="w-20 border border-slate-300 rounded p-2 text-sm">
+                    <input type="color" id="color-title" value="#1e293b" class="flex-1 h-9 border border-slate-300 rounded p-1">
+                </div>
+            </div>
+
+            <!-- Subtitle Settings -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Untertitel</label>
+                <select id="font-subtitle" class="w-full border border-slate-300 rounded p-2 mb-2 text-sm">
+                    <option value="Inter" selected>Inter</option>
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Open Sans">Open Sans</option>
+                    <option value="Lato">Lato</option>
+                </select>
+                <div class="flex gap-2">
+                    <input type="number" id="size-subtitle" value="14" class="w-20 border border-slate-300 rounded p-2 text-sm">
+                    <input type="color" id="color-subtitle" value="#64748b" class="flex-1 h-9 border border-slate-300 rounded p-1">
+                </div>
+            </div>
+
+            <!-- Key Settings -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Tonart (Key)</label>
+                <select id="font-key" class="w-full border border-slate-300 rounded p-2 mb-2 text-sm">
+                    <option value="Inter" selected>Inter</option>
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Open Sans">Open Sans</option>
+                    <option value="Lato">Lato</option>
+                </select>
+                <div class="flex gap-2">
+                    <input type="number" id="size-key" value="14" class="w-20 border border-slate-300 rounded p-2 text-sm">
+                    <input type="color" id="color-key" value="#64748b" class="flex-1 h-9 border border-slate-300 rounded p-1">
+                </div>
+            </div>
+
+            <!-- Comment Settings -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Kommentar / Capo</label>
+                <select id="font-comment" class="w-full border border-slate-300 rounded p-2 mb-2 text-sm">
+                    <option value="Inter" selected>Inter</option>
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Open Sans">Open Sans</option>
+                    <option value="Lato">Lato</option>
+                </select>
+                <div class="flex gap-2">
+                    <input type="number" id="size-comment" value="14" class="w-20 border border-slate-300 rounded p-2 text-sm">
+                    <input type="color" id="color-comment" value="#64748b" class="flex-1 h-9 border border-slate-300 rounded p-1">
+                </div>
+            </div>
+
+            <!-- Tempo Settings -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Tempo</label>
+                <select id="font-tempo" class="w-full border border-slate-300 rounded p-2 mb-2 text-sm">
+                    <option value="Inter" selected>Inter</option>
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Open Sans">Open Sans</option>
+                    <option value="Lato">Lato</option>
+                </select>
+                <div class="flex gap-2">
+                    <input type="number" id="size-tempo" value="14" class="w-20 border border-slate-300 rounded p-2 text-sm">
+                    <input type="color" id="color-tempo" value="#64748b" class="flex-1 h-9 border border-slate-300 rounded p-1">
+                </div>
+            </div>
+
+            <!-- Chords Settings -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Akkorde</label>
+                <select id="font-chords" class="w-full border border-slate-300 rounded p-2 mb-2 text-sm">
+                    <option value="Inter">Inter</option>
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Roboto" selected>Roboto</option>
+                    <option value="Open Sans">Open Sans</option>
+                    <option value="Lato">Lato</option>
+                </select>
+                <div class="flex gap-2">
+                    <input type="number" id="size-chords" value="13" class="w-20 border border-slate-300 rounded p-2 text-sm">
+                    <input type="color" id="color-chords" value="#2563eb" class="flex-1 h-9 border border-slate-300 rounded p-1">
+                </div>
+            </div>
+
+            <!-- Lyrics Settings -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Songtext</label>
+                <select id="font-lyrics" class="w-full border border-slate-300 rounded p-2 mb-2 text-sm">
+                    <option value="Inter" selected>Inter</option>
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Open Sans">Open Sans</option>
+                    <option value="Lato">Lato</option>
+                </select>
+                <div class="flex gap-2 mb-3">
+                    <input type="number" id="size-lyrics" value="16" class="w-20 border border-slate-300 rounded p-2 text-sm">
+                    <input type="color" id="color-lyrics" value="#334155" class="flex-1 h-9 border border-slate-300 rounded p-1">
+                </div>
+                <!-- Line Spacing Slider -->
+                <label class="block text-[11px] font-medium text-slate-500 mb-1">Zeilenabstand</label>
+                <input type="range" id="line-spacing" min="1.5" max="4" step="0.1" value="2.2" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+            </div>
+
+            <!-- Chorus Highlight Settings -->
+            <div class="mb-6 pt-6 border-t border-slate-100">
+                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Chorus-Hervorhebung</h2>
+                
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="chorus-indent-toggle" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="applyStyles()">
+                        <span class="text-xs text-slate-600 font-medium">Einrücken</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <input type="number" id="chorus-indent-val" value="30" class="w-14 border border-slate-300 rounded p-1 text-xs" oninput="applyStyles()">
+                        <span class="text-[10px] text-slate-400">px</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="chorus-line-toggle" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="applyStyles()">
+                        <span class="text-xs text-slate-600 font-medium">Linke Linie</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <input type="number" id="chorus-line-val" value="4" class="w-14 border border-slate-300 rounded p-1 text-xs" oninput="applyStyles()">
+                        <span class="text-[10px] text-slate-400">px</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="chorus-border-toggle" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="applyStyles()">
+                        <span class="text-xs text-slate-600 font-medium">Rahmen</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <input type="number" id="chorus-border-val" value="1" class="w-14 border border-slate-300 rounded p-1 text-xs" oninput="applyStyles()">
+                        <span class="text-[10px] text-slate-400">px</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Song Library -->
+            <div class="pt-6 border-t border-slate-100">
+                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Song-Bibliothek</h2>
+                <button onclick="saveCurrentSong()" class="w-full bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded text-sm font-medium mb-4 transition-colors">
+                    Aktuellen Song speichern
+                </button>
+                <div id="song-list" class="space-y-2">
+                    <!-- Saved songs will appear here -->
+                </div>
+            </div>
+
+            <!-- File Transfer -->
+            <div class="pt-6 border-t border-slate-100 mt-6">
+                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Datei-Transfer</h2>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <button onclick="downloadFile('cho')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded text-[10px] font-bold transition-colors">
+                        Download .cho
+                    </button>
+                    <button onclick="downloadFile('txt')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded text-[10px] font-bold transition-colors">
+                        Download .txt
+                    </button>
+                </div>
+                <button onclick="document.getElementById('file-upload').click()" class="w-full border-2 border-dashed border-slate-200 hover:border-blue-400 text-slate-400 hover:text-blue-600 py-3 rounded text-[10px] font-bold transition-all flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    Datei laden (.cho / .txt)
+                </button>
+                <input type="file" id="file-upload" class="hidden" accept=".cho,.txt,.chordpro" onchange="handleFileUpload(event)">
+            </div>
+
+            <!-- Transpose -->
+            <div class="pt-6 border-t border-slate-100 mt-6">
+                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Transponieren</h2>
+                <div class="flex gap-2">
+                    <button onclick="transposeSong(-1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-[10px] font-bold transition-colors">
+                        -1 Halbton
+                    </button>
+                    <button onclick="transposeSong(1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-[10px] font-bold transition-colors">
+                        +1 Halbton
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chord Helper -->
+            <div class="pt-6 border-t border-slate-100 mt-6">
+                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Akkord-Helfer</h2>
+                
+                <!-- Quick Chords -->
+                <div class="grid grid-cols-4 gap-1 mb-4">
+                    <button onclick="insertChord('C')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">C</button>
+                    <button onclick="insertChord('G')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">G</button>
+                    <button onclick="insertChord('D')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">D</button>
+                    <button onclick="insertChord('A')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">A</button>
+                    <button onclick="insertChord('E')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">E</button>
+                    <button onclick="insertChord('Am')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">Am</button>
+                    <button onclick="insertChord('Em')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">Em</button>
+                    <button onclick="insertChord('Dm')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">Dm</button>
+                </div>
+
+                <!-- Chord Builder -->
+                <div class="space-y-3">
+                    <div class="flex gap-1 overflow-x-auto pb-1 no-scrollbar" id="chord-roots">
+                        <!-- Roots injected by JS -->
+                    </div>
+                    <div class="flex gap-1 overflow-x-auto pb-1 no-scrollbar" id="chord-qualities">
+                        <!-- Qualities injected by JS -->
+                    </div>
+                    <button onclick="insertCustomChord()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-xs font-bold transition-colors">
+                        [<span id="custom-chord-preview">C</span>] Einfügen
+                    </button>
+                </div>
+
+                <!-- Diagram Creator -->
+                <div class="mt-6 pt-6 border-t border-slate-100">
+                    <h3 class="text-[11px] font-bold text-slate-400 uppercase mb-3">Diagramm-Ersteller</h3>
+                    <div class="flex gap-4">
+                        <div id="fretboard-ui" class="fretboard">
+                            <!-- Fretboard injected by JS -->
+                        </div>
+                        <div class="flex-1 space-y-2">
+                            <input type="text" id="diag-name" placeholder="Akkord Name" class="w-full border border-slate-300 rounded p-1 text-xs">
+                            <button onclick="insertDiagram()" class="w-full bg-slate-700 text-white py-1.5 rounded text-[10px] font-bold">Definieren</button>
+                            <p class="text-[9px] text-slate-400 leading-tight">Klicke auf Bünde zum Markieren. "X" für Mute.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-slate-100 mt-6">
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Tipp: Nutze [Chord] direkt im Text. Direktiven wie {title: Name} werden automatisch erkannt.
+                </p>
+            </div>
+        </aside>
+
+        <!-- Editor Spalte -->
+        <section class="border-r border-slate-200 flex flex-col no-print">
+            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase">ChordPro Editor</div>
+            <textarea id="chordpro-input" class="flex-1 p-6 text-sm leading-relaxed text-slate-700 bg-white" placeholder="Gib hier deinen ChordPro Text ein..."></textarea>
+        </section>
+
+        <!-- Preview Spalte -->
+        <section class="flex flex-col bg-slate-100 p-8 overflow-hidden">
+            <div class="bg-white rounded-xl shadow-lg flex-1 overflow-hidden flex flex-col">
+                <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase no-print">Live Vorschau</div>
+                <div id="preview-pane" class="flex-1">
+                    <!-- Songsheet content will be injected here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden no-print">
+        <div class="bg-white rounded-xl p-6 max-w-sm w-full shadow-2xl mx-4">
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Song überschreiben?</h3>
+            <p class="text-slate-600 text-sm mb-6">Ein Song mit dem Titel "<span id="duplicate-title" class="font-semibold"></span>" existiert bereits. Möchtest du ihn überschreiben?</p>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Abbrechen</button>
+                <button id="confirm-overwrite-btn" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">Überschreiben</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('chordpro-input');
+        const preview = document.getElementById('preview-pane');
+        
+        // Settings elements
+        const settings = {
+            title: { font: 'font-title', size: 'size-title', color: 'color-title' },
+            subtitle: { font: 'font-subtitle', size: 'size-subtitle', color: 'color-subtitle' },
+            key: { font: 'font-key', size: 'size-key', color: 'color-key' },
+            comment: { font: 'font-comment', size: 'size-comment', color: 'color-comment' },
+            tempo: { font: 'font-tempo', size: 'size-tempo', color: 'color-tempo' },
+            chords: { font: 'font-chords', size: 'size-chords', color: 'color-chords' },
+            lyrics: { font: 'font-lyrics', size: 'size-lyrics', color: 'color-lyrics' }
+        };
+
+        const defaultText = `{title: Jolene}
+{artist: Dolly Parton}
+{key: C#m}
+{comment: Capo @ 4}
+{tempo: 111}
+
+{start_of_bridge: Intro}
+[Am]
+{end_of_bridge}
+
+{start_of_chorus}
+Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
+I'm [G]begging of you [G]please don't take my[Am]  man
+Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
+[G]Please don't take him [G]just because you [Am]can
+{end_of_chorus}
+
+{start_of_verse: Verse 1}
+Your [Am]beauty is beyond[C] compare
+With [G]flaming locks of au[Am]burn hair
+With [G]ivory skin and eyes of emerald [Am]green
+Your [Am]smile is like a breath[C] of spring
+Your [G]voice is soft like sum[Am]mer rain
+And [G]I cannot compete with you, [Am]Jolene
+He [Am]talks about you in[C] his sleep
+There's [G]nothing I can do[Am]  to keep
+From [G]crying when he calls your name, [Am]Jolene
+And [Am]I can easily un[C]derstand
+How [G]you could easily take[Am]  my man
+But you [G]don't know what he means to me, Jo[Am]lene
+{end_of_verse}
+
+{start_of_chorus}
+Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
+I'm [G]begging of you [G]please don't take my[Am]  man
+Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
+[G]Please don't take him [G]just because you [Am]can
+{end_of_chorus}
+
+{start_of_verse: Verse 2}
+[Am]You could have your choice[C] of men
+But [G]I could never love[Am]  again
+[G]He's the only one for me, [Am]Jolene
+I [Am]had to have this talk[C] with you
+My [G]happiness depends[Am]  on you
+And wha[G]tever you decide to do, Jo[Am]lene
+{end_of_verse}
+
+{start_of_chorus}
+Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
+I'm [G]begging of you [G]please don't take my[Am]  man
+Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
+[G]Please don't take him [G]even though you [Am]can
+{end_of_chorus}
+
+{start_of_bridge: Outro}
+[Am]Jolene, Jolene
+{end_of_bridge}`;
+
+        input.value = defaultText;
+
+        function parseChordPro(text) {
+            const lines = text.split('\n');
+            let html = '<div class="songsheet">';
+            let metadata = { title: '', subtitle: '', info: [] };
+            let inBlock = false;
+
+            lines.forEach(line => {
+                line = line.trim();
+                
+                // Directives with colon
+                const directiveMatch = line.match(/^{([^:]+):?\s*(.*)}$/);
+                if (directiveMatch) {
+                    const key = directiveMatch[1].trim().toLowerCase();
+                    const value = directiveMatch[2].trim();
+
+                    if (key === 'title' || key === 't') metadata.title = value;
+                    else if (key === 'artist' || key === 'subtitle' || key === 'st') metadata.subtitle = value;
+                    else if (key === 'start_of_chorus' || key === 'soc') {
+                        if (inBlock) html += '</div>';
+                        html += `<div class="chorus-block"><div class="section-header">[Chorus]</div>`;
+                        inBlock = true;
+                    }
+                    else if (key === 'end_of_chorus' || key === 'eoc' || key === 'end_of_verse' || key === 'eov' || key === 'end_of_bridge' || key === 'eob') {
+                        if (inBlock) {
+                            html += '</div>';
+                            inBlock = false;
+                        }
+                    }
+                    else if (key === 'start_of_verse' || key === 'sov') {
+                        if (inBlock) html += '</div>';
+                        html += `<div class="section-block"><div class="section-header">[${value || 'Verse'}]</div>`;
+                        inBlock = true;
+                    }
+                    else if (key === 'start_of_bridge' || key === 'sob') {
+                        if (inBlock) html += '</div>';
+                        html += `<div class="section-block"><div class="section-header">[${value || 'Bridge'}]</div>`;
+                        inBlock = true;
+                    }
+                    else if (key === 'key') {
+                        metadata.info.push({ type: 'key', text: `Key: ${value}` });
+                    }
+                    else if (key === 'tempo') {
+                        metadata.info.push({ type: 'tempo', text: `Tempo: ${value}` });
+                    }
+                    else if (key === 'comment' || key === 'c') {
+                        metadata.info.push({ type: 'comment', text: value });
+                    }
+                    else if (key === 'capo') {
+                        metadata.info.push({ type: 'comment', text: `Capo: ${value}` });
+                    }
+                    else if (key === 'new_page' || key === 'np') {
+                        html += '<div class="page-break"></div>';
+                    }
+                    return;
+                }
+
+                if (!line) {
+                    html += '<div class="spacer">&nbsp;</div>';
+                    return;
+                }
+
+                // Content Line
+                html += '<div class="line">';
+                
+                let i = 0;
+                while (i < line.length) {
+                    if (line[i] === '[') {
+                        let chord = '';
+                        i++;
+                        while (i < line.length && line[i] !== ']') {
+                            chord += line[i];
+                            i++;
+                        }
+                        i++; // skip ]
+                        
+                        // Collect lyrics until next chord or end of line
+                        let lyrics = '';
+                        while (i < line.length && line[i] !== '[') {
+                            lyrics += line[i];
+                            i++;
+                        }
+                        
+                        html += `<div class="word-group"><span class="chord">${chord}</span><span class="lyrics">${lyrics || '&nbsp;'}</span></div>`;
+                    } else {
+                        let lyrics = '';
+                        while (i < line.length && line[i] !== '[') {
+                            lyrics += line[i];
+                            i++;
+                        }
+                        html += `<div class="word-group"><span class="chord"></span><span class="lyrics">${lyrics}</span></div>`;
+                    }
+                }
+                
+                html += '</div>';
+            });
+
+            if (inBlock) html += '</div>';
+
+            // Prepend metadata
+            let headerHtml = '<div class="song-header-block" style="break-inside: avoid; page-break-inside: avoid;">';
+            if (metadata.title) headerHtml += `<div class="song-title">${metadata.title}</div>`;
+            if (metadata.subtitle) headerHtml += `<div class="song-subtitle">${metadata.subtitle}</div>`;
+            if (metadata.info.length > 0) {
+                headerHtml += `<div class="song-info mb-2 text-sm opacity-70">`;
+                metadata.info.forEach(info => {
+                    const cls = info.type ? `song-${info.type}` : 'song-info-misc';
+                    headerHtml += `<div class="${cls}">${info.text}</div>`;
+                });
+                headerHtml += `</div>`;
+            }
+            headerHtml += '</div>';
+
+            return headerHtml + html + '</div>';
+        }
+
+        function updatePreview() {
+            const raw = input.value;
+            preview.innerHTML = parseChordPro(raw);
+            applyStyles();
+        }
+
+        function applyStyles() {
+            const getVal = (id) => document.getElementById(id).value;
+
+            // Title
+            const titles = document.querySelectorAll('.song-title');
+            titles.forEach(el => {
+                el.style.fontFamily = getVal('font-title');
+                el.style.fontSize = getVal('size-title') + 'px';
+                el.style.color = getVal('color-title');
+            });
+
+            // Subtitle
+            const subtitles = document.querySelectorAll('.song-subtitle');
+            subtitles.forEach(el => {
+                el.style.fontFamily = getVal('font-subtitle');
+                el.style.fontSize = getVal('size-subtitle') + 'px';
+                el.style.color = getVal('color-subtitle');
+            });
+
+            // Key
+            const keys = document.querySelectorAll('.song-key');
+            keys.forEach(el => {
+                el.style.fontFamily = getVal('font-key');
+                el.style.fontSize = getVal('size-key') + 'px';
+                el.style.color = getVal('color-key');
+            });
+
+            // Comment
+            const comments = document.querySelectorAll('.song-comment');
+            comments.forEach(el => {
+                el.style.fontFamily = getVal('font-comment');
+                el.style.fontSize = getVal('size-comment') + 'px';
+                el.style.color = getVal('color-comment');
+            });
+
+            // Tempo
+            const tempos = document.querySelectorAll('.song-tempo');
+            tempos.forEach(el => {
+                el.style.fontFamily = getVal('font-tempo');
+                el.style.fontSize = getVal('size-tempo') + 'px';
+                el.style.color = getVal('color-tempo');
+            });
+
+            // Chords
+            const chords = document.querySelectorAll('.chord');
+            chords.forEach(el => {
+                el.style.fontFamily = getVal('font-chords');
+                el.style.fontSize = getVal('size-chords') + 'px';
+                el.style.color = getVal('color-chords');
+            });
+
+            // Lyrics
+            const lyrics = document.querySelectorAll('.lyrics, .section-header');
+            lyrics.forEach(el => {
+                el.style.fontFamily = getVal('font-lyrics');
+                el.style.fontSize = getVal('size-lyrics') + 'px';
+                el.style.color = getVal('color-lyrics');
+            });
+
+            // Chorus Blocks
+            const chorusBlocks = document.querySelectorAll('.chorus-block');
+            const indentOn = document.getElementById('chorus-indent-toggle').checked;
+            const indentVal = getVal('chorus-indent-val');
+            const lineOn = document.getElementById('chorus-line-toggle').checked;
+            const lineVal = getVal('chorus-line-val');
+            const borderOn = document.getElementById('chorus-border-toggle').checked;
+            const borderVal = getVal('chorus-border-val');
+
+            chorusBlocks.forEach(el => {
+                el.style.marginLeft = indentOn ? indentVal + 'px' : '0';
+                
+                if (borderOn) {
+                    el.style.border = `${borderVal}px solid black`;
+                    el.style.paddingLeft = '10px';
+                    el.style.paddingRight = '10px';
+                    el.style.paddingTop = '10px';
+                    el.style.paddingBottom = '10px';
+                } else if (lineOn) {
+                    el.style.border = 'none';
+                    el.style.borderLeft = `${lineVal}px solid black`;
+                    el.style.paddingLeft = '10px';
+                    el.style.paddingRight = '0';
+                    el.style.paddingTop = '0';
+                    el.style.paddingBottom = '0';
+                } else {
+                    el.style.border = 'none';
+                    el.style.paddingLeft = '0';
+                    el.style.paddingRight = '0';
+                    el.style.paddingTop = '0';
+                    el.style.paddingBottom = '0';
+                }
+
+                el.style.marginTop = '1rem';
+                el.style.marginBottom = '1rem';
+            });
+
+            // Line Spacing
+            const spacing = getVal('line-spacing');
+            const lines = document.querySelectorAll('.line, .section-header, .spacer');
+            lines.forEach(el => {
+                el.style.height = spacing + 'em';
+                el.style.lineHeight = '1';
+            });
+        }
+
+        function exportPDF() {
+            const element = document.getElementById('preview-pane');
+            const title = document.querySelector('.song-title')?.innerText || 'Songsheet';
+            
+            const opt = {
+                margin: 15,
+                filename: `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // Event Listeners
+        input.addEventListener('input', () => {
+            updatePreview();
+            autoSaveSession();
+        });
+        
+        const allInputs = document.querySelectorAll('select, input[type="number"], input[type="color"], input[type="range"]');
+        allInputs.forEach(el => {
+            el.addEventListener('input', () => {
+                applyStyles();
+                autoSaveSession();
+            });
+            el.addEventListener('change', () => {
+                applyStyles();
+                autoSaveSession();
+            });
+        });
+
+        // Local Storage Logic
+        function getSettings() {
+            const data = {};
+            for (const [key, fields] of Object.entries(settings)) {
+                data[key] = {
+                    font: document.getElementById(fields.font).value,
+                    size: document.getElementById(fields.size).value,
+                    color: document.getElementById(fields.color).value
+                };
+            }
+            return data;
+        }
+
+        function setSettings(data) {
+            if (!data) return;
+            for (const [key, values] of Object.entries(data)) {
+                if (settings[key]) {
+                    document.getElementById(settings[key].font).value = values.font;
+                    document.getElementById(settings[key].size).value = values.size;
+                    document.getElementById(settings[key].color).value = values.color;
+                }
+            }
+        }
+
+        let pendingSongData = null;
+
+        function saveCurrentSong() {
+            const content = input.value;
+            const titleMatch = content.match(/{title:\s*(.+)}/i) || content.match(/{t:\s*(.+)}/i);
+            const title = titleMatch ? titleMatch[1].trim() : "Unbenannter Song";
+            
+            const songData = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                settings: getSettings(),
+                updatedAt: new Date().toISOString()
+            };
+
+            let library = JSON.parse(localStorage.getItem('chordpro_library') || '[]');
+            const existingIndex = library.findIndex(s => s.title.toLowerCase() === title.toLowerCase());
+
+            if (existingIndex !== -1) {
+                pendingSongData = { data: songData, index: existingIndex };
+                document.getElementById('duplicate-title').innerText = title;
+                document.getElementById('confirm-modal').classList.remove('hidden');
+            } else {
+                executeSave(songData);
+            }
+        }
+
+        function executeSave(songData, replaceIndex = -1) {
+            let library = JSON.parse(localStorage.getItem('chordpro_library') || '[]');
+            if (replaceIndex !== -1) {
+                // Keep the old ID if overwriting
+                songData.id = library[replaceIndex].id;
+                library[replaceIndex] = songData;
+            } else {
+                library.unshift(songData);
+            }
+            localStorage.setItem('chordpro_library', JSON.stringify(library));
+            renderSongList();
+            closeModal();
+        }
+
+        function closeModal() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            pendingSongData = null;
+        }
+
+        document.getElementById('confirm-overwrite-btn').onclick = () => {
+            if (pendingSongData) {
+                executeSave(pendingSongData.data, pendingSongData.index);
+            }
+        };
+
+        function deleteSong(id) {
+            let library = JSON.parse(localStorage.getItem('chordpro_library') || '[]');
+            library = library.filter(s => s.id !== id);
+            localStorage.setItem('chordpro_library', JSON.stringify(library));
+            renderSongList();
+        }
+
+        function loadSong(id) {
+            const library = JSON.parse(localStorage.getItem('chordpro_library') || '[]');
+            const song = library.find(s => s.id === id);
+            if (song) {
+                input.value = song.content;
+                setSettings(song.settings);
+                updatePreview();
+            }
+        }
+
+        function renderSongList() {
+            const listEl = document.getElementById('song-list');
+            const library = JSON.parse(localStorage.getItem('chordpro_library') || '[]');
+            
+            if (library.length === 0) {
+                listEl.innerHTML = '<p class="text-xs text-slate-400 italic">Keine gespeicherten Songs.</p>';
+                return;
+            }
+
+            listEl.innerHTML = library.map(song => `
+                <div class="song-list-item group flex items-center justify-between p-2 rounded hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all cursor-pointer" onclick="loadSong(${song.id})">
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-slate-700 truncate">${song.title}</div>
+                        <div class="text-[10px] text-slate-400">${new Date(song.updatedAt).toLocaleDateString()}</div>
+                    </div>
+                    <button onclick="event.stopPropagation(); deleteSong(${song.id})" class="delete-btn text-slate-300 hover:text-red-500 p-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function autoSaveSession() {
+            const session = {
+                content: input.value,
+                settings: getSettings()
+            };
+            localStorage.setItem('chordpro_session', JSON.stringify(session));
+        }
+
+        function loadSession() {
+            const session = JSON.parse(localStorage.getItem('chordpro_session'));
+            if (session) {
+                input.value = session.content;
+                setSettings(session.settings);
+            }
+        }
+
+        // File Transfer Logic
+        function downloadFile(ext) {
+            const content = input.value;
+            const titleMatch = content.match(/{title:\s*(.+)}/i) || content.match(/{t:\s*(.+)}/i);
+            const title = titleMatch ? titleMatch[1].trim() : "song";
+            const filename = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${ext}`;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                input.value = e.target.result;
+                updatePreview();
+                autoSaveSession();
+                // Reset file input so same file can be uploaded again
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        // Transpose Logic
+        const sharpScale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const flatScale = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+        const noteMap = {
+            'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4, 'F': 5, 
+            'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11
+        };
+
+        function transposeChord(chord, semitones) {
+            const scale = semitones > 0 ? sharpScale : flatScale;
+            return chord.split('/').map(part => {
+                const match = part.match(/^([A-G][#b]?)(.*)/);
+                if (!match) return part;
+                
+                const root = match[1];
+                const quality = match[2];
+                
+                let index = noteMap[root];
+                if (index === undefined) return part;
+                
+                index = (index + semitones + 12) % 12;
+                return scale[index] + quality;
+            }).join('/');
+        }
+
+        function transposeSong(semitones) {
+            const content = input.value;
+            
+            // 1. Chords in brackets [Am7]
+            let newContent = content.replace(/\[([^\]]+)\]/g, (match, chord) => {
+                return `[${transposeChord(chord, semitones)}]`;
+            });
+            
+            // 2. {key: ...}
+            newContent = newContent.replace(/{key:\s*([^}]+)}/gi, (match, chord) => {
+                return `{key: ${transposeChord(chord.trim(), semitones)}}`;
+            });
+
+            // 3. {define: ChordName ...}
+            newContent = newContent.replace(/{define:\s*([^\s]+)([^}]+)}/gi, (match, chordName, rest) => {
+                return `{define: ${transposeChord(chordName, semitones)}${rest}}`;
+            });
+
+            input.value = newContent;
+            updatePreview();
+            autoSaveSession();
+        }
+
+        // Chord Helper Logic
+        const roots = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
+        const qualities = ['', 'm', '7', 'm7', 'maj7', 'sus2', 'sus4', 'dim', 'aug', 'add9'];
+        let selectedRoot = 'C';
+        let selectedQuality = '';
+
+        function initChordBuilder() {
+            const rootContainer = document.getElementById('chord-roots');
+            const qualityContainer = document.getElementById('chord-qualities');
+
+            rootContainer.innerHTML = roots.map(r => `
+                <button onclick="selectRoot('${r}')" class="chord-root-btn px-2 py-1 rounded text-[10px] border ${r === selectedRoot ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200'}">${r}</button>
+            `).join('');
+
+            qualityContainer.innerHTML = qualities.map(q => `
+                <button onclick="selectQuality('${q}')" class="chord-qual-btn px-2 py-1 rounded text-[10px] border ${q === selectedQuality ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200'}">${q || 'maj'}</button>
+            `).join('');
+        }
+
+        function selectRoot(r) {
+            selectedRoot = r;
+            updateChordBuilderUI();
+        }
+
+        function selectQuality(q) {
+            selectedQuality = q;
+            updateChordBuilderUI();
+        }
+
+        function updateChordBuilderUI() {
+            document.getElementById('custom-chord-preview').innerText = selectedRoot + selectedQuality;
+            initChordBuilder();
+        }
+
+        function insertChord(name) {
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const text = input.value;
+            const before = text.substring(0, start);
+            const after = text.substring(end);
+            
+            input.value = before + `[${name}]` + after;
+            input.selectionStart = input.selectionEnd = start + name.length + 2;
+            input.focus();
+            updatePreview();
+            autoSaveSession();
+        }
+
+        function insertCustomChord() {
+            insertChord(selectedRoot + selectedQuality);
+        }
+
+        // Fretboard Logic
+        let fretboardState = [0, 0, 0, 0, 0, 0]; // 0 = open, -1 = muted, 1-5 = fret
+        function initFretboard() {
+            const container = document.getElementById('fretboard-ui');
+            let html = '';
+            // 5 frets + open/mute row
+            for (let fret = 0; fret <= 5; fret++) {
+                for (let string = 0; string < 6; string++) {
+                    const isActive = fretboardState[string] === fret;
+                    const isMuted = fret === 0 && fretboardState[string] === -1;
+                    let label = fret === 0 ? 'O' : fret;
+                    if (fret === 0 && isMuted) label = 'X';
+                    
+                    html += `
+                        <div class="fret-cell ${isActive ? 'active' : ''} ${isMuted ? 'muted' : ''}" 
+                             onclick="toggleFret(${string}, ${fret})">
+                            ${label}
+                        </div>
+                    `;
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        function toggleFret(string, fret) {
+            if (fret === 0) {
+                if (fretboardState[string] === 0) fretboardState[string] = -1; // mute
+                else if (fretboardState[string] === -1) fretboardState[string] = 0; // open
+                else fretboardState[string] = 0;
+            } else {
+                if (fretboardState[string] === fret) fretboardState[string] = 0;
+                else fretboardState[string] = fret;
+            }
+            initFretboard();
+        }
+
+        function insertDiagram() {
+            const name = document.getElementById('diag-name').value || 'MyChord';
+            const frets = fretboardState.map(f => f === -1 ? 'x' : f).join(' ');
+            const directive = `{define: ${name} frets ${frets}}`;
+            
+            const start = input.selectionStart;
+            const text = input.value;
+            input.value = directive + '\n' + text;
+            updatePreview();
+            autoSaveSession();
+        }
+
+        // Initial render
+        loadSession();
+        renderSongList();
+        initChordBuilder();
+        initFretboard();
+        updatePreview();
+    </script>
+</body>
+</html>

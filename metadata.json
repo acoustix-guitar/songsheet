@@ -1,0 +1,5 @@
+{
+  "name": "ChordPro Studio",
+  "description": "Ein professioneller ChordPro Editor mit Live-Vorschau und PDF-Export.",
+  "requestFramePermissions": []
+}

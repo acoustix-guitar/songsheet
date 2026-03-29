@@ -66,7 +66,7 @@
             background: white;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
             overflow-y: auto;
-            padding: 40px;
+            padding: 30px;
         }
         .song-list-item:hover .delete-btn {
             display: block;
@@ -76,9 +76,10 @@
         }
         /* Songsheet Specific Styles - Dynamic */
         .song-title { margin-bottom: 0.1rem; font-weight: bold; }
-        .song-subtitle { margin-bottom: 0.8rem; opacity: 0.8; }
+        .song-subtitle { margin-bottom: 0.2rem; opacity: 0.8; }
         .section-header, .line, .spacer { 
             display: flex; 
+            flex-direction: row;
             align-items: flex-end;
             margin: 0;
             padding: 0;
@@ -99,15 +100,69 @@
             padding: 0;
         }
         .section-header { font-weight: bold; }
-        .word-group { display: flex; flex-direction: column; margin-right: 0.3em; position: relative; }
-        .chord { height: 1.2em; font-weight: bold; position: absolute; top: -1.0em; white-space: nowrap; }
-        .lyrics { white-space: pre; }
+        .word-group { display: flex; flex-direction: column; margin-right: 0.3em; height: 100%; }
+        .chord { height: 50%; display: flex; align-items: flex-end; font-weight: bold; white-space: nowrap; }
+        .lyrics { height: 50%; display: flex; align-items: flex-start; white-space: pre; }
 
         .spacer { min-width: 1px; }
 
+        /* Diagram Layouts */
+        .songsheet-container {
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+            width: 100%;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .songsheet {
+            flex: 1;
+            min-width: 0;
+        }
+        .diagram-sidebar {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding-top: 2rem;
+        }
+        .diagram-row {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .diagram-item {
+            display: inline-block;
+            text-align: center;
+        }
+
         @media print {
-            .no-print { display: none; }
-            #preview-pane { box-shadow: none; padding: 0; }
+            .no-print { display: none !important; }
+            #preview-pane { 
+                box-shadow: none !important; 
+                padding: 0 !important; 
+                width: 100% !important; 
+                background: white !important;
+            }
+            .songsheet-container {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 1.5rem !important;
+                width: 100% !important;
+            }
+            .songsheet {
+                flex: 1 !important;
+            }
+            .diagram-sidebar {
+                display: flex !important;
+                flex-shrink: 0 !important;
+            }
+            .diagram-row {
+                display: flex !important;
+            }
         }
     </style>
 </head>
@@ -246,7 +301,7 @@
                 </div>
                 <!-- Line Spacing Slider -->
                 <label class="block text-[11px] font-medium text-slate-500 mb-1">Zeilenabstand</label>
-                <input type="range" id="line-spacing" min="1.5" max="4" step="0.1" value="2.2" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                <input type="range" id="line-spacing" min="0.8" max="4" step="0.1" value="1.2" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
             </div>
 
             <!-- Chorus Highlight Settings -->
@@ -284,6 +339,29 @@
                         <input type="number" id="chorus-border-val" value="1" class="w-14 border border-slate-300 rounded p-1 text-xs" oninput="applyStyles()">
                         <span class="text-[10px] text-slate-400">px</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- Chord Diagram Settings -->
+            <div class="mb-6 pt-6 border-t border-slate-100">
+                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Akkorddiagramme</h2>
+                
+                <div class="flex items-center gap-2 mb-3">
+                    <input type="checkbox" id="diag-toggle" checked class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="updatePreview()">
+                    <span class="text-xs text-slate-600 font-medium">Diagramme anzeigen</span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-[11px] font-medium text-slate-500 mb-1">Position</label>
+                    <select id="diag-position" class="w-full border border-slate-300 rounded p-2 text-xs" onchange="updatePreview()">
+                        <option value="side" selected>Seite (Spalte)</option>
+                        <option value="bottom">Unten (Reihe)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-[11px] font-medium text-slate-500 mb-1">Größe</label>
+                    <input type="range" id="diag-size" min="40" max="150" step="5" value="80" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="applyStyles()">
                 </div>
             </div>
 
@@ -378,7 +456,9 @@
 
             <div class="pt-6 border-t border-slate-100 mt-6">
                 <p class="text-xs text-slate-400 leading-relaxed">
-                    Tipp: Nutze [Chord] direkt im Text. Direktiven wie {title: Name} werden automatisch erkannt.
+                    Tipp: Nutze [Chord] im Text. <br>
+                    {diagrams: C G Am} zeigt nur diese Akkorde.<br>
+                    {define: C frets x 3 2 0 1 0} für eigene Griffe.
                 </p>
             </div>
         </aside>
@@ -416,6 +496,87 @@
         const input = document.getElementById('chordpro-input');
         const preview = document.getElementById('preview-pane');
         
+        const commonChords = {
+            'C': 'x 3 2 0 1 0',
+            'G': '3 2 0 0 0 3',
+            'D': 'x x 0 2 3 2',
+            'A': 'x 0 2 2 2 0',
+            'E': '0 2 2 1 0 0',
+            'Am': 'x 0 2 2 1 0',
+            'Em': '0 2 2 0 0 0',
+            'Dm': 'x x 0 2 3 1',
+            'F': '1 3 3 2 1 1',
+            'Bm': 'x 2 4 4 3 2',
+            'Bb': 'x 1 3 3 3 1',
+            'B7': 'x 2 1 2 0 2',
+            'A7': 'x 0 2 0 2 0',
+            'D7': 'x x 0 2 1 2',
+            'G7': '3 2 0 0 0 1',
+            'C7': 'x 3 2 3 1 0',
+            'F#m': '2 4 4 2 2 2',
+            'G#m': '4 6 6 4 4 4',
+            'C#m': 'x 4 6 6 5 4',
+            'Eb': 'x 6 8 8 8 6',
+            'Ab': '4 6 6 5 4 4',
+            'Am7': 'x 0 2 0 1 0',
+            'Dm7': 'x x 0 2 1 1',
+            'Em7': '0 2 0 0 0 0',
+            'Gmaj7': '3 2 0 0 0 2',
+            'Cmaj7': 'x 3 2 0 0 0',
+            'Dmaj7': 'x x 0 2 2 2',
+            'B': 'x 2 4 4 4 2',
+            'F#': '2 4 4 3 2 2',
+            'C#': 'x 4 6 6 6 4',
+            'G#': '4 6 6 5 4 4'
+        };
+
+        function renderChordSVG(name, fretsStr, size = 80, color = 'currentColor') {
+            if (!fretsStr) return '';
+            const frets = fretsStr.split(' ').map(f => f === 'x' ? -1 : parseInt(f));
+            const width = 100;
+            const height = 130;
+            const margin = 15;
+            const stringSpacing = (width - 2 * margin) / 5;
+            const fretSpacing = (height - 2 * margin - 20) / 5;
+            
+            const svgHeight = Math.round(size * (height / width));
+            let svg = `<div class="diagram-item" style="width: ${size}px"><svg width="${size}" height="${svgHeight}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
+            
+            // Title
+            svg += `<text x="${width/2}" y="12" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="${color}">${name}</text>`;
+            
+            // Vertical lines (strings)
+            for (let i = 0; i < 6; i++) {
+                const x = margin + i * stringSpacing;
+                svg += `<line x1="${x}" y1="${margin + 10}" x2="${x}" y2="${height - margin}" stroke="${color}" stroke-width="1" />`;
+            }
+            
+            // Horizontal lines (frets)
+            for (let i = 0; i <= 5; i++) {
+                const y = margin + 10 + i * fretSpacing;
+                svg += `<line x1="${margin}" y1="${y}" x2="${width - margin}" y2="${y}" stroke="${color}" stroke-width="${i === 0 ? 3 : 1}" />`;
+            }
+            
+            // Dots
+            frets.forEach((f, s) => {
+                const x = margin + s * stringSpacing;
+                if (f === -1) {
+                    // X for muted
+                    svg += `<text x="${x}" y="${margin + 8}" text-anchor="middle" font-family="Arial" font-size="12" fill="${color}">X</text>`;
+                } else if (f === 0) {
+                    // O for open
+                    svg += `<circle cx="${x}" cy="${margin + 4}" r="3" fill="none" stroke="${color}" stroke-width="1" />`;
+                } else {
+                    // Dot on fret
+                    const y = margin + 10 + (f - 0.5) * fretSpacing;
+                    svg += `<circle cx="${x}" cy="${y}" r="5" fill="${color}" />`;
+                }
+            });
+            
+            svg += `</svg></div>`;
+            return svg;
+        }
+
         // Settings elements
         const settings = {
             title: { font: 'font-title', size: 'size-title', color: 'color-title' },
@@ -432,6 +593,7 @@
 {key: C#m}
 {comment: Capo @ 4}
 {tempo: 111}
+{diagrams: Am C G F}
 
 {start_of_bridge: Intro}
 [Am]
@@ -490,9 +652,17 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
 
         function parseChordPro(text) {
             const lines = text.split('\n');
-            let html = '<div class="songsheet">';
+            let mainHtml = '';
             let metadata = { title: '', subtitle: '', info: [] };
             let inBlock = false;
+            let usedChords = new Set();
+            let customChords = new Map();
+            let explicitDiagrams = null;
+
+            const diagEnabled = document.getElementById('diag-toggle')?.checked ?? true;
+            const diagPos = document.getElementById('diag-position')?.value || 'top';
+            const diagSize = parseInt(document.getElementById('diag-size')?.value || '80');
+            const chordColor = document.getElementById('color-chords')?.value || 'currentColor';
 
             lines.forEach(line => {
                 line = line.trim();
@@ -505,25 +675,32 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
 
                     if (key === 'title' || key === 't') metadata.title = value;
                     else if (key === 'artist' || key === 'subtitle' || key === 'st') metadata.subtitle = value;
+                    else if (key === 'define') {
+                        const defMatch = value.match(/^([^ ]+) frets (.+)$/);
+                        if (defMatch) customChords.set(defMatch[1], defMatch[2]);
+                    }
+                    else if (key === 'diagrams' || key === 'chords') {
+                        explicitDiagrams = value.split(/[ ,]+/).filter(c => c.trim());
+                    }
                     else if (key === 'start_of_chorus' || key === 'soc') {
-                        if (inBlock) html += '</div>';
-                        html += `<div class="chorus-block"><div class="section-header">[Chorus]</div>`;
+                        if (inBlock) mainHtml += '</div>';
+                        mainHtml += `<div class="chorus-block"><div class="section-header">[Chorus]</div>`;
                         inBlock = true;
                     }
                     else if (key === 'end_of_chorus' || key === 'eoc' || key === 'end_of_verse' || key === 'eov' || key === 'end_of_bridge' || key === 'eob') {
                         if (inBlock) {
-                            html += '</div>';
+                            mainHtml += '</div>';
                             inBlock = false;
                         }
                     }
                     else if (key === 'start_of_verse' || key === 'sov') {
-                        if (inBlock) html += '</div>';
-                        html += `<div class="section-block"><div class="section-header">[${value || 'Verse'}]</div>`;
+                        if (inBlock) mainHtml += '</div>';
+                        mainHtml += `<div class="section-block"><div class="section-header">[${value || 'Verse'}]</div>`;
                         inBlock = true;
                     }
                     else if (key === 'start_of_bridge' || key === 'sob') {
-                        if (inBlock) html += '</div>';
-                        html += `<div class="section-block"><div class="section-header">[${value || 'Bridge'}]</div>`;
+                        if (inBlock) mainHtml += '</div>';
+                        mainHtml += `<div class="section-block"><div class="section-header">[${value || 'Bridge'}]</div>`;
                         inBlock = true;
                     }
                     else if (key === 'key') {
@@ -539,18 +716,18 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                         metadata.info.push({ type: 'comment', text: `Capo: ${value}` });
                     }
                     else if (key === 'new_page' || key === 'np') {
-                        html += '<div class="page-break"></div>';
+                        mainHtml += '<div class="page-break"></div>';
                     }
                     return;
                 }
 
                 if (!line) {
-                    html += '<div class="spacer">&nbsp;</div>';
+                    mainHtml += '<div class="spacer">&nbsp;</div>';
                     return;
                 }
 
                 // Content Line
-                html += '<div class="line">';
+                mainHtml += '<div class="line">';
                 
                 let i = 0;
                 while (i < line.length) {
@@ -563,6 +740,10 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                         }
                         i++; // skip ]
                         
+                        // Clean chord name for lookup (remove bass note etc if needed, but let's keep it simple)
+                        const cleanChord = chord.split('/')[0].trim();
+                        if (cleanChord) usedChords.add(cleanChord);
+
                         // Collect lyrics until next chord or end of line
                         let lyrics = '';
                         while (i < line.length && line[i] !== '[') {
@@ -570,37 +751,71 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                             i++;
                         }
                         
-                        html += `<div class="word-group"><span class="chord">${chord}</span><span class="lyrics">${lyrics || '&nbsp;'}</span></div>`;
+                        mainHtml += `<div class="word-group"><span class="chord">${chord}</span><span class="lyrics">${lyrics || '&nbsp;'}</span></div>`;
                     } else {
                         let lyrics = '';
                         while (i < line.length && line[i] !== '[') {
                             lyrics += line[i];
                             i++;
                         }
-                        html += `<div class="word-group"><span class="chord"></span><span class="lyrics">${lyrics}</span></div>`;
+                        mainHtml += `<div class="word-group"><span class="chord"></span><span class="lyrics">${lyrics}</span></div>`;
                     }
                 }
                 
-                html += '</div>';
+                mainHtml += '</div>';
             });
 
-            if (inBlock) html += '</div>';
+            if (inBlock) mainHtml += '</div>';
+
+            // Generate Diagrams
+            let diagramsHtml = '';
+            if (diagEnabled) {
+                const chordsToShow = explicitDiagrams || Array.from(usedChords).sort();
+                chordsToShow.forEach(c => {
+                    const frets = customChords.get(c) || commonChords[c];
+                    if (frets) {
+                        diagramsHtml += renderChordSVG(c, frets, diagSize, chordColor);
+                    }
+                });
+            }
 
             // Prepend metadata
-            let headerHtml = '<div class="song-header-block" style="break-inside: avoid; page-break-inside: avoid;">';
+            let headerHtml = '<div class="song-header-block" style="break-inside: avoid; page-break-inside: avoid; margin-bottom: 0;">';
             if (metadata.title) headerHtml += `<div class="song-title">${metadata.title}</div>`;
             if (metadata.subtitle) headerHtml += `<div class="song-subtitle">${metadata.subtitle}</div>`;
             if (metadata.info.length > 0) {
-                headerHtml += `<div class="song-info mb-2 text-sm opacity-70">`;
+                headerHtml += `<div class="song-info mb-0 text-sm opacity-70" style="line-height: 1.1;">`;
                 metadata.info.forEach(info => {
                     const cls = info.type ? `song-${info.type}` : 'song-info-misc';
-                    headerHtml += `<div class="${cls}">${info.text}</div>`;
+                    headerHtml += `<div class="${cls}" style="margin-bottom: 0;">${info.text}</div>`;
                 });
                 headerHtml += `</div>`;
             }
             headerHtml += '</div>';
 
-            return headerHtml + html + '</div>';
+            // Construct Final Layout
+            let finalHtml = '<div class="songsheet-container">';
+            
+            finalHtml += '<div class="songsheet">';
+            finalHtml += headerHtml;
+            
+            finalHtml += mainHtml;
+
+            // Bottom diagrams
+            if (diagPos === 'bottom' && diagramsHtml) {
+                finalHtml += `<div class="diagram-row">${diagramsHtml}</div>`;
+            }
+
+            finalHtml += '</div>'; // close songsheet
+
+            // Sidebar diagrams (RIGHT)
+            if (diagPos === 'side' && diagramsHtml) {
+                finalHtml += `<div class="diagram-sidebar">${diagramsHtml}</div>`;
+            }
+
+            finalHtml += '</div>';
+
+            return finalHtml;
         }
 
         function updatePreview() {
@@ -668,8 +883,8 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 el.style.color = getVal('color-lyrics');
             });
 
-            // Chorus Blocks
-            const chorusBlocks = document.querySelectorAll('.chorus-block');
+            // Blocks (Chorus and Section)
+            const blocks = document.querySelectorAll('.chorus-block, .section-block');
             const indentOn = document.getElementById('chorus-indent-toggle').checked;
             const indentVal = getVal('chorus-indent-val');
             const lineOn = document.getElementById('chorus-line-toggle').checked;
@@ -677,57 +892,91 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             const borderOn = document.getElementById('chorus-border-toggle').checked;
             const borderVal = getVal('chorus-border-val');
 
-            chorusBlocks.forEach(el => {
-                el.style.marginLeft = indentOn ? indentVal + 'px' : '0';
-                
-                if (borderOn) {
-                    el.style.border = `${borderVal}px solid black`;
-                    el.style.paddingLeft = '10px';
-                    el.style.paddingRight = '10px';
-                    el.style.paddingTop = '10px';
-                    el.style.paddingBottom = '10px';
-                } else if (lineOn) {
-                    el.style.border = 'none';
-                    el.style.borderLeft = `${lineVal}px solid black`;
-                    el.style.paddingLeft = '10px';
-                    el.style.paddingRight = '0';
-                    el.style.paddingTop = '0';
-                    el.style.paddingBottom = '0';
-                } else {
-                    el.style.border = 'none';
-                    el.style.paddingLeft = '0';
-                    el.style.paddingRight = '0';
-                    el.style.paddingTop = '0';
-                    el.style.paddingBottom = '0';
+            blocks.forEach(el => {
+                if (el.classList.contains('chorus-block')) {
+                    el.style.marginLeft = indentOn ? indentVal + 'px' : '0';
+                    
+                    if (borderOn) {
+                        el.style.border = `${borderVal}px solid black`;
+                        el.style.paddingLeft = '10px';
+                        el.style.paddingRight = '10px';
+                        el.style.paddingTop = '10px';
+                        el.style.paddingBottom = '10px';
+                    } else if (lineOn) {
+                        el.style.border = 'none';
+                        el.style.borderLeft = `${lineVal}px solid black`;
+                        el.style.paddingLeft = '10px';
+                        el.style.paddingRight = '0';
+                        el.style.paddingTop = '0';
+                        el.style.paddingBottom = '0';
+                    } else {
+                        el.style.border = 'none';
+                        el.style.paddingLeft = '0';
+                        el.style.paddingRight = '0';
+                        el.style.paddingTop = '0';
+                        el.style.paddingBottom = '0';
+                    }
                 }
 
-                el.style.marginTop = '1rem';
-                el.style.marginBottom = '1rem';
+                el.style.marginTop = '0';
+                el.style.marginBottom = '0';
+            });
+
+            // Diagrams
+            const diagSize = getVal('diag-size');
+            const chordColor = getVal('color-chords');
+            const diagramItems = document.querySelectorAll('.diagram-item');
+            diagramItems.forEach(el => {
+                el.style.width = diagSize + 'px';
+                el.style.color = chordColor;
             });
 
             // Line Spacing
-            const spacing = getVal('line-spacing');
-            const lines = document.querySelectorAll('.line, .section-header, .spacer');
+            const spacing = parseFloat(getVal('line-spacing'));
+            const lines = document.querySelectorAll('.line');
             lines.forEach(el => {
+                // Total height is 2x the spacing to account for both chord and lyric rows
+                el.style.height = (spacing * 2) + 'em';
+                el.style.lineHeight = '1';
+            });
+
+            const headers = document.querySelectorAll('.section-header, .spacer');
+            headers.forEach(el => {
+                // Headers and spacers only need a single row height
                 el.style.height = spacing + 'em';
                 el.style.lineHeight = '1';
             });
         }
 
-        function exportPDF() {
+        async function exportPDF() {
             const element = document.getElementById('preview-pane');
             const title = document.querySelector('.song-title')?.innerText || 'Songsheet';
             
+            // Ensure styles are up to date
+            applyStyles();
+
             const opt = {
-                margin: 15,
+                margin: [10, 10, 10, 10],
                 filename: `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    letterRendering: true,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
-            html2pdf().set(opt).from(element).save();
+            try {
+                // We use the live element directly for better style preservation
+                await html2pdf().set(opt).from(element).save();
+            } catch (error) {
+                console.error('PDF Export failed:', error);
+                alert('PDF Export fehlgeschlagen.');
+            }
         }
 
         // Event Listeners
@@ -868,7 +1117,9 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         function autoSaveSession() {
             const session = {
                 content: input.value,
-                settings: getSettings()
+                settings: getSettings(),
+                lineSpacing: document.getElementById('line-spacing').value,
+                diagPosition: document.getElementById('diag-position').value
             };
             localStorage.setItem('chordpro_session', JSON.stringify(session));
         }
@@ -878,6 +1129,8 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             if (session) {
                 input.value = session.content;
                 setSettings(session.settings);
+                if (session.lineSpacing) document.getElementById('line-spacing').value = session.lineSpacing;
+                if (session.diagPosition) document.getElementById('diag-position').value = session.diagPosition;
             }
         }
 

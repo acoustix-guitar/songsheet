@@ -367,7 +367,10 @@
             <div class="flex items-center gap-3">
                 <div class="flex flex-col">
                     <span class="text-[10px] text-slate-500 uppercase">Zeilenabstand</span>
-                    <input type="range" id="line-spacing" min="0.5" max="3" step="0.1" value="1.2" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="applyStyles()">
+                    <div class="flex items-center gap-2">
+                        <input type="range" id="line-spacing" min="0.5" max="3" step="0.1" value="1.2" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('line-spacing', 'line-spacing-num'); applyStyles()">
+                        <input type="number" id="line-spacing-num" min="0.5" max="3" step="0.1" value="1.2" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('line-spacing-num', 'line-spacing'); applyStyles()">
+                    </div>
                 </div>
                 
                 <div class="flex flex-col gap-1">
@@ -455,7 +458,31 @@
                 </div>
                 <div class="flex flex-col">
                     <span class="text-[10px] text-slate-500 uppercase">Größe</span>
-                    <input type="range" id="diag-size" min="40" max="150" step="5" value="80" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="applyStyles()">
+                    <div class="flex items-center gap-2">
+                        <input type="range" id="diag-size" min="40" max="150" step="5" value="80" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-size', 'diag-size-num'); applyStyles()">
+                        <input type="number" id="diag-size-num" min="40" max="150" step="5" value="80" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('diag-size-num', 'diag-size'); applyStyles()">
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-slate-500 uppercase">Akkord-Abstand</span>
+                    <div class="flex items-center gap-2">
+                        <input type="range" id="diag-name-gap" min="0" max="30" step="1" value="12" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-name-gap', 'diag-name-gap-num'); applyStyles()">
+                        <input type="number" id="diag-name-gap-num" min="0" max="30" step="1" value="12" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('diag-name-gap-num', 'diag-name-gap'); applyStyles()">
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-slate-500 uppercase">Schriftgröße</span>
+                    <div class="flex items-center gap-2">
+                        <input type="range" id="diag-name-size" min="8" max="32" step="1" value="18" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-name-size', 'diag-name-size-num'); applyStyles()">
+                        <input type="number" id="diag-name-size-num" min="8" max="32" step="1" value="18" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('diag-name-size-num', 'diag-name-size'); applyStyles()">
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-slate-500 uppercase">Diagramm-Abstand</span>
+                    <div class="flex items-center gap-2">
+                        <input type="range" id="diag-spacing" min="0" max="40" step="1" value="16" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-spacing', 'diag-spacing-num'); applyStyles()">
+                        <input type="number" id="diag-spacing-num" min="0" max="40" step="1" value="16" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('diag-spacing-num', 'diag-spacing'); applyStyles()">
+                    </div>
                 </div>
             </div>
         </div>
@@ -542,6 +569,29 @@
                 <h2 class="text-[12px] font-bold text-slate-500 uppercase">Diagramm-Ersteller</h2>
                 <div class="flex flex-col gap-2">
                     <div id="fretboard-ui" class="fretboard w-full mx-auto"></div>
+                    <div class="bg-slate-50 p-2 rounded border border-slate-200">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Optionen</div>
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <div class="flex flex-col">
+                                <label class="text-[9px] text-slate-500">Basis-Bund</label>
+                                <input type="number" id="base-fret" min="1" max="20" value="1" class="border border-slate-300 rounded p-1 text-[11px]">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[9px] text-slate-500">Barre Bund (Rel.)</label>
+                                <input type="number" id="barre-fret" min="0" max="5" value="0" class="border border-slate-300 rounded p-1 text-[11px]">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="flex flex-col">
+                                <label class="text-[9px] text-slate-500">Barre Von</label>
+                                <input type="number" id="barre-start" min="1" max="6" value="1" class="border border-slate-300 rounded p-1 text-[11px]">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[9px] text-slate-500">Barre Bis</label>
+                                <input type="number" id="barre-end" min="1" max="6" value="6" class="border border-slate-300 rounded p-1 text-[11px]">
+                            </div>
+                        </div>
+                    </div>
                     <div class="flex flex-col gap-2">
                         <input type="text" id="diag-name" placeholder="Name" class="w-full border border-slate-300 rounded p-1.5 text-[13px]">
                         <button onclick="insertDiagram()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded text-[13px] font-bold transition-colors">Definieren</button>
@@ -705,12 +755,12 @@
             'E/G#': '4 x 2 1 0 0'
         };
 
-        function renderChordSVG(name, fretsStr, size = 80, color = 'currentColor') {
+        function renderChordSVG(name, fretsStr, size = 80, color = 'currentColor', barreInfo = null, baseFret = 1, nameGap = 12, nameSize = 18) {
             if (!fretsStr) return '';
             const frets = fretsStr.split(' ').map(f => f === 'x' ? -1 : parseInt(f));
-            const width = 100;
+            const width = 120;
             const height = 130;
-            const margin = 15;
+            const margin = 25;
             const stringSpacing = (width - 2 * margin) / 5;
             const fretSpacing = (height - 2 * margin - 20) / 5;
             
@@ -718,7 +768,7 @@
             let svg = `<div class="diagram-item" style="width: ${size}px"><svg width="${size}" height="${svgHeight}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
             
             // Title
-            svg += `<text x="${width/2}" y="12" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="${color}">${name}</text>`;
+            svg += `<text x="${width/2}" y="${nameGap}" text-anchor="middle" font-family="Arial" font-size="${nameSize}" font-weight="bold" fill="${color}">${name}</text>`;
             
             // Vertical lines (strings)
             for (let i = 0; i < 6; i++) {
@@ -729,22 +779,52 @@
             // Horizontal lines (frets)
             for (let i = 0; i <= 5; i++) {
                 const y = margin + 10 + i * fretSpacing;
-                svg += `<line x1="${margin}" y1="${y}" x2="${width - margin}" y2="${y}" stroke="${color}" stroke-width="${i === 0 ? 3 : 1}" />`;
+                const isNut = (i === 0 && baseFret === 1);
+                svg += `<line x1="${margin}" y1="${y}" x2="${width - margin}" y2="${y}" stroke="${color}" stroke-width="${isNut ? 3 : 1}" />`;
+            }
+
+            // Base Fret Number
+            if (baseFret > 1) {
+                svg += `<text x="${margin - 8}" y="${margin + 10 + 0.7 * fretSpacing}" text-anchor="end" font-family="Arial" font-size="10" font-weight="bold" fill="${color}">${baseFret}fr</text>`;
             }
             
+            // Barre
+            if (barreInfo && barreInfo.fret > 0) {
+                const relativeFret = barreInfo.fret - baseFret + 1;
+                if (relativeFret >= 1 && relativeFret <= 5) {
+                    const y = margin + 10 + (relativeFret - 0.5) * fretSpacing;
+                    const x1 = margin + (barreInfo.start - 1) * stringSpacing;
+                    const x2 = margin + (barreInfo.end - 1) * stringSpacing;
+                    svg += `<rect x="${x1 - 5}" y="${y - 5}" width="${x2 - x1 + 10}" height="10" rx="5" fill="${color}" />`;
+                }
+            }
+
             // Dots
             frets.forEach((f, s) => {
                 const x = margin + s * stringSpacing;
+                const isCoveredByBarre = barreInfo && barreInfo.fret > 0 && (s + 1) >= barreInfo.start && (s + 1) <= barreInfo.end;
+
                 if (f === -1) {
                     // X for muted
-                    svg += `<text x="${x}" y="${margin + 8}" text-anchor="middle" font-family="Arial" font-size="12" fill="${color}">X</text>`;
+                    if (!isCoveredByBarre) {
+                        svg += `<text x="${x}" y="${margin + 8}" text-anchor="middle" font-family="Arial" font-size="12" fill="${color}">X</text>`;
+                    }
                 } else if (f === 0) {
                     // O for open
-                    svg += `<circle cx="${x}" cy="${margin + 4}" r="3" fill="none" stroke="${color}" stroke-width="1" />`;
+                    if (!isCoveredByBarre) {
+                        svg += `<circle cx="${x}" cy="${margin + 4}" r="3" fill="none" stroke="${color}" stroke-width="1" />`;
+                    }
                 } else {
                     // Dot on fret
-                    const y = margin + 10 + (f - 0.5) * fretSpacing;
-                    svg += `<circle cx="${x}" cy="${y}" r="5" fill="${color}" />`;
+                    const relativeFret = f - baseFret + 1;
+                    if (relativeFret >= 1 && relativeFret <= 5) {
+                        // Skip dot if it's part of a barre
+                        if (barreInfo && barreInfo.fret === f && (s + 1) >= barreInfo.start && (s + 1) <= barreInfo.end) {
+                            return;
+                        }
+                        const y = margin + 10 + (relativeFret - 0.5) * fretSpacing;
+                        svg += `<circle cx="${x}" cy="${y}" r="5" fill="${color}" />`;
+                    }
                 }
             });
             
@@ -837,6 +917,8 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             const diagEnabled = document.getElementById('diag-toggle')?.checked ?? true;
             const diagPos = 'bottom';
             const diagSize = parseInt(document.getElementById('diag-size')?.value || '80');
+            const diagNameGap = parseInt(document.getElementById('diag-name-gap')?.value || '12');
+            const diagNameSize = parseInt(document.getElementById('diag-name-size')?.value || '18');
             const chordColor = document.getElementById('color-chords')?.value || 'currentColor';
 
             lines.forEach(line => {
@@ -851,8 +933,24 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                     if (key === 'title' || key === 't') metadata.title = value;
                     else if (key === 'artist' || key === 'subtitle' || key === 'st') metadata.subtitle = value;
                     else if (key === 'define') {
-                        const defMatch = value.match(/^([^ ]+) frets (.+)$/);
-                        if (defMatch) customChords.set(defMatch[1], defMatch[2]);
+                        const defMatch = value.match(/^([^ ]+) frets (.+?)(?: barre (.+?))?(?: base-fret (\d+))?$/);
+                        if (defMatch) {
+                            const name = defMatch[1];
+                            const frets = defMatch[2].trim();
+                            let barre = null;
+                            if (defMatch[3]) {
+                                const bParts = defMatch[3].trim().split(' ');
+                                if (bParts.length === 3) {
+                                    barre = {
+                                        fret: parseInt(bParts[0]),
+                                        start: parseInt(bParts[1]),
+                                        end: parseInt(bParts[2])
+                                    };
+                                }
+                            }
+                            const baseFret = defMatch[4] ? parseInt(defMatch[4]) : 1;
+                            customChords.set(name, { frets, barre, baseFret });
+                        }
                     }
                     else if (key === 'diagrams' || key === 'chords') {
                         explicitDiagrams = value.split(/[ ,]+/).filter(c => c.trim());
@@ -951,14 +1049,21 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             if (diagEnabled) {
                 const chordsToShow = explicitDiagrams || Array.from(usedChords).sort();
                 chordsToShow.forEach(c => {
-                    let frets = customChords.get(c) || commonChords[c];
+                    let chordData = customChords.get(c);
+                    let frets = chordData ? chordData.frets : commonChords[c];
+                    let barre = chordData ? chordData.barre : null;
+                    let baseFret = chordData ? chordData.baseFret : 1;
+
                     // Fallback for slash chords: if G/B is not found, try G
                     if (!frets && c.includes('/')) {
                         const baseChord = c.split('/')[0].trim();
-                        frets = customChords.get(baseChord) || commonChords[baseChord];
+                        chordData = customChords.get(baseChord);
+                        frets = chordData ? chordData.frets : commonChords[baseChord];
+                        barre = chordData ? chordData.barre : null;
+                        baseFret = chordData ? chordData.baseFret : 1;
                     }
                     if (frets) {
-                        diagramsHtml += renderChordSVG(c, frets, diagSize, chordColor);
+                        diagramsHtml += renderChordSVG(c, frets, diagSize, chordColor, barre, baseFret, diagNameGap, diagNameSize);
                     }
                 });
             }
@@ -1003,6 +1108,14 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             applyStyles();
         }
 
+        function syncInputs(sourceId, targetId) {
+            const source = document.getElementById(sourceId);
+            const target = document.getElementById(targetId);
+            if (source && target) {
+                target.value = source.value;
+            }
+        }
+
         function applyStyles() {
             const getVal = (id) => {
                 const el = document.getElementById(id);
@@ -1011,6 +1124,9 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                     if (id.includes('size')) return id.includes('title') ? '28' : '14';
                     if (id.includes('color')) return id.includes('chords') ? '#2563eb' : '#334155';
                     if (id === 'line-spacing') return '1.2';
+                    if (id === 'diag-name-gap') return '12';
+                    if (id === 'diag-name-size') return '18';
+                    if (id === 'diag-spacing') return '16';
                     if (id.includes('val')) return '20';
                     if (id.includes('margin')) {
                         if (id.includes('top') || id.includes('bottom')) return '25';
@@ -1154,12 +1270,38 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             });
 
             // Diagrams
-            const diagSize = getVal('diag-size');
+            const diagSize = parseFloat(getVal('diag-size'));
+            const diagNameGap = getVal('diag-name-gap');
+            const diagNameSize = getVal('diag-name-size');
             const chordColor = getVal('color-chords');
             const diagramItems = document.querySelectorAll('.diagram-item');
+            
+            // SVG aspect ratio is 130/120
+            const svgAspectRatio = 130 / 120;
+            const svgHeight = Math.round(diagSize * svgAspectRatio);
+
             diagramItems.forEach(el => {
                 el.style.width = diagSize + 'px';
                 el.style.color = chordColor;
+                
+                const svg = el.querySelector('svg');
+                if (svg) {
+                    svg.setAttribute('width', diagSize);
+                    svg.setAttribute('height', svgHeight);
+                    
+                    const text = svg.querySelector('text');
+                    if (text) {
+                        text.setAttribute('y', diagNameGap);
+                        text.setAttribute('font-size', diagNameSize);
+                    }
+                }
+            });
+
+            // Diagram Spacing
+            const diagSpacing = getVal('diag-spacing');
+            const diagramRows = document.querySelectorAll('.diagram-row');
+            diagramRows.forEach(el => {
+                el.style.gap = diagSpacing + 'px';
             });
 
             // Line Spacing
@@ -1363,6 +1505,19 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 left: document.getElementById('margin-left')?.value || '20',
                 right: document.getElementById('margin-right')?.value || '20'
             };
+
+            // Add layout settings
+            data.layout = {
+                lineSpacing: document.getElementById('line-spacing')?.value || '1.2',
+                diagSize: document.getElementById('diag-size')?.value || '80',
+                diagNameGap: document.getElementById('diag-name-gap')?.value || '12',
+                diagNameSize: document.getElementById('diag-name-size')?.value || '18',
+                diagSpacing: document.getElementById('diag-spacing')?.value || '16',
+                diagToggle: document.getElementById('diag-toggle')?.checked ?? true,
+                chorusIndentToggle: document.getElementById('chorus-indent-toggle')?.checked ?? true,
+                chorusIndentVal: document.getElementById('chorus-indent-val')?.value || '20',
+                chorusLineToggle: document.getElementById('chorus-line-toggle')?.checked ?? false
+            };
             
             return data;
         }
@@ -1392,6 +1547,34 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 if (mb) mb.value = data.margins.bottom;
                 if (ml) ml.value = data.margins.left;
                 if (mr) mr.value = data.margins.right;
+            }
+
+            // Set layout settings
+            if (data.layout) {
+                const ls = document.getElementById('line-spacing');
+                const lsn = document.getElementById('line-spacing-num');
+                const ds = document.getElementById('diag-size');
+                const dsn = document.getElementById('diag-size-num');
+                const dng = document.getElementById('diag-name-gap');
+                const dngn = document.getElementById('diag-name-gap-num');
+                const dns = document.getElementById('diag-name-size');
+                const dnsn = document.getElementById('diag-name-size-num');
+                const dsp = document.getElementById('diag-spacing');
+                const dspn = document.getElementById('diag-spacing-num');
+                const dt = document.getElementById('diag-toggle');
+                const cit = document.getElementById('chorus-indent-toggle');
+                const civ = document.getElementById('chorus-indent-val');
+                const clt = document.getElementById('chorus-line-toggle');
+                
+                if (ls) { ls.value = data.layout.lineSpacing; if (lsn) lsn.value = ls.value; }
+                if (ds) { ds.value = data.layout.diagSize; if (dsn) dsn.value = ds.value; }
+                if (dng) { dng.value = data.layout.diagNameGap; if (dngn) dngn.value = dng.value; }
+                if (dns) { dns.value = data.layout.diagNameSize; if (dnsn) dnsn.value = dns.value; }
+                if (dsp) { dsp.value = data.layout.diagSpacing; if (dspn) dspn.value = dsp.value; }
+                if (dt) dt.checked = data.layout.diagToggle;
+                if (cit) cit.checked = data.layout.chorusIndentToggle;
+                if (civ) civ.value = data.layout.chorusIndentVal;
+                if (clt) clt.checked = data.layout.chorusLineToggle;
             }
             
             applyStyles();
@@ -1706,17 +1889,26 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         let fretboardState = [0, 0, 0, 0, 0, 0]; // 0 = open, -1 = muted, 1-5 = fret
         function initFretboard() {
             const container = document.getElementById('fretboard-ui');
+            const barreFret = parseInt(document.getElementById('barre-fret')?.value || '0');
+            const barreStart = parseInt(document.getElementById('barre-start')?.value || '1');
+            const barreEnd = parseInt(document.getElementById('barre-end')?.value || '6');
+            
             let html = '';
             // 5 frets + open/mute row
             for (let fret = 0; fret <= 5; fret++) {
                 for (let string = 0; string < 6; string++) {
                     const isActive = fretboardState[string] === fret;
                     const isMuted = fret === 0 && fretboardState[string] === -1;
+                    
+                    // Check if this cell is part of a barre
+                    const isBarre = fret > 0 && fret === barreFret && (string + 1) >= barreStart && (string + 1) <= barreEnd;
+                    
                     let label = fret === 0 ? 'O' : fret;
                     if (fret === 0 && isMuted) label = 'X';
+                    if (isBarre) label = 'B';
                     
                     html += `
-                        <div class="fret-cell ${isActive ? 'active' : ''} ${isMuted ? 'muted' : ''}" 
+                        <div class="fret-cell ${isActive ? 'active' : ''} ${isMuted ? 'muted' : ''} ${isBarre ? 'bg-slate-400 text-white' : ''}" 
                              onclick="toggleFret(${string}, ${fret})">
                             ${label}
                         </div>
@@ -1740,12 +1932,38 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
 
         function insertDiagram() {
             const name = document.getElementById('diag-name').value || 'MyChord';
-            const frets = fretboardState.map(f => f === -1 ? 'x' : f).join(' ');
-            const directive = `{define: ${name} frets ${frets}}`;
+            const baseFret = parseInt(document.getElementById('base-fret').value || '1');
+            
+            const frets = fretboardState.map(f => {
+                if (f <= 0) return f === -1 ? 'x' : 0;
+                return f + baseFret - 1;
+            }).join(' ');
+            
+            const barreFretRel = parseInt(document.getElementById('barre-fret').value);
+            const barreStart = parseInt(document.getElementById('barre-start').value);
+            const barreEnd = parseInt(document.getElementById('barre-end').value);
+            
+            let barrePart = '';
+            if (barreFretRel > 0) {
+                const barreFretAbs = barreFretRel + baseFret - 1;
+                barrePart = ` barre ${barreFretAbs} ${barreStart} ${barreEnd}`;
+            }
+            
+            let baseFretPart = baseFret > 1 ? ` base-fret ${baseFret}` : '';
+            
+            const directive = `{define: ${name} frets ${frets}${barrePart}${baseFretPart}}`;
             
             const start = input.selectionStart;
             const text = input.value;
             input.value = directive + '\n' + text;
+            
+            // Reset
+            fretboardState = [0, 0, 0, 0, 0, 0];
+            document.getElementById('barre-fret').value = 0;
+            document.getElementById('base-fret').value = 1;
+            document.getElementById('diag-name').value = '';
+            initFretboard();
+            
             updatePreview();
             autoSaveSession();
         }
@@ -1770,6 +1988,12 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         renderSongList();
         initChordBuilder();
         initFretboard();
+        
+        // Barre input listeners
+        ['base-fret', 'barre-fret', 'barre-start', 'barre-end'].forEach(id => {
+            document.getElementById(id).addEventListener('input', initFretboard);
+        });
+
         updatePreview();
     </script>
 </body>

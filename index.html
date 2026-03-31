@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChordPro Studio</title>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Merriweather:wght@400;700&family=Playfair+Display:wght@400;700&family=Lora:wght@400;700&family=Crimson+Text:wght@400;700&family=Roboto+Mono&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- html2pdf.js -->
@@ -23,8 +23,47 @@
         }
         .editor-container {
             display: grid;
-            grid-template-columns: 300px 1fr 1fr;
-            height: calc(100vh - 64px);
+            grid-template-columns: 260px 1fr 1fr;
+            height: calc(100vh - 64px - 100px); /* Adjust based on top-nav height */
+            transition: all 0.3s ease;
+        }
+        .preview-column {
+            background: white;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+        }
+        #top-nav {
+            height: 120px;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        #sidebar {
+            background: white;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 1.25rem;
+            gap: 1.5rem;
+        }
+        .sidebar-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .nav-section {
+            padding: 0 1rem;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: max-content;
+        }
+        .nav-section:last-child {
+            border-right: none;
         }
         textarea {
             font-family: 'Roboto Mono', monospace;
@@ -64,9 +103,28 @@
         }
         #preview-pane {
             background: white;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            overflow-y: auto;
-            padding: 30px;
+            box-shadow: none;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            padding: 25mm 20mm;
+            box-sizing: border-box;
+            position: relative;
+            transform-origin: top center;
+            transition: transform 0.2s ease;
+        }
+        #preview-pane.pdf-export-mode {
+            background-image: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+        }
+        @media (max-width: 210mm) {
+            #preview-pane {
+                /* Scale down if column is too narrow */
+                transform: scale(0.8);
+                margin: 0 auto;
+            }
         }
         .song-list-item:hover .delete-btn {
             display: block;
@@ -74,9 +132,8 @@
         .delete-btn {
             display: none;
         }
-        /* Songsheet Specific Styles - Dynamic */
         .song-title { margin-bottom: 0.1rem; font-weight: bold; }
-        .song-subtitle { margin-bottom: 0.2rem; opacity: 0; }
+        .song-subtitle { margin-bottom: 0.2rem; opacity: 0.8; }
         .section-header, .line, .spacer { 
             display: flex; 
             flex-direction: row;
@@ -85,10 +142,14 @@
             padding: 0;
             width: 100%;
             transition: height 0.2s;
-            break-inside: avoid;
-            page-break-inside: avoid;
         }
         .chorus-block, .section-block {
+            margin-bottom: 1.5rem;
+            display: block;
+            width: 100%;
+        }
+        /* Keep chords and lyrics together on the same line */
+        .line {
             break-inside: avoid;
             page-break-inside: avoid;
         }
@@ -118,13 +179,6 @@
         .songsheet {
             flex: 1;
             min-width: 0;
-        }
-        .diagram-sidebar {
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            padding-top: 2rem;
         }
         .diagram-row {
             display: flex;
@@ -164,316 +218,339 @@
                 display: flex !important;
             }
         }
+
+        /* PDF Export Specific Styles - Matches Full Preview dimensions */
+        .pdf-export-mode {
+            height: auto !important;
+            min-height: 297mm !important;
+            overflow: visible !important;
+            max-height: none !important;
+            width: 210mm !important;
+            padding: 25mm 20mm !important;
+            box-sizing: border-box !important;
+            background: white !important;
+            background-image: none !important; /* Remove guides in PDF */
+            box-shadow: none !important;
+            margin: 0 !important;
+            text-rendering: optimizeLegibility !important;
+            -webkit-font-smoothing: antialiased !important;
+        }
+        .pdf-export-mode * {
+            box-sizing: border-box !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            transition: none !important;
+            font-variant-ligatures: none !important;
+        }
+        .pdf-export-mode .word-group {
+            display: flex !important;
+            flex-direction: column !important;
+            margin-right: 0.3em !important;
+            height: auto !important;
+        }
+        .pdf-export-mode .line {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: flex-end !important;
+            flex-wrap: nowrap !important;
+            width: 100% !important;
+            height: auto !important;
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+            margin-bottom: 0.1rem !important;
+            overflow: hidden !important;
+        }
+        .pdf-export-mode .lyrics {
+            white-space: pre !important;
+            height: auto !important;
+            display: flex !important;
+            align-items: flex-start !important;
+        }
+        .pdf-export-mode .chord {
+            height: auto !important;
+            display: flex !important;
+            align-items: flex-end !important;
+            font-weight: bold !important;
+        }
+        .pdf-export-mode .songsheet-container {
+            max-width: 100% !important;
+            width: 100% !important;
+            gap: 1.5rem !important;
+            height: auto !important;
+            overflow: visible !important;
+            display: block !important;
+            break-inside: auto !important;
+            page-break-inside: auto !important;
+        }
+        .pdf-export-mode .songsheet {
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
+            display: block !important;
+            break-inside: auto !important;
+            page-break-inside: auto !important;
+        }
+        .pdf-export-mode .diagram-sidebar {
+            width: 100% !important;
+            margin-top: 2rem !important;
+            height: auto !important;
+            overflow: visible !important;
+            display: block !important;
+        }
+        .pdf-export-mode .chorus-block, .pdf-export-mode .section-block, .pdf-export-mode .song-header-block {
+            break-inside: auto !important;
+            page-break-inside: auto !important;
+            margin-bottom: 1rem !important;
+            display: block !important;
+            float: none !important;
+            position: static !important;
+        }
     </style>
 </head>
 <body class="flex flex-col">
 
     <!-- Header -->
-    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 no-print">
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 no-print shrink-0">
         <div class="flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
-            <h1 class="text-xl font-bold text-slate-800">ACOUSTIX GUITAR'S ChordPro Studio</h1>
+            <h1 class="text-xl font-bold text-slate-800">ChordPro Studio</h1>
         </div>
-        <button onclick="exportPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd" />
-            </svg>
-            PDF Export
-        </button>
+        <div class="flex items-center gap-3">
+            <button onclick="toggleFullPreview()" id="preview-toggle-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span id="preview-btn-text">Full Preview</span>
+            </button>
+            <button id="pdf-export-btn" onclick="exportPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg id="pdf-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd" />
+                </svg>
+                <svg id="pdf-spinner" class="animate-spin h-5 w-5 hidden" xmlns="http://www.w3.org/2000/center" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span id="pdf-btn-text">PDF Export</span>
+            </button>
+        </div>
     </header>
 
-    <main class="editor-container flex-1 overflow-hidden">
-        <!-- Sidebar Controls -->
-        <aside class="bg-white border-r border-slate-200 p-6 overflow-y-auto no-print">
-            <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-6">Formatierung</h2>
-            
-            <!-- Title Settings -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-slate-700 mb-2">Titel</label>
-                <select id="font-title" class="w-full border border-slate-300 rounded p-2 mb-2 text-sm">
-                    <option value="Inter">Inter</option>
-                    <option value="Montserrat" selected>Montserrat</option>
-                    <option value="Roboto">Roboto</option>
-                    <option value="Open Sans">Open Sans</option>
-                    <option value="Lato">Lato</option>
-                </select>
-                <div class="flex gap-2">
-                    <input type="number" id="size-title" value="28" class="w-20 border border-slate-300 rounded p-2 text-sm">
-                    <input type="color" id="color-title" value="#1e293b" class="flex-1 h-9 border border-slate-300 rounded p-1">
+    <!-- Top Navigation Menu -->
+    <nav id="top-nav" class="bg-white border-b border-slate-200 flex no-print shrink-0 no-scrollbar">
+        <!-- Stile & Layout -->
+        <div class="nav-section">
+            <h2 class="text-[20px] font-bold text-slate-600 uppercase mb-2">Stile & Layout</h2>
+            <div class="flex items-center gap-4">
+                <div class="flex flex-col">
+                    <span class="text-[16px] text-slate-500 uppercase">Zeilenabstand</span>
+                    <input type="range" id="line-spacing" min="0.5" max="3" step="0.1" value="1.2" class="w-32 h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="applyStyles()">
                 </div>
-            </div>
-
-            <!-- Subtitle Settings -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-slate-700 mb-2">Untertitel</label>
-                <select id="font-subtitle" class="w-full border border-slate-300 rounded p-2 mb-2 text-sm">
-                    <option value="Inter" selected>Inter</option>
-                    <option value="Montserrat">Montserrat</option>
-                    <option value="Roboto">Roboto</option>
-                    <option value="Open Sans">Open Sans</option>
-                    <option value="Lato">Lato</option>
-                </select>
-                <div class="flex gap-2">
-                    <input type="number" id="size-subtitle" value="14" class="w-20 border border-slate-300 rounded p-2 text-sm">
-                    <input type="color" id="color-subtitle" value="#64748b" class="flex-1 h-9 border border-slate-300 rounded p-1">
-                </div>
-            </div>
-
-            <!-- Key Settings -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-slate-700 mb-2">Tonart (Key)</label>
-                <select id="font-key" class="w-full border border-slate-300 rounded p-2 mb-2 text-sm">
-                    <option value="Inter" selected>Inter</option>
-                    <option value="Montserrat">Montserrat</option>
-                    <option value="Roboto">Roboto</option>
-                    <option value="Open Sans">Open Sans</option>
-                    <option value="Lato">Lato</option>
-                </select>
-                <div class="flex gap-2">
-                    <input type="number" id="size-key" value="14" class="w-20 border border-slate-300 rounded p-2 text-sm">
-                    <input type="color" id="color-key" value="#64748b" class="flex-1 h-9 border border-slate-300 rounded p-1">
-                </div>
-            </div>
-
-            <!-- Comment Settings -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-slate-700 mb-2">Kommentar / Capo</label>
-                <select id="font-comment" class="w-full border border-slate-300 rounded p-2 mb-2 text-sm">
-                    <option value="Inter" selected>Inter</option>
-                    <option value="Montserrat">Montserrat</option>
-                    <option value="Roboto">Roboto</option>
-                    <option value="Open Sans">Open Sans</option>
-                    <option value="Lato">Lato</option>
-                </select>
-                <div class="flex gap-2">
-                    <input type="number" id="size-comment" value="14" class="w-20 border border-slate-300 rounded p-2 text-sm">
-                    <input type="color" id="color-comment" value="#64748b" class="flex-1 h-9 border border-slate-300 rounded p-1">
-                </div>
-            </div>
-
-            <!-- Tempo Settings -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-slate-700 mb-2">Tempo</label>
-                <select id="font-tempo" class="w-full border border-slate-300 rounded p-2 mb-2 text-sm">
-                    <option value="Inter" selected>Inter</option>
-                    <option value="Montserrat">Montserrat</option>
-                    <option value="Roboto">Roboto</option>
-                    <option value="Open Sans">Open Sans</option>
-                    <option value="Lato">Lato</option>
-                </select>
-                <div class="flex gap-2">
-                    <input type="number" id="size-tempo" value="14" class="w-20 border border-slate-300 rounded p-2 text-sm">
-                    <input type="color" id="color-tempo" value="#64748b" class="flex-1 h-9 border border-slate-300 rounded p-1">
-                </div>
-            </div>
-
-            <!-- Chords Settings -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-slate-700 mb-2">Akkorde</label>
-                <select id="font-chords" class="w-full border border-slate-300 rounded p-2 mb-2 text-sm">
-                    <option value="Inter">Inter</option>
-                    <option value="Montserrat">Montserrat</option>
-                    <option value="Roboto" selected>Roboto</option>
-                    <option value="Open Sans">Open Sans</option>
-                    <option value="Lato">Lato</option>
-                </select>
-                <div class="flex gap-2">
-                    <input type="number" id="size-chords" value="13" class="w-20 border border-slate-300 rounded p-2 text-sm">
-                    <input type="color" id="color-chords" value="#2563eb" class="flex-1 h-9 border border-slate-300 rounded p-1">
-                </div>
-            </div>
-
-            <!-- Lyrics Settings -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-slate-700 mb-2">Songtext</label>
-                <select id="font-lyrics" class="w-full border border-slate-300 rounded p-2 mb-2 text-sm">
-                    <option value="Inter" selected>Inter</option>
-                    <option value="Montserrat">Montserrat</option>
-                    <option value="Roboto">Roboto</option>
-                    <option value="Open Sans">Open Sans</option>
-                    <option value="Lato">Lato</option>
-                </select>
-                <div class="flex gap-2 mb-3">
-                    <input type="number" id="size-lyrics" value="16" class="w-20 border border-slate-300 rounded p-2 text-sm">
-                    <input type="color" id="color-lyrics" value="#334155" class="flex-1 h-9 border border-slate-300 rounded p-1">
-                </div>
-                <!-- Line Spacing Slider -->
-                <label class="block text-[11px] font-medium text-slate-500 mb-1">Zeilenabstand</label>
-                <input type="range" id="line-spacing" min="0.8" max="4" step="0.1" value="1.2" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
-            </div>
-
-            <!-- Chorus Highlight Settings -->
-            <div class="mb-6 pt-6 border-t border-slate-100">
-                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Chorus-Hervorhebung</h2>
                 
-                <div class="flex items-center justify-between mb-3">
+                <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2">
-                        <input type="checkbox" id="chorus-indent-toggle" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="applyStyles()">
-                        <span class="text-xs text-slate-600 font-medium">Einrücken</span>
+                        <span class="text-[16px] text-slate-500 uppercase w-20">Titel</span>
+                        <select id="font-title" class="border border-slate-300 rounded p-1.5 text-[18px] w-48" onchange="applyStyles()">
+                            <optgroup label="Sans-Serif">
+                                <option value="Inter">Inter</option>
+                                <option value="Montserrat" selected>Montserrat</option>
+                                <option value="Open Sans">Open Sans</option>
+                                <option value="Roboto">Roboto</option>
+                            </optgroup>
+                            <optgroup label="Serif">
+                                <option value="Merriweather">Merriweather</option>
+                                <option value="Playfair Display">Playfair</option>
+                                <option value="Lora">Lora</option>
+                                <option value="Crimson Text">Crimson Text</option>
+                                <option value="Georgia">Georgia</option>
+                            </optgroup>
+                        </select>
+                        <input type="number" id="size-title" value="28" class="border border-slate-300 rounded p-1.5 text-[16px] w-20" oninput="applyStyles()">
+                        <input type="color" id="color-title" value="#1e293b" class="w-10 h-10 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
                     </div>
-                    <div class="flex items-center gap-1">
-                        <input type="number" id="chorus-indent-val" value="30" class="w-14 border border-slate-300 rounded p-1 text-xs" oninput="applyStyles()">
-                        <span class="text-[10px] text-slate-400">px</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[16px] text-slate-500 uppercase w-20">Text</span>
+                        <select id="font-lyrics" class="border border-slate-300 rounded p-1.5 text-[18px] w-48" onchange="applyStyles()">
+                            <optgroup label="Sans-Serif">
+                                <option value="Inter" selected>Inter</option>
+                                <option value="Roboto">Roboto</option>
+                                <option value="Lato">Lato</option>
+                                <option value="Open Sans">Open Sans</option>
+                            </optgroup>
+                            <optgroup label="Serif">
+                                <option value="Lora">Lora</option>
+                                <option value="Merriweather">Merriweather</option>
+                                <option value="Playfair Display">Playfair</option>
+                                <option value="Crimson Text">Crimson Text</option>
+                                <option value="Georgia">Georgia</option>
+                            </optgroup>
+                        </select>
+                        <input type="number" id="size-lyrics" value="14" class="border border-slate-300 rounded p-1.5 text-[16px] w-20" oninput="applyStyles()">
+                        <input type="color" id="color-lyrics" value="#334155" class="w-10 h-10 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between mb-3">
+                <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2">
-                        <input type="checkbox" id="chorus-line-toggle" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="applyStyles()">
-                        <span class="text-xs text-slate-600 font-medium">Linke Linie</span>
+                        <span class="text-[16px] text-slate-500 uppercase w-20">Akkord</span>
+                        <select id="font-chords" class="border border-slate-300 rounded p-1.5 text-[18px] w-48" onchange="applyStyles()">
+                            <optgroup label="Sans-Serif">
+                                <option value="Inter" selected>Inter</option>
+                                <option value="Montserrat">Montserrat</option>
+                                <option value="Roboto">Roboto</option>
+                            </optgroup>
+                            <optgroup label="Serif">
+                                <option value="Lora">Lora</option>
+                                <option value="Merriweather">Merriweather</option>
+                                <option value="Playfair Display">Playfair</option>
+                            </optgroup>
+                            <optgroup label="Monospace">
+                                <option value="Roboto Mono">Roboto Mono</option>
+                                <option value="Courier New">Courier New</option>
+                            </optgroup>
+                        </select>
+                        <input type="number" id="size-chords" value="14" class="border border-slate-300 rounded p-1.5 text-[16px] w-20" oninput="applyStyles()">
+                        <input type="color" id="color-chords" value="#2563eb" class="w-10 h-10 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
                     </div>
-                    <div class="flex items-center gap-1">
-                        <input type="number" id="chorus-line-val" value="4" class="w-14 border border-slate-300 rounded p-1 text-xs" oninput="applyStyles()">
-                        <span class="text-[10px] text-slate-400">px</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <input type="checkbox" id="chorus-border-toggle" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="applyStyles()">
-                        <span class="text-xs text-slate-600 font-medium">Rahmen</span>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <input type="number" id="chorus-border-val" value="1" class="w-14 border border-slate-300 rounded p-1 text-xs" oninput="applyStyles()">
-                        <span class="text-[10px] text-slate-400">px</span>
+                        <span class="text-[16px] text-slate-500 uppercase w-20">Refrain</span>
+                        <input type="checkbox" id="chorus-indent-toggle" checked class="w-6 h-6 rounded border-slate-300 text-blue-600" onchange="applyStyles()">
+                        <input type="number" id="chorus-indent-val" value="20" class="w-24 border border-slate-300 rounded p-1.5 text-[18px]" oninput="applyStyles()">
+                        <input type="checkbox" id="chorus-line-toggle" class="w-6 h-6 rounded border-slate-300 text-blue-600" onchange="applyStyles()">
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Chord Diagram Settings -->
-            <div class="mb-6 pt-6 border-t border-slate-100">
-                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Akkorddiagramme</h2>
-                
-                <div class="flex items-center gap-2 mb-3">
-                    <input type="checkbox" id="diag-toggle" checked class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="updatePreview()">
-                    <span class="text-xs text-slate-600 font-medium">Diagramme anzeigen</span>
+        <!-- Chord Diagram Settings -->
+        <div class="nav-section">
+            <h2 class="text-[20px] font-bold text-slate-600 uppercase mb-2">Akkorddiagramme</h2>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="diag-toggle" checked class="w-6 h-6 rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="updatePreview()">
+                    <span class="text-[18px] text-slate-600 font-medium">Anzeigen</span>
                 </div>
-
-                <div class="mb-3">
-                    <label class="block text-[11px] font-medium text-slate-500 mb-1">Position</label>
-                    <select id="diag-position" class="w-full border border-slate-300 rounded p-2 text-xs" onchange="updatePreview()">
-                        <option value="side" selected>Seite (Spalte)</option>
-                        <option value="bottom">Unten (Reihe)</option>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label class="block text-[11px] font-medium text-slate-500 mb-1">Größe</label>
-                    <input type="range" id="diag-size" min="40" max="150" step="5" value="80" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="applyStyles()">
+                <div class="flex flex-col">
+                    <span class="text-[16px] text-slate-500 uppercase">Größe</span>
+                    <input type="range" id="diag-size" min="40" max="150" step="5" value="80" class="w-32 h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="applyStyles()">
                 </div>
             </div>
+        </div>
 
-            <!-- Song Library -->
-            <div class="pt-6 border-t border-slate-100">
-                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Song-Bibliothek</h2>
-                <button onclick="saveCurrentSong()" class="w-full bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded text-sm font-medium mb-4 transition-colors">
-                    Aktuellen Song speichern
+        <!-- Page Margins -->
+        <div class="nav-section">
+            <h2 class="text-[20px] font-bold text-slate-600 uppercase mb-2">Seitenränder (mm)</h2>
+            <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+                <div class="flex items-center gap-2">
+                    <span class="text-[14px] text-slate-500 uppercase w-12">Oben</span>
+                    <input type="number" id="margin-top" value="25" min="0" max="100" class="border border-slate-300 rounded p-1 text-[16px] w-16" oninput="applyStyles(); autoSaveSession()">
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[14px] text-slate-500 uppercase w-12">Unten</span>
+                    <input type="number" id="margin-bottom" value="25" min="0" max="100" class="border border-slate-300 rounded p-1 text-[16px] w-16" oninput="applyStyles(); autoSaveSession()">
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[14px] text-slate-500 uppercase w-12">Links</span>
+                    <input type="number" id="margin-left" value="20" min="0" max="100" class="border border-slate-300 rounded p-1 text-[16px] w-16" oninput="applyStyles(); autoSaveSession()">
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[14px] text-slate-500 uppercase w-12">Rechts</span>
+                    <input type="number" id="margin-right" value="20" min="0" max="100" class="border border-slate-300 rounded p-1 text-[16px] w-16" oninput="applyStyles(); autoSaveSession()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Song Library -->
+        <div class="nav-section">
+            <h2 class="text-[20px] font-bold text-slate-600 uppercase mb-2">Song-Bibliothek</h2>
+            <div class="flex items-center gap-3">
+                <button onclick="saveCurrentSong()" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded text-[18px] font-medium transition-colors">
+                    Speichern
                 </button>
-                <div id="song-list" class="space-y-2">
-                    <!-- Saved songs will appear here -->
+                <div id="song-list" class="flex gap-2 overflow-x-auto max-w-[400px] no-scrollbar">
+                    <!-- Saved songs -->
                 </div>
             </div>
+        </div>
 
-            <!-- File Transfer -->
-            <div class="pt-6 border-t border-slate-100 mt-6">
-                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Datei-Transfer</h2>
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                    <button onclick="downloadFile('cho')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded text-[10px] font-bold transition-colors">
-                        Download .cho
-                    </button>
-                    <button onclick="downloadFile('txt')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded text-[10px] font-bold transition-colors">
-                        Download .txt
-                    </button>
-                </div>
-                <button onclick="document.getElementById('file-upload').click()" class="w-full border-2 border-dashed border-slate-200 hover:border-blue-400 text-slate-400 hover:text-blue-600 py-3 rounded text-[10px] font-bold transition-all flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- File Transfer -->
+        <div class="nav-section">
+            <h2 class="text-[20px] font-bold text-slate-600 uppercase mb-2">Datei</h2>
+            <div class="flex items-center gap-2">
+                <button onclick="downloadFile('cho')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded text-[18px] font-bold">.cho</button>
+                <button onclick="downloadFile('txt')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded text-[18px] font-bold">.txt</button>
+                <button onclick="document.getElementById('file-upload').click()" class="bg-blue-50 text-blue-600 px-5 py-2.5 rounded text-[18px] font-bold flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
-                    Datei laden (.cho / .txt)
+                    Laden
                 </button>
                 <input type="file" id="file-upload" class="hidden" accept=".cho,.txt,.chordpro" onchange="handleFileUpload(event)">
             </div>
+        </div>
+    </nav>
 
+    <main class="editor-container flex-1 overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="no-print">
             <!-- Transpose -->
-            <div class="pt-6 border-t border-slate-100 mt-6">
-                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Transponieren</h2>
+            <div class="sidebar-section">
+                <h2 class="text-[10px] font-bold text-slate-400 uppercase">Transponieren</h2>
                 <div class="flex gap-2">
-                    <button onclick="transposeSong(-1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-[10px] font-bold transition-colors">
-                        -1 Halbton
-                    </button>
-                    <button onclick="transposeSong(1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-[10px] font-bold transition-colors">
-                        +1 Halbton
-                    </button>
+                    <button onclick="transposeSong(-1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-xs font-bold">-1 Halbton</button>
+                    <button onclick="transposeSong(1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-xs font-bold">+1 Halbton</button>
                 </div>
             </div>
 
             <!-- Chord Helper -->
-            <div class="pt-6 border-t border-slate-100 mt-6">
-                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Akkord-Helfer</h2>
-                
-                <!-- Quick Chords -->
-                <div class="grid grid-cols-4 gap-1 mb-4">
-                    <button onclick="insertChord('C')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">C</button>
-                    <button onclick="insertChord('G')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">G</button>
-                    <button onclick="insertChord('D')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">D</button>
-                    <button onclick="insertChord('A')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">A</button>
-                    <button onclick="insertChord('E')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">E</button>
-                    <button onclick="insertChord('Am')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">Am</button>
-                    <button onclick="insertChord('Em')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">Em</button>
-                    <button onclick="insertChord('Dm')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 rounded font-medium">Dm</button>
-                </div>
-
-                <!-- Chord Builder -->
-                <div class="space-y-3">
-                    <div class="flex gap-1 overflow-x-auto pb-1 no-scrollbar" id="chord-roots">
-                        <!-- Roots injected by JS -->
-                    </div>
-                    <div class="flex gap-1 overflow-x-auto pb-1 no-scrollbar" id="chord-qualities">
-                        <!-- Qualities injected by JS -->
-                    </div>
-                    <button onclick="insertCustomChord()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-xs font-bold transition-colors">
-                        [<span id="custom-chord-preview">C</span>] Einfügen
+            <div class="sidebar-section">
+                <h2 class="text-[10px] font-bold text-slate-400 uppercase">Akkord-Helfer</h2>
+                <div class="flex flex-col gap-2">
+                    <div class="flex flex-wrap gap-1" id="chord-roots"></div>
+                    <div class="flex flex-wrap gap-1" id="chord-qualities"></div>
+                    <button onclick="insertCustomChord()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-xs font-bold">
+                        Akkord einfügen [<span id="custom-chord-preview">C</span>]
                     </button>
                 </div>
+            </div>
 
-                <!-- Diagram Creator -->
-                <div class="mt-6 pt-6 border-t border-slate-100">
-                    <h3 class="text-[11px] font-bold text-slate-400 uppercase mb-3">Diagramm-Ersteller</h3>
-                    <div class="flex gap-4">
-                        <div id="fretboard-ui" class="fretboard">
-                            <!-- Fretboard injected by JS -->
-                        </div>
-                        <div class="flex-1 space-y-2">
-                            <input type="text" id="diag-name" placeholder="Akkord Name" class="w-full border border-slate-300 rounded p-1 text-xs">
-                            <button onclick="insertDiagram()" class="w-full bg-slate-700 text-white py-1.5 rounded text-[10px] font-bold">Definieren</button>
-                            <p class="text-[9px] text-slate-400 leading-tight">Klicke auf Bünde zum Markieren. "X" für Mute.</p>
-                        </div>
+            <!-- Diagram Creator -->
+            <div class="sidebar-section">
+                <h2 class="text-[10px] font-bold text-slate-400 uppercase">Diagramm-Ersteller</h2>
+                <div class="flex flex-col gap-3">
+                    <div id="fretboard-ui" class="fretboard w-full"></div>
+                    <div class="flex gap-2">
+                        <input type="text" id="diag-name" placeholder="Name" class="flex-1 border border-slate-300 rounded p-2 text-xs">
+                        <button onclick="insertDiagram()" class="bg-slate-800 text-white px-3 py-2 rounded text-xs font-bold">Definieren</button>
                     </div>
                 </div>
             </div>
 
-            <div class="pt-6 border-t border-slate-100 mt-6">
-                <p class="text-xs text-slate-400 leading-relaxed">
-                    Tipp: Nutze [Chord] im Text. <br>
-                    {diagrams: C G Am} zeigt nur diese Akkorde.<br>
-                    {define: C frets x 3 2 0 1 0} für eigene Griffe.
-                </p>
+            <!-- Editor Tools -->
+            <div class="sidebar-section">
+                <h2 class="text-[10px] font-bold text-slate-400 uppercase">Editor-Tools</h2>
+                <button onclick="insertPageBreak()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded text-xs font-bold flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7" />
+                    </svg>
+                    Seitenumbruch einfügen
+                </button>
             </div>
         </aside>
 
         <!-- Editor Spalte -->
-        <section class="border-r border-slate-200 flex flex-col no-print">
+        <section id="editor-section" class="border-r border-slate-200 flex flex-col no-print">
             <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase">ChordPro Editor</div>
             <textarea id="chordpro-input" class="flex-1 p-6 text-sm leading-relaxed text-slate-700 bg-white" placeholder="Gib hier deinen ChordPro Text ein..."></textarea>
         </section>
 
         <!-- Preview Spalte -->
-        <section class="flex flex-col bg-slate-100 p-8 overflow-hidden">
-            <div class="bg-white rounded-xl shadow-lg flex-1 overflow-hidden flex flex-col">
-                <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase no-print">Live Vorschau</div>
-                <div id="preview-pane" class="flex-1">
+        <section id="preview-section" class="flex flex-col bg-slate-100 overflow-hidden">
+            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase no-print">Live Vorschau</div>
+            <div class="preview-column flex-1 overflow-auto p-4 md:p-8">
+                <div id="preview-pane">
                     <!-- Songsheet content will be injected here -->
                 </div>
             </div>
@@ -488,6 +565,27 @@
             <div class="flex justify-end gap-3">
                 <button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Abbrechen</button>
                 <button id="confirm-overwrite-btn" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">Überschreiben</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Preview Overlay -->
+    <div id="full-preview-overlay" class="fixed inset-0 bg-white z-[100] hidden flex-col no-print">
+        <div class="h-14 border-b border-slate-200 flex items-center justify-between px-6 bg-white shrink-0">
+            <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span class="font-bold text-slate-800">Vollbild-Vorschau</span>
+            </div>
+            <button onclick="toggleFullPreview()" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all shadow-sm active:scale-95">
+                Schließen
+            </button>
+        </div>
+        <div id="full-preview-container" class="flex-1 overflow-y-auto bg-slate-100 flex justify-center items-start p-4 md:p-12">
+            <div id="full-preview-content" class="w-[210mm] min-h-[297mm] bg-white shadow-2xl p-[25mm_20mm] my-8 relative">
+                <!-- Content injected here -->
             </div>
         </div>
     </div>
@@ -527,7 +625,14 @@
             'B': 'x 2 4 4 4 2',
             'F#': '2 4 4 3 2 2',
             'C#': 'x 4 6 6 6 4',
-            'G#': '4 6 6 5 4 4'
+            'G#': '4 6 6 5 4 4',
+            'G/B': 'x 2 0 0 0 3',
+            'D/F#': '2 x 0 2 3 2',
+            'C/G': '3 3 2 0 1 0',
+            'Am/G': '3 0 2 2 1 0',
+            'F/A': 'x 0 3 2 1 1',
+            'D/A': 'x 0 0 2 3 2',
+            'E/G#': '4 x 2 1 0 0'
         };
 
         function renderChordSVG(name, fretsStr, size = 80, color = 'currentColor') {
@@ -660,7 +765,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             let explicitDiagrams = null;
 
             const diagEnabled = document.getElementById('diag-toggle')?.checked ?? true;
-            const diagPos = document.getElementById('diag-position')?.value || 'top';
+            const diagPos = 'bottom';
             const diagSize = parseInt(document.getElementById('diag-size')?.value || '80');
             const chordColor = document.getElementById('color-chords')?.value || 'currentColor';
 
@@ -716,6 +821,10 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                         metadata.info.push({ type: 'comment', text: `Capo: ${value}` });
                     }
                     else if (key === 'new_page' || key === 'np') {
+                        if (inBlock) {
+                            mainHtml += '</div>';
+                            inBlock = false;
+                        }
                         mainHtml += '<div class="page-break"></div>';
                     }
                     return;
@@ -740,8 +849,8 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                         }
                         i++; // skip ]
                         
-                        // Clean chord name for lookup (remove bass note etc if needed, but let's keep it simple)
-                        const cleanChord = chord.split('/')[0].trim();
+                        // Clean chord name for lookup
+                        const cleanChord = chord.trim();
                         if (cleanChord) usedChords.add(cleanChord);
 
                         // Collect lyrics until next chord or end of line
@@ -772,7 +881,12 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             if (diagEnabled) {
                 const chordsToShow = explicitDiagrams || Array.from(usedChords).sort();
                 chordsToShow.forEach(c => {
-                    const frets = customChords.get(c) || commonChords[c];
+                    let frets = customChords.get(c) || commonChords[c];
+                    // Fallback for slash chords: if G/B is not found, try G
+                    if (!frets && c.includes('/')) {
+                        const baseChord = c.split('/')[0].trim();
+                        frets = customChords.get(baseChord) || commonChords[baseChord];
+                    }
                     if (frets) {
                         diagramsHtml += renderChordSVG(c, frets, diagSize, chordColor);
                     }
@@ -780,7 +894,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             }
 
             // Prepend metadata
-            let headerHtml = '<div class="song-header-block" style="break-inside: avoid; page-break-inside: avoid; margin-bottom: 0;">';
+            let headerHtml = '<div class="song-header-block" style="margin-bottom: 0;">';
             if (metadata.title) headerHtml += `<div class="song-title">${metadata.title}</div>`;
             if (metadata.subtitle) headerHtml += `<div class="song-subtitle">${metadata.subtitle}</div>`;
             if (metadata.info.length > 0) {
@@ -808,11 +922,6 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
 
             finalHtml += '</div>'; // close songsheet
 
-            // Sidebar diagrams (RIGHT)
-            if (diagPos === 'side' && diagramsHtml) {
-                finalHtml += `<div class="diagram-sidebar">${diagramsHtml}</div>`;
-            }
-
             finalHtml += '</div>';
 
             return finalHtml;
@@ -825,7 +934,59 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         }
 
         function applyStyles() {
-            const getVal = (id) => document.getElementById(id).value;
+            const getVal = (id) => {
+                const el = document.getElementById(id);
+                if (!el) {
+                    if (id.includes('font')) return 'Inter';
+                    if (id.includes('size')) return id.includes('title') ? '28' : '14';
+                    if (id.includes('color')) return id.includes('chords') ? '#2563eb' : '#334155';
+                    if (id === 'line-spacing') return '1.2';
+                    if (id.includes('val')) return '20';
+                    if (id.includes('margin')) {
+                        if (id.includes('top') || id.includes('bottom')) return '25';
+                        return '20';
+                    }
+                    return '';
+                }
+                return el.value;
+            };
+
+            // Margins & Page Guides
+            const marginTop = getVal('margin-top');
+            const marginBottom = getVal('margin-bottom');
+            const marginLeft = getVal('margin-left');
+            const marginRight = getVal('margin-right');
+
+            const previewPane = document.getElementById('preview-pane');
+            const fullPreviewContent = document.getElementById('full-preview-content');
+
+            [previewPane, fullPreviewContent].forEach(el => {
+                if (el) {
+                    el.style.padding = `${marginTop}mm ${marginRight}mm ${marginBottom}mm ${marginLeft}mm`;
+                    
+                    // Update background guides
+                    const guides = [
+                        /* Horizontal Page Break (Bottom of Page) */
+                        `linear-gradient(to bottom, transparent 296.5mm, #cbd5e1 296.5mm, #cbd5e1 297mm, transparent 297mm)`,
+                        /* Top Margin */
+                        `linear-gradient(to bottom, transparent ${parseFloat(marginTop)-0.1}mm, #e2e8f0 ${parseFloat(marginTop)-0.1}mm, #e2e8f0 ${parseFloat(marginTop)+0.1}mm, transparent ${parseFloat(marginTop)+0.1}mm)`,
+                        /* Bottom Margin */
+                        `linear-gradient(to bottom, transparent ${297 - parseFloat(marginBottom)-0.1}mm, #e2e8f0 ${297 - parseFloat(marginBottom)-0.1}mm, #e2e8f0 ${297 - parseFloat(marginBottom)+0.1}mm, transparent ${297 - parseFloat(marginBottom)+0.1}mm)`,
+                        /* Left Margin */
+                        `linear-gradient(to right, transparent ${parseFloat(marginLeft)-0.1}mm, #e2e8f0 ${parseFloat(marginLeft)-0.1}mm, #e2e8f0 ${parseFloat(marginLeft)+0.1}mm, transparent ${parseFloat(marginLeft)+0.1}mm)`,
+                        /* Right Margin */
+                        `linear-gradient(to left, transparent ${parseFloat(marginRight)-0.1}mm, #e2e8f0 ${parseFloat(marginRight)-0.1}mm, #e2e8f0 ${parseFloat(marginRight)+0.1}mm, transparent ${parseFloat(marginRight)+0.1}mm)`
+                    ];
+
+                    if (document.body.classList.contains('pdf-export-mode-active')) {
+                        el.style.backgroundImage = 'none';
+                        el.style.backgroundSize = '0 0';
+                    } else {
+                        el.style.backgroundImage = guides.join(', ');
+                        el.style.backgroundSize = '100% 297mm, 100% 297mm, 100% 297mm, 100% 297mm, 100% 297mm';
+                    }
+                }
+            });
 
             // Title
             const titles = document.querySelectorAll('.song-title');
@@ -838,33 +999,33 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             // Subtitle
             const subtitles = document.querySelectorAll('.song-subtitle');
             subtitles.forEach(el => {
-                el.style.fontFamily = getVal('font-subtitle');
-                el.style.fontSize = getVal('size-subtitle') + 'px';
-                el.style.color = getVal('color-subtitle');
+                el.style.fontFamily = getVal('font-subtitle') || 'Inter';
+                el.style.fontSize = (getVal('size-subtitle') || '18') + 'px';
+                el.style.color = getVal('color-subtitle') || '#64748b';
             });
 
             // Key
             const keys = document.querySelectorAll('.song-key');
             keys.forEach(el => {
-                el.style.fontFamily = getVal('font-key');
-                el.style.fontSize = getVal('size-key') + 'px';
-                el.style.color = getVal('color-key');
+                el.style.fontFamily = getVal('font-key') || 'Inter';
+                el.style.fontSize = (getVal('size-key') || '12') + 'px';
+                el.style.color = getVal('color-key') || '#94a3b8';
             });
 
             // Comment
             const comments = document.querySelectorAll('.song-comment');
             comments.forEach(el => {
-                el.style.fontFamily = getVal('font-comment');
-                el.style.fontSize = getVal('size-comment') + 'px';
-                el.style.color = getVal('color-comment');
+                el.style.fontFamily = getVal('font-comment') || 'Inter';
+                el.style.fontSize = (getVal('size-comment') || '12') + 'px';
+                el.style.color = getVal('color-comment') || '#64748b';
             });
 
             // Tempo
             const tempos = document.querySelectorAll('.song-tempo');
             tempos.forEach(el => {
-                el.style.fontFamily = getVal('font-tempo');
-                el.style.fontSize = getVal('size-tempo') + 'px';
-                el.style.color = getVal('color-tempo');
+                el.style.fontFamily = getVal('font-tempo') || 'Inter';
+                el.style.fontSize = (getVal('size-tempo') || '12') + 'px';
+                el.style.color = getVal('color-tempo') || '#94a3b8';
             });
 
             // Chords
@@ -885,11 +1046,11 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
 
             // Blocks (Chorus and Section)
             const blocks = document.querySelectorAll('.chorus-block, .section-block');
-            const indentOn = document.getElementById('chorus-indent-toggle').checked;
+            const indentOn = document.getElementById('chorus-indent-toggle')?.checked ?? true;
             const indentVal = getVal('chorus-indent-val');
-            const lineOn = document.getElementById('chorus-line-toggle').checked;
+            const lineOn = document.getElementById('chorus-line-toggle')?.checked ?? false;
             const lineVal = getVal('chorus-line-val');
-            const borderOn = document.getElementById('chorus-border-toggle').checked;
+            const borderOn = document.getElementById('chorus-border-toggle')?.checked ?? false;
             const borderVal = getVal('chorus-border-val');
 
             blocks.forEach(el => {
@@ -949,33 +1110,126 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         }
 
         async function exportPDF() {
-            const element = document.getElementById('preview-pane');
+            if (typeof html2pdf === 'undefined') {
+                alert('PDF-Bibliothek wird noch geladen. Bitte warten Sie einen Moment.');
+                return;
+            }
+
+            const btn = document.getElementById('pdf-export-btn');
+            const icon = document.getElementById('pdf-icon');
+            const spinner = document.getElementById('pdf-spinner');
+            const btnText = document.getElementById('pdf-btn-text');
+            const previewPane = document.getElementById('preview-pane');
             const title = document.querySelector('.song-title')?.innerText || 'Songsheet';
             
-            // Ensure styles are up to date
+            // Get current manual margins
+            const mt = parseFloat(document.getElementById('margin-top')?.value || '25');
+            const mb = parseFloat(document.getElementById('margin-bottom')?.value || '25');
+            const ml = parseFloat(document.getElementById('margin-left')?.value || '20');
+            const mr = parseFloat(document.getElementById('margin-right')?.value || '20');
+
+            // Set loading state
+            btn.disabled = true;
+            icon.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            btnText.innerText = 'Exportiere...';
+
+            // Toggle export mode to suppress guides in original element during cloning
+            document.body.classList.add('pdf-export-mode-active');
             applyStyles();
 
-            const opt = {
-                margin: [10, 10, 10, 10],
-                filename: `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2, 
-                    useCORS: true, 
-                    letterRendering: true,
-                    backgroundColor: '#ffffff',
-                    logging: false
-                },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-            };
-
             try {
-                // We use the live element directly for better style preservation
-                await html2pdf().set(opt).from(element).save();
+                // Ensure fonts are loaded and layout is stable
+                await document.fonts.ready;
+                await new Promise(resolve => setTimeout(resolve, 800));
+
+                const opt = {
+                    margin: [mt, ml, mb, mr], // Use real margins for PDF
+                    filename: `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { 
+                        scale: 2, 
+                        useCORS: true, 
+                        backgroundColor: '#ffffff',
+                        logging: false,
+                        scrollY: 0,
+                        scrollX: 0,
+                        onclone: (clonedDoc) => {
+                            // Nuclear option: Remove all background images from the cloned document
+                            const style = clonedDoc.createElement('style');
+                            style.innerHTML = `
+                                #preview-pane, #preview-pane * { 
+                                    background-image: none !important; 
+                                    background-color: transparent !important;
+                                }
+                                #preview-pane {
+                                    background-color: white !important;
+                                }
+                            `;
+                            clonedDoc.head.appendChild(style);
+
+                            const body = clonedDoc.body;
+                            body.style.margin = '0';
+                            body.style.padding = '0';
+                            
+                            const clonedPreview = clonedDoc.getElementById('preview-pane');
+                            if (clonedPreview) {
+                                // REMOVE ALL INLINE STYLES FIRST
+                                clonedPreview.removeAttribute('style');
+                                
+                                clonedPreview.classList.add('pdf-export-mode');
+                                
+                                // Calculate content width (A4 is 210mm)
+                                const contentWidth = 210 - ml - mr;
+
+                                // MATCH FULL PREVIEW EXACTLY BUT WITHOUT PADDING (because opt.margin handles it)
+                                Object.assign(clonedPreview.style, {
+                                    width: `${contentWidth}mm`,
+                                    minHeight: '0',
+                                    padding: '0',
+                                    margin: '0',
+                                    background: 'white',
+                                    backgroundImage: 'none',
+                                    backgroundSize: '0 0',
+                                    boxShadow: 'none',
+                                    transform: 'none',
+                                    position: 'static',
+                                    display: 'block',
+                                    overflow: 'visible'
+                                });
+                                clonedPreview.style.setProperty('background-image', 'none', 'important');
+                                clonedPreview.style.setProperty('background-size', '0 0', 'important');
+
+                                // Ensure internal structure matches Full Preview
+                                const container = clonedPreview.querySelector('.songsheet-container');
+                                if (container) {
+                                    container.style.display = 'flex';
+                                    container.style.flexDirection = 'row';
+                                    container.style.width = '100%';
+                                    container.style.gap = '2rem';
+                                }
+                            }
+                        }
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { 
+                        mode: ['css', 'legacy']
+                    }
+                };
+
+                await html2pdf().set(opt).from(previewPane).save();
             } catch (error) {
                 console.error('PDF Export failed:', error);
-                alert('PDF Export fehlgeschlagen.');
+                alert('PDF Export fehlgeschlagen. Bitte versuchen Sie es erneut.');
+            } finally {
+                // Restore original guides
+                document.body.classList.remove('pdf-export-mode-active');
+                applyStyles();
+                
+                btn.disabled = false;
+                icon.classList.remove('hidden');
+                spinner.classList.add('hidden');
+                btnText.innerText = 'PDF Export';
             }
         }
 
@@ -1001,12 +1255,25 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         function getSettings() {
             const data = {};
             for (const [key, fields] of Object.entries(settings)) {
+                const fontEl = document.getElementById(fields.font);
+                const sizeEl = document.getElementById(fields.size);
+                const colorEl = document.getElementById(fields.color);
+                
                 data[key] = {
-                    font: document.getElementById(fields.font).value,
-                    size: document.getElementById(fields.size).value,
-                    color: document.getElementById(fields.color).value
+                    font: fontEl ? fontEl.value : (key === 'title' ? 'Montserrat' : 'Inter'),
+                    size: sizeEl ? sizeEl.value : (key === 'title' ? '28' : '14'),
+                    color: colorEl ? colorEl.value : (key === 'chords' ? '#2563eb' : '#334155')
                 };
             }
+            
+            // Add margins
+            data.margins = {
+                top: document.getElementById('margin-top')?.value || '25',
+                bottom: document.getElementById('margin-bottom')?.value || '25',
+                left: document.getElementById('margin-left')?.value || '20',
+                right: document.getElementById('margin-right')?.value || '20'
+            };
+            
             return data;
         }
 
@@ -1014,11 +1281,30 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             if (!data) return;
             for (const [key, values] of Object.entries(data)) {
                 if (settings[key]) {
-                    document.getElementById(settings[key].font).value = values.font;
-                    document.getElementById(settings[key].size).value = values.size;
-                    document.getElementById(settings[key].color).value = values.color;
+                    const fontEl = document.getElementById(settings[key].font);
+                    const sizeEl = document.getElementById(settings[key].size);
+                    const colorEl = document.getElementById(settings[key].color);
+                    
+                    if (fontEl) fontEl.value = values.font;
+                    if (sizeEl) sizeEl.value = values.size;
+                    if (colorEl) colorEl.value = values.color;
                 }
             }
+            
+            // Set margins
+            if (data.margins) {
+                const mt = document.getElementById('margin-top');
+                const mb = document.getElementById('margin-bottom');
+                const ml = document.getElementById('margin-left');
+                const mr = document.getElementById('margin-right');
+                
+                if (mt) mt.value = data.margins.top;
+                if (mb) mb.value = data.margins.bottom;
+                if (ml) ml.value = data.margins.left;
+                if (mr) mr.value = data.margins.right;
+            }
+            
+            applyStyles();
         }
 
         let pendingSongData = null;
@@ -1095,19 +1381,16 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             const library = JSON.parse(localStorage.getItem('chordpro_library') || '[]');
             
             if (library.length === 0) {
-                listEl.innerHTML = '<p class="text-xs text-slate-400 italic">Keine gespeicherten Songs.</p>';
+                listEl.innerHTML = '<p class="text-[10px] text-slate-400 italic">Leer</p>';
                 return;
             }
 
             listEl.innerHTML = library.map(song => `
-                <div class="song-list-item group flex items-center justify-between p-2 rounded hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all cursor-pointer" onclick="loadSong(${song.id})">
-                    <div class="flex-1 min-w-0">
-                        <div class="text-sm font-medium text-slate-700 truncate">${song.title}</div>
-                        <div class="text-[10px] text-slate-400">${new Date(song.updatedAt).toLocaleDateString()}</div>
-                    </div>
-                    <button onclick="event.stopPropagation(); deleteSong(${song.id})" class="delete-btn text-slate-300 hover:text-red-500 p-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded px-2 py-1 cursor-pointer hover:bg-slate-100 shrink-0" onclick="loadSong(${song.id})">
+                    <span class="text-[10px] font-medium text-slate-700 truncate max-w-[80px]">${song.title}</span>
+                    <button onclick="event.stopPropagation(); deleteSong(${song.id})" class="text-slate-300 hover:text-red-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
@@ -1115,11 +1398,17 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         }
 
         function autoSaveSession() {
+            const spacingEl = document.getElementById('line-spacing');
             const session = {
                 content: input.value,
                 settings: getSettings(),
-                lineSpacing: document.getElementById('line-spacing').value,
-                diagPosition: document.getElementById('diag-position').value
+                lineSpacing: spacingEl ? spacingEl.value : '1.2',
+                margins: {
+                    top: document.getElementById('margin-top')?.value || '25',
+                    bottom: document.getElementById('margin-bottom')?.value || '25',
+                    left: document.getElementById('margin-left')?.value || '20',
+                    right: document.getElementById('margin-right')?.value || '20'
+                }
             };
             localStorage.setItem('chordpro_session', JSON.stringify(session));
         }
@@ -1129,8 +1418,35 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             if (session) {
                 input.value = session.content;
                 setSettings(session.settings);
-                if (session.lineSpacing) document.getElementById('line-spacing').value = session.lineSpacing;
-                if (session.diagPosition) document.getElementById('diag-position').value = session.diagPosition;
+                const spacingEl = document.getElementById('line-spacing');
+                if (session.lineSpacing && spacingEl) spacingEl.value = session.lineSpacing;
+                
+                if (session.margins) {
+                    const mt = document.getElementById('margin-top');
+                    const mb = document.getElementById('margin-bottom');
+                    const ml = document.getElementById('margin-left');
+                    const mr = document.getElementById('margin-right');
+                    
+                    if (mt) mt.value = session.margins.top;
+                    if (mb) mb.value = session.margins.bottom;
+                    if (ml) ml.value = session.margins.left;
+                    if (mr) mr.value = session.margins.right;
+                }
+            }
+        }
+
+        function toggleFullPreview() {
+            const overlay = document.getElementById('full-preview-overlay');
+            const content = document.getElementById('full-preview-content');
+            const source = document.getElementById('preview-pane');
+            
+            overlay.classList.toggle('hidden');
+            overlay.classList.toggle('flex');
+            
+            if (!overlay.classList.contains('hidden')) {
+                content.innerHTML = source.innerHTML;
+                // Re-apply styles to the content in the overlay
+                applyStyles();
             }
         }
 
@@ -1309,6 +1625,21 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             const start = input.selectionStart;
             const text = input.value;
             input.value = directive + '\n' + text;
+            updatePreview();
+            autoSaveSession();
+        }
+
+        function insertPageBreak() {
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const text = input.value;
+            const before = text.substring(0, start);
+            const after = text.substring(end);
+            
+            const breakTag = '\n{new_page}\n';
+            input.value = before + breakTag + after;
+            input.selectionStart = input.selectionEnd = start + breakTag.length;
+            input.focus();
             updatePreview();
             autoSaveSession();
         }

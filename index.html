@@ -23,9 +23,10 @@
         }
         .editor-container {
             display: grid;
-            grid-template-columns: 300px 1fr 1fr;
-            height: calc(100vh - 64px - 85px); /* Adjust based on top-nav height */
+            grid-template-columns: 280px minmax(0, 1fr) minmax(0, 1fr);
+            height: calc(100vh - 64px - 70px); /* Adjust based on header (64px) and top-nav (70px) height */
             transition: all 0.3s ease;
+            overflow-x: hidden;
         }
         .preview-column {
             background: white;
@@ -36,7 +37,7 @@
             padding: 1rem;
         }
         #top-nav {
-            height: 85px;
+            height: 70px;
             overflow-x: auto;
             overflow-y: hidden;
         }
@@ -47,8 +48,8 @@
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            padding: 1rem;
-            gap: 1.5rem;
+            padding: 0.75rem;
+            gap: 1.25rem;
         }
         .sidebar-section {
             display: flex;
@@ -62,6 +63,7 @@
             flex-direction: column;
             justify-content: center;
             min-width: max-content;
+            max-height: 100%;
         }
         .nav-section:last-child {
             border-right: none;
@@ -163,9 +165,26 @@
             padding: 0;
         }
         .section-header { font-weight: bold; }
-        .word-group { display: flex; flex-direction: column; margin-right: 0.3em; height: 100%; }
-        .chord { height: 50%; display: flex; align-items: flex-end; font-weight: bold; white-space: nowrap; }
-        .lyrics { height: 50%; display: flex; align-items: flex-start; white-space: pre; }
+        .word-group { 
+            display: flex; 
+            flex-direction: column; 
+            margin-right: 0.3em; 
+            height: 100%; 
+            justify-content: center;
+        }
+        .chord { 
+            display: flex; 
+            align-items: flex-end; 
+            font-weight: bold; 
+            white-space: nowrap; 
+            min-height: 1.2em;
+        }
+        .lyrics { 
+            display: flex; 
+            align-items: flex-start; 
+            white-space: pre; 
+            min-height: 1.2em;
+        }
 
         .spacer { min-width: 1px; }
 
@@ -312,26 +331,26 @@
 <body class="flex flex-col">
 
     <!-- Header -->
-    <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-6 no-print shrink-0">
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 no-print shrink-0">
         <div class="flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
-            <h1 class="text-2xl font-bold text-slate-800">ChordPro Studio</h1>
+            <h1 class="text-xl font-bold text-slate-800">ChordPro Studio</h1>
         </div>
         <div class="flex items-center gap-4">
-            <button onclick="toggleFullPreview()" id="preview-toggle-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-lg text-[16px] font-bold transition-colors flex items-center gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button onclick="toggleFullPreview()" id="preview-toggle-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-[14px] font-bold transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
                 <span id="preview-btn-text">Vollbild Vorschau</span>
             </button>
-            <button id="pdf-export-btn" onclick="exportPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-[16px] font-bold transition-colors flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
-                <svg id="pdf-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+            <button id="pdf-export-btn" onclick="openPDFModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-[14px] font-bold transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg id="pdf-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd" />
                 </svg>
-                <svg id="pdf-spinner" class="animate-spin h-6 w-6 hidden" xmlns="http://www.w3.org/2000/center" fill="none" viewBox="0 0 24 24">
+                <svg id="pdf-spinner" class="animate-spin h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -344,17 +363,17 @@
     <nav id="top-nav" class="bg-white border-b border-slate-200 flex no-print shrink-0 no-scrollbar">
         <!-- Stile & Layout -->
         <div class="nav-section">
-            <h2 class="text-[12px] font-bold text-slate-800 uppercase mb-1">Stile & Layout</h2>
-            <div class="flex items-center gap-4">
+            <h2 class="text-[11px] font-bold text-slate-800 uppercase mb-1">Stile & Layout</h2>
+            <div class="flex items-center gap-3">
                 <div class="flex flex-col">
-                    <span class="text-[11px] text-slate-500 uppercase">Zeilenabstand</span>
-                    <input type="range" id="line-spacing" min="0.5" max="3" step="0.1" value="1.2" class="w-32 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="applyStyles()">
+                    <span class="text-[10px] text-slate-500 uppercase">Zeilenabstand</span>
+                    <input type="range" id="line-spacing" min="0.5" max="3" step="0.1" value="1.2" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="applyStyles()">
                 </div>
                 
                 <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2">
-                        <span class="text-[11px] text-slate-500 uppercase w-20">Titel</span>
-                        <select id="font-title" class="border border-slate-300 rounded p-1 text-[11px] w-40" onchange="applyStyles()">
+                        <span class="text-[10px] text-slate-500 uppercase w-16">Titel</span>
+                        <select id="font-title" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="applyStyles()">
                             <optgroup label="Sans-Serif">
                                 <option value="Inter">Inter</option>
                                 <option value="Montserrat" selected>Montserrat</option>
@@ -373,8 +392,8 @@
                         <input type="color" id="color-title" value="#1e293b" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[11px] text-slate-500 uppercase w-20">Text</span>
-                        <select id="font-lyrics" class="border border-slate-300 rounded p-1 text-[11px] w-40" onchange="applyStyles()">
+                        <span class="text-[10px] text-slate-500 uppercase w-16">Text</span>
+                        <select id="font-lyrics" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="applyStyles()">
                             <optgroup label="Sans-Serif">
                                 <option value="Inter" selected>Inter</option>
                                 <option value="Roboto">Roboto</option>
@@ -396,8 +415,8 @@
  
                 <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2">
-                        <span class="text-[11px] text-slate-500 uppercase w-20">Akkord</span>
-                        <select id="font-chords" class="border border-slate-300 rounded p-1 text-[11px] w-40" onchange="applyStyles()">
+                        <span class="text-[10px] text-slate-500 uppercase w-16">Akkord</span>
+                        <select id="font-chords" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="applyStyles()">
                             <optgroup label="Sans-Serif">
                                 <option value="Inter" selected>Inter</option>
                                 <option value="Montserrat">Montserrat</option>
@@ -417,10 +436,10 @@
                         <input type="color" id="color-chords" value="#2563eb" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[11px] text-slate-500 uppercase w-20">Refrain</span>
-                        <input type="checkbox" id="chorus-indent-toggle" checked class="w-6 h-6 rounded border-slate-300 text-blue-600" onchange="applyStyles()">
-                        <input type="number" id="chorus-indent-val" value="20" class="w-20 border border-slate-300 rounded p-1 text-[11px]" oninput="applyStyles()">
-                        <input type="checkbox" id="chorus-line-toggle" class="w-6 h-6 rounded border-slate-300 text-blue-600" onchange="applyStyles()">
+                        <span class="text-[10px] text-slate-500 uppercase w-16">Refrain</span>
+                        <input type="checkbox" id="chorus-indent-toggle" checked class="w-5 h-5 rounded border-slate-300 text-blue-600" onchange="applyStyles()">
+                        <input type="number" id="chorus-indent-val" value="20" class="w-16 border border-slate-300 rounded p-1 text-[10px]" oninput="applyStyles()">
+                        <input type="checkbox" id="chorus-line-toggle" class="w-5 h-5 rounded border-slate-300 text-blue-600" onchange="applyStyles()">
                     </div>
                 </div>
             </div>
@@ -428,50 +447,50 @@
 
         <!-- Chord Diagram Settings -->
         <div class="nav-section">
-            <h2 class="text-[12px] font-bold text-slate-800 uppercase mb-1">Akkorddiagramme</h2>
-            <div class="flex items-center gap-4">
+            <h2 class="text-[11px] font-bold text-slate-800 uppercase mb-1">Akkorddiagramme</h2>
+            <div class="flex items-center gap-3">
                 <div class="flex items-center gap-2">
-                    <input type="checkbox" id="diag-toggle" checked class="w-6 h-6 rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="updatePreview()">
-                    <span class="text-[11px] text-slate-600 font-medium">Anzeigen</span>
+                    <input type="checkbox" id="diag-toggle" checked class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="updatePreview()">
+                    <span class="text-[10px] text-slate-600 font-medium">Anzeigen</span>
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-[11px] text-slate-500 uppercase">Größe</span>
-                    <input type="range" id="diag-size" min="40" max="150" step="5" value="80" class="w-32 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="applyStyles()">
+                    <span class="text-[10px] text-slate-500 uppercase">Größe</span>
+                    <input type="range" id="diag-size" min="40" max="150" step="5" value="80" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="applyStyles()">
                 </div>
             </div>
         </div>
 
         <!-- Page Margins -->
         <div class="nav-section">
-            <h2 class="text-[12px] font-bold text-slate-800 uppercase mb-1">Seitenränder (mm)</h2>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-1">
-                <div class="flex items-center gap-2">
-                    <span class="text-[11px] text-slate-500 uppercase w-12">Oben</span>
-                    <input type="number" id="margin-top" value="25" min="0" max="100" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="applyStyles(); autoSaveSession()">
+            <h2 class="text-[11px] font-bold text-slate-800 uppercase mb-1">Seitenränder (mm)</h2>
+            <div class="grid grid-cols-2 gap-x-2 gap-y-1">
+                <div class="flex items-center gap-1">
+                    <span class="text-[10px] text-slate-500 uppercase w-10">Oben</span>
+                    <input type="number" id="margin-top" value="25" min="0" max="100" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="applyStyles(); autoSaveSession()">
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-[11px] text-slate-500 uppercase w-12">Unten</span>
-                    <input type="number" id="margin-bottom" value="25" min="0" max="100" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="applyStyles(); autoSaveSession()">
+                <div class="flex items-center gap-1">
+                    <span class="text-[10px] text-slate-500 uppercase w-10">Unten</span>
+                    <input type="number" id="margin-bottom" value="25" min="0" max="100" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="applyStyles(); autoSaveSession()">
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-[11px] text-slate-500 uppercase w-12">Links</span>
-                    <input type="number" id="margin-left" value="20" min="0" max="100" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="applyStyles(); autoSaveSession()">
+                <div class="flex items-center gap-1">
+                    <span class="text-[10px] text-slate-500 uppercase w-10">Links</span>
+                    <input type="number" id="margin-left" value="20" min="0" max="100" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="applyStyles(); autoSaveSession()">
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-[11px] text-slate-500 uppercase w-12">Rechts</span>
-                    <input type="number" id="margin-right" value="20" min="0" max="100" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="applyStyles(); autoSaveSession()">
+                <div class="flex items-center gap-1">
+                    <span class="text-[10px] text-slate-500 uppercase w-10">Rechts</span>
+                    <input type="number" id="margin-right" value="20" min="0" max="100" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="applyStyles(); autoSaveSession()">
                 </div>
             </div>
         </div>
 
         <!-- Song Library -->
         <div class="nav-section">
-            <h2 class="text-[12px] font-bold text-slate-800 uppercase mb-1">Song-Bibliothek</h2>
-            <div class="flex items-center gap-4">
-                <button onclick="saveCurrentSong()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded text-[11px] font-medium transition-colors">
+            <h2 class="text-[11px] font-bold text-slate-800 uppercase mb-1">Song-Bibliothek</h2>
+            <div class="flex items-center gap-3">
+                <button onclick="saveCurrentSong()" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded text-[10px] font-medium transition-colors">
                     Speichern
                 </button>
-                <div id="song-list" class="flex gap-2 overflow-x-auto max-w-[400px] no-scrollbar">
+                <div id="song-list" class="flex gap-2 overflow-x-auto max-w-[300px] no-scrollbar">
                     <!-- Saved songs -->
                 </div>
             </div>
@@ -479,12 +498,12 @@
 
         <!-- File Transfer -->
         <div class="nav-section">
-            <h2 class="text-[12px] font-bold text-slate-800 uppercase mb-1">Datei</h2>
+            <h2 class="text-[11px] font-bold text-slate-800 uppercase mb-1">Datei</h2>
             <div class="flex items-center gap-2">
-                <button onclick="downloadFile('cho')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded text-[11px] font-bold">.cho</button>
-                <button onclick="downloadFile('txt')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded text-[11px] font-bold">.txt</button>
-                <button onclick="document.getElementById('file-upload').click()" class="bg-blue-50 text-blue-600 px-4 py-2 rounded text-[11px] font-bold flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button onclick="downloadFile('cho')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded text-[10px] font-bold">.cho</button>
+                <button onclick="downloadFile('txt')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded text-[10px] font-bold">.txt</button>
+                <button onclick="document.getElementById('file-upload').click()" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded text-[10px] font-bold flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
                     Laden
@@ -499,20 +518,20 @@
         <aside id="sidebar" class="no-print">
             <!-- Transpose -->
             <div class="sidebar-section">
-                <h2 class="text-[13px] font-bold text-slate-500 uppercase">Transponieren</h2>
-                <div class="flex gap-2">
-                    <button onclick="transposeSong(-1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-[14px] font-bold">-1 Halbton</button>
-                    <button onclick="transposeSong(1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-[14px] font-bold">+1 Halbton</button>
+                <h2 class="text-[12px] font-bold text-slate-500 uppercase">Transponieren</h2>
+                <div class="flex gap-1">
+                    <button onclick="transposeSong(-1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-1.5 rounded text-[13px] font-bold">-1 Halbton</button>
+                    <button onclick="transposeSong(1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-1.5 rounded text-[13px] font-bold">+1 Halbton</button>
                 </div>
             </div>
 
             <!-- Chord Helper -->
             <div class="sidebar-section">
-                <h2 class="text-[13px] font-bold text-slate-500 uppercase">Akkord-Helfer</h2>
+                <h2 class="text-[12px] font-bold text-slate-500 uppercase">Akkord-Helfer</h2>
                 <div class="flex flex-col gap-2">
                     <div class="flex flex-wrap gap-1" id="chord-roots"></div>
                     <div class="flex flex-wrap gap-1" id="chord-qualities"></div>
-                    <button onclick="insertCustomChord()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-[14px] font-bold">
+                    <button onclick="insertCustomChord()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">
                         Akkord einfügen [<span id="custom-chord-preview">C</span>]
                     </button>
                 </div>
@@ -520,20 +539,20 @@
 
             <!-- Diagram Creator -->
             <div class="sidebar-section">
-                <h2 class="text-[13px] font-bold text-slate-500 uppercase">Diagramm-Ersteller</h2>
-                <div class="flex flex-col gap-3">
-                    <div id="fretboard-ui" class="fretboard w-full"></div>
-                    <div class="flex gap-2">
-                        <input type="text" id="diag-name" placeholder="Name" class="flex-1 border border-slate-300 rounded p-2 text-[14px]">
-                        <button onclick="insertDiagram()" class="bg-slate-800 text-white px-3 py-2 rounded text-[14px] font-bold">Definieren</button>
+                <h2 class="text-[12px] font-bold text-slate-500 uppercase">Diagramm-Ersteller</h2>
+                <div class="flex flex-col gap-2">
+                    <div id="fretboard-ui" class="fretboard w-full mx-auto"></div>
+                    <div class="flex flex-col gap-2">
+                        <input type="text" id="diag-name" placeholder="Name" class="w-full border border-slate-300 rounded p-1.5 text-[13px]">
+                        <button onclick="insertDiagram()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded text-[13px] font-bold transition-colors">Definieren</button>
                     </div>
                 </div>
             </div>
 
             <!-- Editor Tools -->
             <div class="sidebar-section">
-                <h2 class="text-[13px] font-bold text-slate-500 uppercase">Editor-Tools</h2>
-                <button onclick="insertPageBreak()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded text-[14px] font-bold flex items-center justify-center gap-2">
+                <h2 class="text-[12px] font-bold text-slate-500 uppercase">Editor-Tools</h2>
+                <button onclick="insertPageBreak()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-[13px] font-bold flex items-center justify-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7" />
                     </svg>
@@ -543,15 +562,15 @@
         </aside>
 
         <!-- Editor Spalte -->
-        <section id="editor-section" class="border-r border-slate-200 flex flex-col no-print">
-            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-[14px] font-semibold text-slate-500 uppercase">ChordPro Editor</div>
-            <textarea id="chordpro-input" class="flex-1 p-6 text-[16px] leading-relaxed text-slate-700 bg-white" placeholder="Gib hier deinen ChordPro Text ein..."></textarea>
+        <section id="editor-section" class="border-r border-slate-200 flex flex-col no-print overflow-hidden">
+            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-[13px] font-semibold text-slate-500 uppercase">ChordPro Editor</div>
+            <textarea id="chordpro-input" class="flex-1 p-4 text-[15px] leading-relaxed text-slate-700 bg-white" placeholder="Gib hier deinen ChordPro Text ein..."></textarea>
         </section>
 
         <!-- Preview Spalte -->
         <section id="preview-section" class="flex flex-col bg-slate-100 overflow-hidden">
-            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-[14px] font-semibold text-slate-500 uppercase no-print">Live Vorschau</div>
-            <div class="preview-column flex-1 overflow-auto p-4 md:p-8">
+            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-[13px] font-semibold text-slate-500 uppercase no-print">Live Vorschau</div>
+            <div class="preview-column flex-1 overflow-auto p-4">
                 <div id="preview-pane">
                     <!-- Songsheet content will be injected here -->
                 </div>
@@ -567,6 +586,55 @@
             <div class="flex justify-end gap-3">
                 <button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Abbrechen</button>
                 <button id="confirm-overwrite-btn" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">Überschreiben</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Export Modal -->
+    <div id="pdf-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[110] hidden no-print">
+        <div class="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl mx-4">
+            <h3 class="text-xl font-bold text-slate-800 mb-4">PDF Export Einstellungen</h3>
+            
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Papierformat</label>
+                    <select id="pdf-format" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="a4">A4 (210 x 297 mm)</option>
+                        <option value="a3">A3 (297 x 420 mm)</option>
+                        <option value="a5">A5 (148 x 210 mm)</option>
+                        <option value="letter">Letter (8.5 x 11 in)</option>
+                        <option value="legal">Legal (8.5 x 14 in)</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Ausrichtung</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition-all border-blue-600 bg-blue-50" id="label-portrait">
+                            <input type="radio" name="pdf-orientation" value="portrait" checked class="hidden" onchange="updateOrientationUI()">
+                            <div class="flex flex-col items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                                </svg>
+                                <span class="text-xs font-bold">Hochformat</span>
+                            </div>
+                        </label>
+                        <label class="flex items-center justify-center p-3 border-2 border-slate-200 rounded-lg cursor-pointer transition-all hover:border-slate-300" id="label-landscape">
+                            <input type="radio" name="pdf-orientation" value="landscape" class="hidden" onchange="updateOrientationUI()">
+                            <div class="flex flex-col items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                                </svg>
+                                <span class="text-xs font-bold">Querformat</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="closePDFModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Abbrechen</button>
+                <button onclick="confirmPDFExport()" class="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-lg shadow-blue-200">PDF Erstellen</button>
             </div>
         </div>
     </div>
@@ -1099,8 +1167,15 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             const lines = document.querySelectorAll('.line');
             lines.forEach(el => {
                 // Total height is 2x the spacing to account for both chord and lyric rows
-                el.style.height = (spacing * 2) + 'em';
+                el.style.height = (spacing * 2.5) + 'em';
                 el.style.lineHeight = '1';
+            });
+            
+            // Adjust gap between chords and lyrics
+            const wordGroups = document.querySelectorAll('.word-group');
+            wordGroups.forEach(el => {
+                // Gap increases with spacing to satisfy user request for spacing between chords and lyrics
+                el.style.gap = Math.max(0, (spacing - 1) * 1.5) + 'em';
             });
 
             const headers = document.querySelectorAll('.section-header, .spacer');
@@ -1124,6 +1199,10 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             const previewPane = document.getElementById('preview-pane');
             const title = document.querySelector('.song-title')?.innerText || 'Songsheet';
             
+            // Get PDF settings
+            const format = document.getElementById('pdf-format').value;
+            const orientation = document.querySelector('input[name="pdf-orientation"]:checked').value;
+
             // Get current manual margins
             const mt = parseFloat(document.getElementById('margin-top')?.value || '25');
             const mb = parseFloat(document.getElementById('margin-bottom')?.value || '25');
@@ -1181,8 +1260,17 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                                 
                                 clonedPreview.classList.add('pdf-export-mode');
                                 
-                                // Calculate content width (A4 is 210mm)
-                                const contentWidth = 210 - ml - mr;
+                                // Calculate content width
+                                const paperWidths = {
+                                    'a4': 210, 'a3': 297, 'a5': 148, 'letter': 215.9, 'legal': 215.9
+                                };
+                                const paperHeights = {
+                                    'a4': 297, 'a3': 420, 'a5': 210, 'letter': 279.4, 'legal': 355.6
+                                };
+                                let pageWidth = paperWidths[format];
+                                if (orientation === 'landscape') pageWidth = paperHeights[format];
+                                
+                                const contentWidth = pageWidth - ml - mr;
 
                                 // MATCH FULL PREVIEW EXACTLY BUT WITHOUT PADDING (because opt.margin handles it)
                                 Object.assign(clonedPreview.style, {
@@ -1213,7 +1301,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                             }
                         }
                     },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    jsPDF: { unit: 'mm', format: format, orientation: orientation },
                     pagebreak: { 
                         mode: ['css', 'legacy']
                     }
@@ -1353,6 +1441,37 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         function closeModal() {
             document.getElementById('confirm-modal').classList.add('hidden');
             pendingSongData = null;
+        }
+
+        function openPDFModal() {
+            document.getElementById('pdf-modal').classList.remove('hidden');
+        }
+
+        function closePDFModal() {
+            document.getElementById('pdf-modal').classList.add('hidden');
+        }
+
+        function updateOrientationUI() {
+            const portrait = document.querySelector('input[name="pdf-orientation"][value="portrait"]').checked;
+            const portraitLabel = document.getElementById('label-portrait');
+            const landscapeLabel = document.getElementById('label-landscape');
+            
+            if (portrait) {
+                portraitLabel.classList.add('border-blue-600', 'bg-blue-50');
+                portraitLabel.classList.remove('border-slate-200');
+                landscapeLabel.classList.remove('border-blue-600', 'bg-blue-50');
+                landscapeLabel.classList.add('border-slate-200');
+            } else {
+                landscapeLabel.classList.add('border-blue-600', 'bg-blue-50');
+                landscapeLabel.classList.remove('border-slate-200');
+                portraitLabel.classList.remove('border-blue-600', 'bg-blue-50');
+                portraitLabel.classList.add('border-slate-200');
+            }
+        }
+
+        function confirmPDFExport() {
+            closePDFModal();
+            exportPDF();
         }
 
         document.getElementById('confirm-overwrite-btn').onclick = () => {
@@ -1542,11 +1661,11 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             const qualityContainer = document.getElementById('chord-qualities');
 
             rootContainer.innerHTML = roots.map(r => `
-                <button onclick="selectRoot('${r}')" class="chord-root-btn px-3 py-1.5 rounded text-[14px] border ${r === selectedRoot ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200'}">${r}</button>
+                <button onclick="selectRoot('${r}')" class="chord-root-btn px-2 py-1 rounded text-[13px] border ${r === selectedRoot ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200'}">${r}</button>
             `).join('');
 
             qualityContainer.innerHTML = qualities.map(q => `
-                <button onclick="selectQuality('${q}')" class="chord-qual-btn px-3 py-1.5 rounded text-[14px] border ${q === selectedQuality ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200'}">${q || 'maj'}</button>
+                <button onclick="selectQuality('${q}')" class="chord-qual-btn px-2 py-1 rounded text-[13px] border ${q === selectedQuality ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200'}">${q || 'maj'}</button>
             `).join('');
         }
 

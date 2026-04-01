@@ -51,23 +51,24 @@
             color: white;
         }
         .fret-cell.barre {
-            background: #64748b;
+            background: #000000;
             color: white;
         }
         .finger-indicator {
             position: absolute;
-            bottom: -2px;
-            right: -2px;
+            bottom: -16px;
+            right: -16px;
             background: #000;
             color: #fff;
-            font-size: 9px;
-            width: 14px;
-            height: 14px;
+            font-size: 14px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             border: 1px solid #fff;
+            z-index: 1000;
         }
         #preview-container svg {
             background: white;
@@ -108,7 +109,7 @@
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <label class="block text-sm font-bold text-slate-700 uppercase">Griffbrett</label>
-                            <span class="text-[10px] text-slate-400">Klick: Bund setzen | Shift+Klick: Fingersatz (1-4, T)</span>
+                            <span class="text-[12px] text-slate-400">Klick: Bund setzen | Shift+Klick: Fingersatz (1-4, T)</span>
                         </div>
                         <div id="fretboard-ui" class="fretboard mx-auto lg:mx-0"></div>
                         <p class="text-xs text-slate-400 mt-2">Reihe 0: O = Offen, X = Gedämpft. Reihen 1-5: Bünde.</p>
@@ -120,7 +121,7 @@
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">Schriftart</label>
+                                <label class="block text-[12px] font-bold text-slate-700 uppercase mb-1">Schriftart</label>
                                 <select id="diag-font" class="w-full border border-slate-300 rounded p-1.5 text-xs outline-none" onchange="updatePreview()">
                                     <optgroup label="Sans-Serif">
                                         <option value="Arial" selected>Arial (System)</option>
@@ -139,24 +140,25 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">Diagramm Größe</label>
+                                <label class="block text-[12px] font-bold text-slate-700 uppercase mb-1">Diagramm Größe</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="range" id="diag-size" min="40" max="300" step="5" value="120" class="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="updatePreview()">
-                                    <span id="diag-size-val" class="text-[10px] font-mono w-8">120</span>
+                                    <input type="range" id="diag-size" min="120" max="600" step="5" value="220" class="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="updatePreview()">
+                                    <span id="diag-size-val" class="text-[16px] font-mono w-8">120</span>
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">Name Abstand</label>
+                                <label class="block text-[12px] font-bold text-slate-700 uppercase mb-1">Name Abstand</label>
                                 <div class="flex items-center gap-2">
                                     <input type="range" id="diag-name-gap" min="0" max="50" step="1" value="18" class="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="updatePreview()">
-                                    <span id="diag-name-gap-val" class="text-[10px] font-mono w-8">18</span>
+                                    <span id="diag-name-gap-val" class="text-[16px] font-mono w-8">18</span>
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">Name Größe</label>
+                                <label class="block text-[12px] font-bold text-slate-700 uppercase mb-1">Name Größe</label>
                                 <div class="flex items-center gap-2">
                                     <input type="range" id="diag-name-size" min="8" max="48" step="1" value="16" class="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="updatePreview()">
-                                    <span id="diag-name-size-val" class="text-[10px] font-mono w-8">16</span>
+                                    <span id="diag-name-size-val" class="text-[12
+                                    px] font-mono w-8">16</span>
                                 </div>
                             </div>
                         </div>
@@ -331,7 +333,7 @@
 
         function renderChordSVG(name, fretsData, barreInfo = null, baseFret = 1, options = {}) {
             const {
-                size = 120,
+                size = 220,
                 nameGap = 18,
                 nameSize = 16,
                 font = 'Arial'

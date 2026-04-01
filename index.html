@@ -784,6 +784,12 @@
                                 <input type="number" id="strum-scale-num" min="0.5" max="2" step="0.1" value="1" class="border border-slate-300 rounded p-0.5 text-[9px] w-8" oninput="syncInputs('strum-scale-num', 'strum-scale'); updatePreview()">
                             </div>
                         </div>
+                        <div class="flex flex-col justify-center">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="strum-colorized" class="w-3 h-3 accent-blue-600" onchange="updatePreview()">
+                                <span class="text-[9px] text-black font-bold uppercase">Colorized</span>
+                            </label>
+                        </div>
                     </div>
                     
                     <div class="flex flex-col">
@@ -799,6 +805,20 @@
                         <div class="text-[10px] font-bold text-black uppercase mb-2">Pattern</div>
                         <div id="strum-grid" class="grid grid-cols-8 gap-x-1 gap-y-3 mb-2">
                             <!-- Slots injected here -->
+                        </div>
+                        <div class="flex items-center gap-3 mt-2 px-1">
+                            <div class="flex items-center gap-1">
+                                <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
+                                <span class="text-[8px] font-bold uppercase text-slate-500">Down</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <div class="w-2 h-2 bg-amber-500 rounded-full"></div>
+                                <span class="text-[8px] font-bold uppercase text-slate-500">Up</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <div class="w-2 h-2 bg-white border border-slate-300 rounded-full"></div>
+                                <span class="text-[8px] font-bold uppercase text-slate-500">None</span>
+                            </div>
                         </div>
                     </div>
                     
@@ -1091,6 +1111,8 @@
             const bpmFont = document.getElementById('font-strum-bpm')?.value || 'Inter';
             const bpmSize = (parseInt(document.getElementById('size-strum-bpm')?.value || '11')) * scale;
             const bpmColor = document.getElementById('color-strum-bpm')?.value || '#000000';
+            
+            const isColorized = document.getElementById('strum-colorized')?.checked || false;
 
             let svg = `<div class="strumming-pattern-container my-6 no-print-break" style="font-family: 'Inter', sans-serif; page-break-inside: avoid;">`;
             svg += `<div style="font-family: '${titleFont}'; font-size: ${titleSize}px; font-weight: 700; color: ${titleColor}; margin-bottom: ${4 * scale}px; letter-spacing: -0.01em;">STRUMMING PATTERN</div>`;
@@ -1121,10 +1143,16 @@
                     svg += `<text x="${x}" y="${labelY}" text-anchor="middle" font-size="${12 * scale}" font-weight="700" fill="#000000">${labelText}</text>`;
                     
                     // Arrow
+                    let arrowColor = "black";
+                    if (isColorized) {
+                        if (char === 'D') arrowColor = "#2563eb"; // blue-600
+                        else if (char === 'U') arrowColor = "#f59e0b"; // amber-500
+                    }
+                    
                     if (char === 'D') {
-                        svg += `<path d="M${x},${15*scale} L${x},${45*scale} M${x-(6*scale)},${35*scale} L${x},${45*scale} L${x+(6*scale)},${35*scale}" stroke="black" stroke-width="${2.5*scale}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`;
+                        svg += `<path d="M${x},${15*scale} L${x},${45*scale} M${x-(6*scale)},${35*scale} L${x},${45*scale} L${x+(6*scale)},${35*scale}" stroke="${arrowColor}" stroke-width="${2.5*scale}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`;
                     } else if (char === 'U') {
-                        svg += `<path d="M${x},${45*scale} L${x},${15*scale} M${x-(6*scale)},${25*scale} L${x},${15*scale} L${x+(6*scale)},${25*scale}" stroke="black" stroke-width="${2.5*scale}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`;
+                        svg += `<path d="M${x},${45*scale} L${x},${15*scale} M${x-(6*scale)},${25*scale} L${x},${15*scale} L${x+(6*scale)},${25*scale}" stroke="${arrowColor}" stroke-width="${2.5*scale}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`;
                     }
                     
                     // Stem
@@ -2454,7 +2482,15 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         function updateStrumSlotUI(slot, index) {
             const val = currentStrummingPattern[index];
             slot.innerHTML = val === 'D' ? '↓' : (val === 'U' ? '↑' : '');
-            slot.className = `w-6 h-6 border rounded flex items-center justify-center cursor-pointer transition-colors text-[11px] font-bold ${val !== '.' ? 'bg-black text-white border-black' : 'bg-white text-black border-slate-300 hover:bg-slate-100'}`;
+            
+            let colorClasses = 'bg-white text-black border-slate-300 hover:bg-slate-100';
+            if (val === 'D') {
+                colorClasses = 'bg-blue-600 text-white border-blue-700';
+            } else if (val === 'U') {
+                colorClasses = 'bg-amber-500 text-white border-amber-600';
+            }
+            
+            slot.className = `w-6 h-6 border rounded flex items-center justify-center cursor-pointer transition-colors text-[11px] font-bold ${colorClasses}`;
         }
 
         function insertStrumming() {

@@ -24,9 +24,11 @@
         .editor-container {
             display: grid;
             grid-template-columns: 280px minmax(0, 1fr) minmax(0, 1fr);
-            height: calc(100vh - 64px - 70px); /* Adjust based on header (64px) and top-nav (70px) height */
+            height: calc(100vh - 64px - 130px); /* Adjust based on header (64px) and top-nav (130px) height */
             transition: all 0.3s ease;
             overflow-x: hidden;
+            position: relative;
+            z-index: 10;
         }
         .preview-column {
             background: white;
@@ -37,9 +39,42 @@
             padding: 1rem;
         }
         #top-nav {
-            height: 70px;
+            height: 130px;
             overflow-x: auto;
             overflow-y: hidden;
+            position: relative;
+            z-index: 20;
+            background-color: #f1f5f9; /* slate-100 */
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid #cbd5e1;
+            padding: 0 10px;
+        }
+        .scroll-indicator {
+            position: sticky;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            z-index: 30;
+            cursor: pointer;
+            color: #2563eb; /* text-blue-600 */
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px #f1f5f9;
+        }
+        .scroll-indicator:hover {
+            color: #1d4ed8; /* text-blue-700 */
+            transform: scale(1.1);
+        }
+        .scroll-indicator-left {
+            left: 0;
+            background: linear-gradient(to right, #f1f5f9 70%, transparent);
+            padding-left: 10px;
+            padding-right: 30px;
+        }
+        .scroll-indicator-right {
+            right: 0;
+            background: linear-gradient(to left, #f1f5f9 70%, transparent);
+            padding-right: 10px;
+            padding-left: 30px;
         }
         #sidebar {
             background: white;
@@ -57,16 +92,29 @@
             gap: 0.75rem;
         }
         .nav-section {
-            padding: 0 0.5rem;
-            border-right: 1px solid var(--border-color);
+            padding: 0.75rem 1.25rem;
+            margin: 10px 6px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             min-width: max-content;
-            max-height: 100%;
+            height: calc(100% - 20px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.2s ease;
         }
-        .nav-section:last-child {
-            border-right: none;
+        .nav-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #cbd5e1;
+        }
+        .nav-section h2 {
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 4px;
+            margin-bottom: 8px;
+            color: black !important;
         }
         textarea {
             font-family: 'Roboto Mono', monospace;
@@ -75,6 +123,24 @@
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @keyframes bounce-x {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+        }
+        @keyframes bounce-x-reverse {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-5px); }
+        }
+        .animate-bounce-x {
+            animation: bounce-x 1s infinite;
+        }
+        .animate-bounce-x-reverse {
+            animation: bounce-x-reverse 1s infinite;
+        }
+        .scroll-indicator {
+            transition: opacity 0.3s ease;
+        }
         
         .fretboard {
             display: grid;
@@ -103,7 +169,7 @@
         }
         .fret-cell.muted {
             background: #f1f5f9;
-            color: #94a3b8;
+            color: #000000;
         }
         #preview-pane {
             background: white;
@@ -137,7 +203,7 @@
             display: none;
         }
         .song-title { margin-bottom: 0.1rem; font-weight: bold; }
-        .song-subtitle { margin-bottom: 0.2rem; opacity: 0.8; }
+        .song-subtitle { margin-bottom: 0.2rem; }
         .section-header, .line, .spacer { 
             display: flex; 
             flex-direction: row;
@@ -171,6 +237,10 @@
             margin-right: 0.3em; 
             height: 100%; 
             justify-content: center;
+        }
+        ::placeholder {
+            color: #000000 !important;
+            opacity: 1; /* Firefox */
         }
         .chord { 
             display: flex; 
@@ -331,20 +401,20 @@
 <body class="flex flex-col">
 
     <!-- Header -->
-    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 no-print shrink-0">
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 no-print shrink-0 relative z-30">
         <div class="flex items-center gap-3">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
-            <h1 class="text-xl font-bold text-slate-800">ChordPro Studio</h1>
+            <h1 class="text-xl font-bold text-black">ChordPro Studio</h1>
         </div>
         <div class="flex items-center gap-4">
-            <button onclick="toggleFullPreview()" id="preview-toggle-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-[14px] font-bold transition-colors flex items-center gap-2">
+            <button onclick="toggleFullPreview()" id="preview-toggle-btn" class="bg-slate-100 hover:bg-slate-200 text-black px-4 py-2 rounded-lg text-[14px] font-bold transition-colors flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                <span id="preview-btn-text">Vollbild Vorschau</span>
+                <span id="preview-btn-text">Full Screen Preview</span>
             </button>
             <button id="pdf-export-btn" onclick="openPDFModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-[14px] font-bold transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                 <svg id="pdf-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -360,13 +430,18 @@
     </header>
 
     <!-- Top Navigation Menu -->
-    <nav id="top-nav" class="bg-white border-b border-slate-200 flex no-print shrink-0 no-scrollbar">
-        <!-- Stile & Layout -->
+    <nav id="top-nav" class="bg-white border-b border-slate-200 flex no-print shrink-0 no-scrollbar relative">
+        <div class="scroll-indicator scroll-indicator-left" onclick="scrollNavLeft()" title="Scroll left">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 animate-bounce-x-reverse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+            </svg>
+        </div>
+        <!-- Style & Layout -->
         <div class="nav-section">
-            <h2 class="text-[11px] font-bold text-slate-800 uppercase mb-1">Stile & Layout</h2>
+            <h2 class="text-[11px] font-bold text-black uppercase mb-1">Style & Layout</h2>
             <div class="flex items-center gap-3">
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-slate-500 uppercase">Zeilenabstand</span>
+                    <span class="text-[10px] text-black font-bold uppercase">Line Spacing</span>
                     <div class="flex items-center gap-2">
                         <input type="range" id="line-spacing" min="0.5" max="3" step="0.1" value="1.2" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('line-spacing', 'line-spacing-num'); applyStyles()">
                         <input type="number" id="line-spacing-num" min="0.5" max="3" step="0.1" value="1.2" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('line-spacing-num', 'line-spacing'); applyStyles()">
@@ -375,7 +450,7 @@
                 
                 <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-slate-500 uppercase w-16">Titel</span>
+                        <span class="text-[10px] text-black font-bold uppercase w-16">Title</span>
                         <select id="font-title" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="applyStyles()">
                             <optgroup label="Sans-Serif">
                                 <option value="Inter">Inter</option>
@@ -392,10 +467,30 @@
                             </optgroup>
                         </select>
                         <input type="number" id="size-title" value="28" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="applyStyles()">
-                        <input type="color" id="color-title" value="#1e293b" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
+                        <input type="color" id="color-title" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-slate-500 uppercase w-16">Text</span>
+                        <span class="text-[10px] text-black font-bold uppercase w-16">Artist</span>
+                        <select id="font-subtitle" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="applyStyles()">
+                            <optgroup label="Sans-Serif">
+                                <option value="Inter" selected>Inter</option>
+                                <option value="Montserrat">Montserrat</option>
+                                <option value="Open Sans">Open Sans</option>
+                                <option value="Roboto">Roboto</option>
+                            </optgroup>
+                            <optgroup label="Serif">
+                                <option value="Merriweather">Merriweather</option>
+                                <option value="Playfair Display">Playfair</option>
+                                <option value="Lora">Lora</option>
+                                <option value="Crimson Text">Crimson Text</option>
+                                <option value="Georgia">Georgia</option>
+                            </optgroup>
+                        </select>
+                        <input type="number" id="size-subtitle" value="18" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="applyStyles()">
+                        <input type="color" id="color-subtitle" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-black font-bold uppercase w-16">Lyrics</span>
                         <select id="font-lyrics" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="applyStyles()">
                             <optgroup label="Sans-Serif">
                                 <option value="Inter" selected>Inter</option>
@@ -412,13 +507,13 @@
                             </optgroup>
                         </select>
                         <input type="number" id="size-lyrics" value="14" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="applyStyles()">
-                        <input type="color" id="color-lyrics" value="#334155" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
+                        <input type="color" id="color-lyrics" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
                     </div>
                 </div>
  
                 <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-slate-500 uppercase w-16">Akkord</span>
+                        <span class="text-[10px] text-black font-bold uppercase w-16">Chord</span>
                         <select id="font-chords" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="applyStyles()">
                             <optgroup label="Sans-Serif">
                                 <option value="Inter" selected>Inter</option>
@@ -436,13 +531,69 @@
                             </optgroup>
                         </select>
                         <input type="number" id="size-chords" value="14" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="applyStyles()">
-                        <input type="color" id="color-chords" value="#2563eb" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
+                        <input type="color" id="color-chords" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-slate-500 uppercase w-16">Refrain</span>
+                        <span class="text-[10px] text-black font-bold uppercase w-16">Chorus</span>
                         <input type="checkbox" id="chorus-indent-toggle" checked class="w-5 h-5 rounded border-slate-300 text-blue-600" onchange="applyStyles()">
                         <input type="number" id="chorus-indent-val" value="20" class="w-16 border border-slate-300 rounded p-1 text-[10px]" oninput="applyStyles()">
                         <input type="checkbox" id="chorus-line-toggle" class="w-5 h-5 rounded border-slate-300 text-blue-600" onchange="applyStyles()">
+                        <input type="number" id="chorus-line-val" value="4" min="1" max="20" class="w-12 border border-slate-300 rounded p-1 text-[10px]" oninput="applyStyles()">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-black font-bold uppercase w-16">Comment</span>
+                        <select id="font-comment" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="applyStyles()">
+                            <optgroup label="Sans-Serif">
+                                <option value="Inter" selected>Inter</option>
+                                <option value="Montserrat">Montserrat</option>
+                                <option value="Open Sans">Open Sans</option>
+                                <option value="Roboto">Roboto</option>
+                            </optgroup>
+                            <optgroup label="Serif">
+                                <option value="Merriweather">Merriweather</option>
+                                <option value="Playfair Display">Playfair</option>
+                                <option value="Lora">Lora</option>
+                                <option value="Crimson Text">Crimson Text</option>
+                                <option value="Georgia">Georgia</option>
+                            </optgroup>
+                        </select>
+                        <input type="number" id="size-comment" value="12" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="applyStyles()">
+                        <input type="color" id="color-comment" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-black font-bold uppercase w-16">Strum Title</span>
+                        <select id="font-strum-title" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="updatePreview()">
+                            <optgroup label="Sans-Serif">
+                                <option value="Inter" selected>Inter</option>
+                                <option value="Montserrat">Montserrat</option>
+                                <option value="Roboto">Roboto</option>
+                            </optgroup>
+                            <optgroup label="Serif">
+                                <option value="Playfair Display">Playfair</option>
+                                <option value="Merriweather">Merriweather</option>
+                            </optgroup>
+                        </select>
+                        <input type="number" id="size-strum-title" value="22" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="updatePreview()">
+                        <input type="color" id="color-strum-title" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="updatePreview()">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-black font-bold uppercase w-16">Strum BPM</span>
+                        <select id="font-strum-bpm" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="updatePreview()">
+                            <optgroup label="Sans-Serif">
+                                <option value="Inter" selected>Inter</option>
+                                <option value="Montserrat">Montserrat</option>
+                                <option value="Roboto">Roboto</option>
+                            </optgroup>
+                            <optgroup label="Serif">
+                                <option value="Playfair Display">Playfair</option>
+                                <option value="Merriweather">Merriweather</option>
+                            </optgroup>
+                        </select>
+                        <input type="number" id="size-strum-bpm" value="16" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="updatePreview()">
+                        <input type="color" id="color-strum-bpm" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="updatePreview()">
                     </div>
                 </div>
             </div>
@@ -450,35 +601,35 @@
 
         <!-- Chord Diagram Settings -->
         <div class="nav-section">
-            <h2 class="text-[11px] font-bold text-slate-800 uppercase mb-1">Akkorddiagramme</h2>
+            <h2 class="text-[11px] font-bold text-black uppercase mb-1">Chord Diagrams</h2>
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-2">
                     <input type="checkbox" id="diag-toggle" checked class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="updatePreview()">
-                    <span class="text-[10px] text-slate-600 font-medium">Anzeigen</span>
+                    <span class="text-[10px] text-black font-bold">Show</span>
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-slate-500 uppercase">Größe</span>
+                    <span class="text-[10px] text-black font-bold uppercase">Size</span>
                     <div class="flex items-center gap-2">
                         <input type="range" id="diag-size" min="40" max="150" step="5" value="80" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-size', 'diag-size-num'); applyStyles()">
                         <input type="number" id="diag-size-num" min="40" max="150" step="5" value="80" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('diag-size-num', 'diag-size'); applyStyles()">
                     </div>
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-slate-500 uppercase">Akkord-Abstand</span>
+                    <span class="text-[10px] text-black font-bold uppercase">Chord Gap</span>
                     <div class="flex items-center gap-2">
                         <input type="range" id="diag-name-gap" min="0" max="30" step="1" value="12" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-name-gap', 'diag-name-gap-num'); applyStyles()">
                         <input type="number" id="diag-name-gap-num" min="0" max="30" step="1" value="12" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('diag-name-gap-num', 'diag-name-gap'); applyStyles()">
                     </div>
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-slate-500 uppercase">Schriftgröße</span>
+                    <span class="text-[10px] text-black font-bold uppercase">Font Size</span>
                     <div class="flex items-center gap-2">
                         <input type="range" id="diag-name-size" min="8" max="32" step="1" value="18" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-name-size', 'diag-name-size-num'); applyStyles()">
                         <input type="number" id="diag-name-size-num" min="8" max="32" step="1" value="18" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('diag-name-size-num', 'diag-name-size'); applyStyles()">
                     </div>
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-slate-500 uppercase">Diagramm-Abstand</span>
+                    <span class="text-[10px] text-black font-bold uppercase">Diagram Spacing</span>
                     <div class="flex items-center gap-2">
                         <input type="range" id="diag-spacing" min="0" max="40" step="1" value="16" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-spacing', 'diag-spacing-num'); applyStyles()">
                         <input type="number" id="diag-spacing-num" min="0" max="40" step="1" value="16" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('diag-spacing-num', 'diag-spacing'); applyStyles()">
@@ -489,22 +640,22 @@
 
         <!-- Page Margins -->
         <div class="nav-section">
-            <h2 class="text-[11px] font-bold text-slate-800 uppercase mb-1">Seitenränder (mm)</h2>
+            <h2 class="text-[11px] font-bold text-black uppercase mb-1">Page Margins (mm)</h2>
             <div class="grid grid-cols-2 gap-x-2 gap-y-1">
                 <div class="flex items-center gap-1">
-                    <span class="text-[10px] text-slate-500 uppercase w-10">Oben</span>
+                    <span class="text-[10px] text-black font-bold uppercase w-10">Top</span>
                     <input type="number" id="margin-top" value="25" min="0" max="100" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="applyStyles(); autoSaveSession()">
                 </div>
                 <div class="flex items-center gap-1">
-                    <span class="text-[10px] text-slate-500 uppercase w-10">Unten</span>
+                    <span class="text-[10px] text-black font-bold uppercase w-10">Bottom</span>
                     <input type="number" id="margin-bottom" value="25" min="0" max="100" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="applyStyles(); autoSaveSession()">
                 </div>
                 <div class="flex items-center gap-1">
-                    <span class="text-[10px] text-slate-500 uppercase w-10">Links</span>
+                    <span class="text-[10px] text-black font-bold uppercase w-10">Left</span>
                     <input type="number" id="margin-left" value="20" min="0" max="100" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="applyStyles(); autoSaveSession()">
                 </div>
                 <div class="flex items-center gap-1">
-                    <span class="text-[10px] text-slate-500 uppercase w-10">Rechts</span>
+                    <span class="text-[10px] text-black font-bold uppercase w-10">Right</span>
                     <input type="number" id="margin-right" value="20" min="0" max="100" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="applyStyles(); autoSaveSession()">
                 </div>
             </div>
@@ -512,10 +663,10 @@
 
         <!-- Song Library -->
         <div class="nav-section">
-            <h2 class="text-[11px] font-bold text-slate-800 uppercase mb-1">Song-Bibliothek</h2>
+            <h2 class="text-[11px] font-bold text-black uppercase mb-1">Song Library</h2>
             <div class="flex items-center gap-3">
                 <button onclick="saveCurrentSong()" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded text-[10px] font-medium transition-colors">
-                    Speichern
+                    Save
                 </button>
                 <div id="song-list" class="flex gap-2 overflow-x-auto max-w-[300px] no-scrollbar">
                     <!-- Saved songs -->
@@ -525,18 +676,24 @@
 
         <!-- File Transfer -->
         <div class="nav-section">
-            <h2 class="text-[11px] font-bold text-slate-800 uppercase mb-1">Datei</h2>
+            <h2 class="text-[11px] font-bold text-black uppercase mb-1">File</h2>
             <div class="flex items-center gap-2">
-                <button onclick="downloadFile('cho')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded text-[10px] font-bold">.cho</button>
-                <button onclick="downloadFile('txt')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded text-[10px] font-bold">.txt</button>
+                <button onclick="downloadFile('cho')" class="bg-slate-100 hover:bg-slate-200 text-black px-3 py-1.5 rounded text-[10px] font-bold">.cho</button>
+                <button onclick="downloadFile('txt')" class="bg-slate-100 hover:bg-slate-200 text-black px-3 py-1.5 rounded text-[10px] font-bold">.txt</button>
                 <button onclick="document.getElementById('file-upload').click()" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded text-[10px] font-bold flex items-center gap-1.5">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
-                    Laden
+                    Load
                 </button>
                 <input type="file" id="file-upload" class="hidden" accept=".cho,.txt,.chordpro" onchange="handleFileUpload(event)">
             </div>
+        </div>
+
+        <div class="scroll-indicator scroll-indicator-right" onclick="scrollNavRight()" title="Scroll right">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 animate-bounce-x" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
+            </svg>
         </div>
     </nav>
 
@@ -545,81 +702,133 @@
         <aside id="sidebar" class="no-print">
             <!-- Transpose -->
             <div class="sidebar-section">
-                <h2 class="text-[12px] font-bold text-slate-500 uppercase">Transponieren</h2>
+                <h2 class="text-[12px] font-bold text-black uppercase">Transpose</h2>
                 <div class="flex gap-1">
-                    <button onclick="transposeSong(-1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-1.5 rounded text-[13px] font-bold">-1 Halbton</button>
-                    <button onclick="transposeSong(1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-1.5 rounded text-[13px] font-bold">+1 Halbton</button>
+                    <button onclick="transposeSong(-1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-black py-1.5 rounded text-[13px] font-bold">-1 Semitone</button>
+                    <button onclick="transposeSong(1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-black py-1.5 rounded text-[13px] font-bold">+1 Semitone</button>
                 </div>
             </div>
 
             <!-- Chord Helper -->
             <div class="sidebar-section">
-                <h2 class="text-[12px] font-bold text-slate-500 uppercase">Akkord-Helfer</h2>
+                <h2 class="text-[12px] font-bold text-black uppercase">Chord Helper</h2>
                 <div class="flex flex-col gap-2">
                     <div class="flex flex-wrap gap-1" id="chord-roots"></div>
                     <div class="flex flex-wrap gap-1" id="chord-qualities"></div>
                     <button onclick="insertCustomChord()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">
-                        Akkord einfügen [<span id="custom-chord-preview">C</span>]
+                        Insert Chord [<span id="custom-chord-preview">C</span>]
                     </button>
                 </div>
             </div>
 
             <!-- Diagram Creator -->
             <div class="sidebar-section">
-                <h2 class="text-[12px] font-bold text-slate-500 uppercase">Diagramm-Ersteller</h2>
+                <h2 class="text-[12px] font-bold text-black uppercase">Diagram Creator</h2>
                 <div class="flex flex-col gap-2">
                     <div id="fretboard-ui" class="fretboard w-full mx-auto"></div>
                     <div class="bg-slate-50 p-2 rounded border border-slate-200">
-                        <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Optionen</div>
+                        <div class="text-[10px] font-bold text-black uppercase mb-1">Options</div>
                         <div class="grid grid-cols-2 gap-2 mb-2">
                             <div class="flex flex-col">
-                                <label class="text-[9px] text-slate-500">Basis-Bund</label>
+                                <label class="text-[9px] text-black font-bold">Base Fret</label>
                                 <input type="number" id="base-fret" min="1" max="20" value="1" class="border border-slate-300 rounded p-1 text-[11px]">
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-[9px] text-slate-500">Barre Bund (Rel.)</label>
+                                <label class="text-[9px] text-black font-bold">Barre Fret (Rel.)</label>
                                 <input type="number" id="barre-fret" min="0" max="5" value="0" class="border border-slate-300 rounded p-1 text-[11px]">
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div class="flex flex-col">
-                                <label class="text-[9px] text-slate-500">Barre Von</label>
+                                <label class="text-[9px] text-black font-bold">Barre From</label>
                                 <input type="number" id="barre-start" min="1" max="6" value="1" class="border border-slate-300 rounded p-1 text-[11px]">
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-[9px] text-slate-500">Barre Bis</label>
+                                <label class="text-[9px] text-black font-bold">Barre To</label>
                                 <input type="number" id="barre-end" min="1" max="6" value="6" class="border border-slate-300 rounded p-1 text-[11px]">
                             </div>
                         </div>
                     </div>
                     <div class="flex flex-col gap-2">
                         <input type="text" id="diag-name" placeholder="Name" class="w-full border border-slate-300 rounded p-1.5 text-[13px]">
-                        <button onclick="insertDiagram()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded text-[13px] font-bold transition-colors">Definieren</button>
+                        <button onclick="insertDiagram()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded text-[13px] font-bold transition-colors">Define</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strumming Pattern Editor -->
+            <div class="sidebar-section">
+                <h2 class="text-[12px] font-bold text-black uppercase">Strumming Pattern</h2>
+                <div class="flex flex-col gap-2">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="flex flex-col">
+                            <label class="text-[9px] text-black font-bold uppercase">BPM</label>
+                            <input type="number" id="strum-bpm" value="82" class="border border-slate-300 rounded p-1 text-[11px]" oninput="updatePreview()">
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-[9px] text-black font-bold uppercase">Rhythm Gap</label>
+                            <div class="flex items-center gap-1">
+                                <input type="range" id="strum-gap" min="5" max="60" step="1" value="15" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('strum-gap', 'strum-gap-num'); updatePreview()">
+                                <input type="number" id="strum-gap-num" min="5" max="60" step="1" value="15" class="border border-slate-300 rounded p-0.5 text-[9px] w-8" oninput="syncInputs('strum-gap-num', 'strum-gap'); updatePreview()">
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-[9px] text-black font-bold uppercase">Strum Scale</label>
+                            <div class="flex items-center gap-1">
+                                <input type="range" id="strum-scale" min="0.5" max="2" step="0.1" value="1" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('strum-scale', 'strum-scale-num'); updatePreview()">
+                                <input type="number" id="strum-scale-num" min="0.5" max="2" step="0.1" value="1" class="border border-slate-300 rounded p-0.5 text-[9px] w-8" oninput="syncInputs('strum-scale-num', 'strum-scale'); updatePreview()">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col">
+                        <label class="text-[9px] text-black font-bold uppercase">Time Signature</label>
+                        <select id="strum-time" onchange="changeTimeSignature()" class="border border-slate-300 rounded p-1 text-[11px]">
+                            <option value="4/4">4/4 (16 slots)</option>
+                            <option value="3/4">3/4 (12 slots)</option>
+                            <option value="6/8">6/8 (12 slots)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="bg-slate-50 p-2 rounded border border-slate-200">
+                        <div class="text-[10px] font-bold text-black uppercase mb-2">Pattern</div>
+                        <div id="strum-grid" class="grid grid-cols-8 gap-x-1 gap-y-3 mb-2">
+                            <!-- Slots injected here -->
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="insertStrumming()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-[13px] font-bold transition-colors">
+                            Insert Pattern
+                        </button>
+                        <button onclick="clearStrumming()" class="px-3 bg-slate-100 hover:bg-slate-200 text-black rounded text-[13px] font-bold transition-colors">
+                            Clear
+                        </button>
                     </div>
                 </div>
             </div>
 
             <!-- Editor Tools -->
             <div class="sidebar-section">
-                <h2 class="text-[12px] font-bold text-slate-500 uppercase">Editor-Tools</h2>
-                <button onclick="insertPageBreak()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-[13px] font-bold flex items-center justify-center gap-2">
+                <h2 class="text-[12px] font-bold text-black uppercase">Editor Tools</h2>
+                <button onclick="insertPageBreak()" class="w-full bg-slate-100 hover:bg-slate-200 text-black py-2 rounded text-[13px] font-bold flex items-center justify-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7" />
                     </svg>
-                    Seitenumbruch einfügen
+                    Insert Page Break
                 </button>
             </div>
         </aside>
 
         <!-- Editor Spalte -->
         <section id="editor-section" class="border-r border-slate-200 flex flex-col no-print overflow-hidden">
-            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-[13px] font-semibold text-slate-500 uppercase">ChordPro Editor</div>
-            <textarea id="chordpro-input" class="flex-1 p-4 text-[15px] leading-relaxed text-slate-700 bg-white" placeholder="Gib hier deinen ChordPro Text ein..."></textarea>
+            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-[13px] font-semibold text-black uppercase">ChordPro Editor</div>
+            <textarea id="chordpro-input" class="flex-1 p-4 text-[15px] leading-relaxed text-black bg-white" placeholder="Enter your ChordPro text here..."></textarea>
         </section>
 
         <!-- Preview Spalte -->
         <section id="preview-section" class="flex flex-col bg-slate-100 overflow-hidden">
-            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-[13px] font-semibold text-slate-500 uppercase no-print">Live Vorschau</div>
+            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-[13px] font-semibold text-black uppercase no-print">Live Preview</div>
             <div class="preview-column flex-1 overflow-auto p-4">
                 <div id="preview-pane">
                     <!-- Songsheet content will be injected here -->
@@ -631,11 +840,11 @@
     <!-- Confirmation Modal -->
     <div id="confirm-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden no-print">
         <div class="bg-white rounded-xl p-6 max-w-sm w-full shadow-2xl mx-4">
-            <h3 class="text-lg font-bold text-slate-800 mb-2">Song überschreiben?</h3>
-            <p class="text-slate-600 text-sm mb-6">Ein Song mit dem Titel "<span id="duplicate-title" class="font-semibold"></span>" existiert bereits. Möchtest du ihn überschreiben?</p>
+            <h3 class="text-lg font-bold text-black mb-2">Overwrite Song?</h3>
+            <p class="text-black text-sm mb-6">A song with the title "<span id="duplicate-title" class="font-semibold"></span>" already exists. Do you want to overwrite it?</p>
             <div class="flex justify-end gap-3">
-                <button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Abbrechen</button>
-                <button id="confirm-overwrite-btn" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">Überschreiben</button>
+                <button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-black hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
+                <button id="confirm-overwrite-btn" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">Overwrite</button>
             </div>
         </div>
     </div>
@@ -643,11 +852,11 @@
     <!-- PDF Export Modal -->
     <div id="pdf-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[110] hidden no-print">
         <div class="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl mx-4">
-            <h3 class="text-xl font-bold text-slate-800 mb-4">PDF Export Einstellungen</h3>
+            <h3 class="text-xl font-bold text-black mb-4">PDF Export Settings</h3>
             
             <div class="space-y-4 mb-6">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Papierformat</label>
+                    <label class="block text-sm font-medium text-black mb-1">Paper Format</label>
                     <select id="pdf-format" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                         <option value="a4">A4 (210 x 297 mm)</option>
                         <option value="a3">A3 (297 x 420 mm)</option>
@@ -658,7 +867,7 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Ausrichtung</label>
+                    <label class="block text-sm font-medium text-black mb-1">Orientation</label>
                     <div class="grid grid-cols-2 gap-3">
                         <label class="flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition-all border-blue-600 bg-blue-50" id="label-portrait">
                             <input type="radio" name="pdf-orientation" value="portrait" checked class="hidden" onchange="updateOrientationUI()">
@@ -666,7 +875,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                                 </svg>
-                                <span class="text-xs font-bold">Hochformat</span>
+                                <span class="text-xs font-bold text-black">Portrait</span>
                             </div>
                         </label>
                         <label class="flex items-center justify-center p-3 border-2 border-slate-200 rounded-lg cursor-pointer transition-all hover:border-slate-300" id="label-landscape">
@@ -675,7 +884,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                                 </svg>
-                                <span class="text-xs font-bold">Querformat</span>
+                                <span class="text-xs font-bold text-black">Landscape</span>
                             </div>
                         </label>
                     </div>
@@ -683,8 +892,8 @@
             </div>
 
             <div class="flex justify-end gap-3">
-                <button onclick="closePDFModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Abbrechen</button>
-                <button onclick="confirmPDFExport()" class="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-lg shadow-blue-200">PDF Erstellen</button>
+                <button onclick="closePDFModal()" class="px-4 py-2 text-sm font-medium text-black hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
+                <button onclick="confirmPDFExport()" class="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-lg shadow-blue-200">Create PDF</button>
             </div>
         </div>
     </div>
@@ -697,10 +906,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                <span class="font-bold text-slate-800">Vollbild-Vorschau</span>
+                <span class="font-bold text-black">Full Screen Preview</span>
             </div>
             <button onclick="toggleFullPreview()" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2 rounded-lg text-[14px] font-bold transition-all shadow-sm active:scale-95">
-                Schließen
+                Close
             </button>
         </div>
         <div id="full-preview-container" class="flex-1 overflow-y-auto bg-slate-100 flex justify-center items-start p-4 md:p-12">
@@ -795,7 +1004,7 @@
                     const y = margin + 10 + (relativeFret - 0.5) * fretSpacing;
                     const x1 = margin + (barreInfo.start - 1) * stringSpacing;
                     const x2 = margin + (barreInfo.end - 1) * stringSpacing;
-                    svg += `<rect x="${x1 - 5}" y="${y - 5}" width="${x2 - x1 + 10}" height="10" rx="5" fill="${color}" />`;
+                    svg += `<rect x="${x1 - 5}" y="${y - 2}" width="${x2 - x1 + 10}" height="4" rx="2" fill="${color}" />`;
                 }
             }
 
@@ -827,6 +1036,104 @@
                     }
                 }
             });
+            
+            svg += `</svg></div>`;
+            return svg;
+        }
+
+        function renderStrummingSVG(bpm, pattern, time = '4/4') {
+            const len = pattern.length || 16;
+            let beats = 4;
+            let slotsPerBeat = 4;
+            let labels = ['1', '2', '3', '4', '5', '6', '7', '8'];
+            let subLabels = ['e', '&', 'e'];
+            
+            // Scale factor
+            const scale = parseFloat(document.getElementById('strum-scale')?.value || '1');
+            let slotGap = 20 * scale; 
+            
+            if (time === '3/4' || len === 12 && time !== '6/8') {
+                beats = 3;
+                slotsPerBeat = 4;
+                subLabels = ['e', '&', 'e'];
+            } else if (time === '6/8' || len === 6 || (len === 12 && time === '6/8')) {
+                beats = 6;
+                slotsPerBeat = 2;
+                subLabels = ['&'];
+                slotGap = 25 * scale;
+            } else if (len === 8) {
+                beats = 2;
+                slotsPerBeat = 4;
+            } else if (len % 4 === 0) {
+                beats = len / 4;
+                slotsPerBeat = 4;
+            } else {
+                beats = len;
+                slotsPerBeat = 1;
+                subLabels = [];
+            }
+            
+            const rhythmGap = parseInt(document.getElementById('strum-gap')?.value || '15') * scale;
+            const startX = 60 * scale;
+            const width = Math.max(600 * scale, startX + beats * slotsPerBeat * slotGap * 1.3);
+            const height = (120 + rhythmGap) * scale;
+            
+            // Font settings
+            const titleFont = document.getElementById('font-strum-title')?.value || 'Inter';
+            const titleSize = (parseInt(document.getElementById('size-strum-title')?.value || '22')) * scale;
+            const titleColor = document.getElementById('color-strum-title')?.value || '#000000';
+            
+            const bpmFont = document.getElementById('font-strum-bpm')?.value || 'Inter';
+            const bpmSize = (parseInt(document.getElementById('size-strum-bpm')?.value || '16')) * scale;
+            const bpmColor = document.getElementById('color-strum-bpm')?.value || '#000000';
+
+            let svg = `<div class="strumming-pattern-container my-8 no-print-break" style="font-family: 'Inter', sans-serif; page-break-inside: avoid;">`;
+            svg += `<div style="font-family: '${titleFont}'; font-size: ${titleSize}px; font-weight: 700; color: ${titleColor}; margin-bottom: ${8 * scale}px; letter-spacing: -0.01em;">STRUMMING PATTERN</div>`;
+            svg += `<div style="font-family: '${bpmFont}'; font-size: ${bpmSize}px; font-weight: 700; color: ${bpmColor}; margin-bottom: ${15 * scale}px;"><span style="font-weight: 400; text-transform: none;">${bpm} bpm</span></div>`;
+            
+            svg += `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
+            
+            const arrowBottom = 60 * scale;
+            const labelY = arrowBottom + rhythmGap + (10 * scale);
+            const stemTop = labelY + (12 * scale);
+            const stemBottom = stemTop + (30 * scale);
+            const beam1Y = stemTop + (20 * scale);
+            const beam2Y = stemTop + (30 * scale);
+
+            for (let i = 0; i < beats; i++) {
+                const groupX = startX + i * slotGap * slotsPerBeat * 1.3;
+                
+                for (let j = 0; j < slotsPerBeat; j++) {
+                    const x = groupX + j * slotGap;
+                    const index = i * slotsPerBeat + j;
+                    const char = pattern[index] || '.';
+                    
+                    // Label
+                    let labelText = '';
+                    if (j === 0) labelText = labels[i];
+                    else if (subLabels.length > 0) labelText = subLabels[j-1];
+                    
+                    svg += `<text x="${x}" y="${labelY}" text-anchor="middle" font-size="${16 * scale}" font-weight="700" fill="#000000">${labelText}</text>`;
+                    
+                    // Arrow
+                    if (char === 'D') {
+                        svg += `<path d="M${x},${20*scale} L${x},${60*scale} M${x-(6*scale)},${50*scale} L${x},${60*scale} L${x+(6*scale)},${50*scale}" stroke="black" stroke-width="${2.5*scale}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`;
+                    } else if (char === 'U') {
+                        svg += `<path d="M${x},${60*scale} L${x},${20*scale} M${x-(6*scale)},${30*scale} L${x},${20*scale} L${x+(6*scale)},${30*scale}" stroke="black" stroke-width="${2.5*scale}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`;
+                    }
+                    
+                    // Stem
+                    svg += `<line x1="${x}" y1="${stemTop}" x2="${x}" y2="${stemBottom}" stroke="black" stroke-width="${2*scale}" />`;
+                }
+                
+                // Beam for the group
+                if (slotsPerBeat > 1) {
+                    const xStart = groupX;
+                    const xEnd = groupX + (slotsPerBeat - 1) * slotGap;
+                    svg += `<line x1="${xStart}" y1="${beam1Y}" x2="${xEnd}" y2="${beam1Y}" stroke="black" stroke-width="${4*scale}" />`;
+                    svg += `<line x1="${xStart}" y1="${beam2Y}" x2="${xEnd}" y2="${beam2Y}" stroke="black" stroke-width="${4*scale}" />`;
+                }
+            }
             
             svg += `</svg></div>`;
             return svg;
@@ -955,6 +1262,32 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                     else if (key === 'diagrams' || key === 'chords') {
                         explicitDiagrams = value.split(/[ ,]+/).filter(c => c.trim());
                     }
+                    else if (key === 'strumming') {
+                        let bpm = '';
+                        let pattern = '';
+                        let time = '4/4';
+                        
+                        const bpmMatch = value.match(/bpm=([^,]+)/);
+                        const patternMatch = value.match(/pattern=([^,]+)/);
+                        const timeMatch = value.match(/time=([^,]+)/);
+                        
+                        if (bpmMatch && patternMatch) {
+                            bpm = bpmMatch[1].trim();
+                            pattern = patternMatch[1].trim();
+                            if (timeMatch) time = timeMatch[1].trim();
+                        } else {
+                            const parts = value.split(',').map(p => p.trim());
+                            if (parts.length >= 2) {
+                                bpm = parts[0];
+                                pattern = parts[1];
+                                if (parts.length >= 3) time = parts[2];
+                            } else if (parts.length === 1) {
+                                pattern = parts[0];
+                            }
+                        }
+                        
+                        mainHtml += renderStrummingSVG(bpm, pattern, time);
+                    }
                     else if (key === 'start_of_chorus' || key === 'soc') {
                         if (inBlock) mainHtml += '</div>';
                         mainHtml += `<div class="chorus-block"><div class="section-header">[Chorus]</div>`;
@@ -1073,7 +1406,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             if (metadata.title) headerHtml += `<div class="song-title">${metadata.title}</div>`;
             if (metadata.subtitle) headerHtml += `<div class="song-subtitle">${metadata.subtitle}</div>`;
             if (metadata.info.length > 0) {
-                headerHtml += `<div class="song-info mb-0 text-sm opacity-70" style="line-height: 1.1;">`;
+                headerHtml += `<div class="song-info mb-0 text-sm" style="line-height: 1.1;">`;
                 metadata.info.forEach(info => {
                     const cls = info.type ? `song-${info.type}` : 'song-info-misc';
                     headerHtml += `<div class="${cls}" style="margin-bottom: 0;">${info.text}</div>`;
@@ -1121,12 +1454,26 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 const el = document.getElementById(id);
                 if (!el) {
                     if (id.includes('font')) return 'Inter';
-                    if (id.includes('size')) return id.includes('title') ? '28' : '14';
-                    if (id.includes('color')) return id.includes('chords') ? '#2563eb' : '#334155';
+                    if (id.includes('size')) {
+                        if (id.includes('title')) return '28';
+                        if (id.includes('subtitle')) return '18';
+                        if (id.includes('comment')) return '12';
+                        return '14';
+                    }
+                    if (id.includes('color')) {
+                        if (id.includes('chords')) return '#000000';
+                        if (id.includes('subtitle')) return '#000000';
+                        if (id.includes('comment')) return '#000000';
+                        return '#000000';
+                    }
                     if (id === 'line-spacing') return '1.2';
                     if (id === 'diag-name-gap') return '12';
                     if (id === 'diag-name-size') return '18';
                     if (id === 'diag-spacing') return '16';
+                    if (id === 'font-subtitle') return 'Inter';
+                    if (id === 'size-subtitle') return '18';
+                    if (id === 'color-subtitle') return '#000000';
+                    if (id === 'chorus-line-val') return '4';
                     if (id.includes('val')) return '20';
                     if (id.includes('margin')) {
                         if (id.includes('top') || id.includes('bottom')) return '25';
@@ -1182,12 +1529,12 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 el.style.color = getVal('color-title');
             });
 
-            // Subtitle
+            // Subtitle / Artist
             const subtitles = document.querySelectorAll('.song-subtitle');
             subtitles.forEach(el => {
-                el.style.fontFamily = getVal('font-subtitle') || 'Inter';
-                el.style.fontSize = (getVal('size-subtitle') || '18') + 'px';
-                el.style.color = getVal('color-subtitle') || '#64748b';
+                el.style.fontFamily = getVal('font-subtitle');
+                el.style.fontSize = getVal('size-subtitle') + 'px';
+                el.style.color = getVal('color-subtitle');
             });
 
             // Key
@@ -1195,7 +1542,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             keys.forEach(el => {
                 el.style.fontFamily = getVal('font-key') || 'Inter';
                 el.style.fontSize = (getVal('size-key') || '12') + 'px';
-                el.style.color = getVal('color-key') || '#94a3b8';
+                el.style.color = getVal('color-key') || '#000000';
             });
 
             // Comment
@@ -1203,7 +1550,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             comments.forEach(el => {
                 el.style.fontFamily = getVal('font-comment') || 'Inter';
                 el.style.fontSize = (getVal('size-comment') || '12') + 'px';
-                el.style.color = getVal('color-comment') || '#64748b';
+                el.style.color = getVal('color-comment') || '#000000';
             });
 
             // Tempo
@@ -1211,7 +1558,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             tempos.forEach(el => {
                 el.style.fontFamily = getVal('font-tempo') || 'Inter';
                 el.style.fontSize = (getVal('size-tempo') || '12') + 'px';
-                el.style.color = getVal('color-tempo') || '#94a3b8';
+                el.style.color = getVal('color-tempo') || '#000000';
             });
 
             // Chords
@@ -1330,7 +1677,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
 
         async function exportPDF() {
             if (typeof html2pdf === 'undefined') {
-                alert('PDF-Bibliothek wird noch geladen. Bitte warten Sie einen Moment.');
+                alert('PDF library is still loading. Please wait a moment.');
                 return;
             }
 
@@ -1355,7 +1702,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             btn.disabled = true;
             icon.classList.add('hidden');
             spinner.classList.remove('hidden');
-            btnText.innerText = 'Exportiere...';
+            btnText.innerText = 'Exporting...';
 
             // Toggle export mode to suppress guides in original element during cloning
             document.body.classList.add('pdf-export-mode-active');
@@ -1452,7 +1799,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 await html2pdf().set(opt).from(previewPane).save();
             } catch (error) {
                 console.error('PDF Export failed:', error);
-                alert('PDF Export fehlgeschlagen. Bitte versuchen Sie es erneut.');
+                alert('PDF Export failed. Please try again.');
             } finally {
                 // Restore original guides
                 document.body.classList.remove('pdf-export-mode-active');
@@ -1494,7 +1841,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 data[key] = {
                     font: fontEl ? fontEl.value : (key === 'title' ? 'Montserrat' : 'Inter'),
                     size: sizeEl ? sizeEl.value : (key === 'title' ? '28' : '14'),
-                    color: colorEl ? colorEl.value : (key === 'chords' ? '#2563eb' : '#334155')
+                    color: colorEl ? colorEl.value : '#000000'
                 };
             }
             
@@ -1516,7 +1863,8 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 diagToggle: document.getElementById('diag-toggle')?.checked ?? true,
                 chorusIndentToggle: document.getElementById('chorus-indent-toggle')?.checked ?? true,
                 chorusIndentVal: document.getElementById('chorus-indent-val')?.value || '20',
-                chorusLineToggle: document.getElementById('chorus-line-toggle')?.checked ?? false
+                chorusLineToggle: document.getElementById('chorus-line-toggle')?.checked ?? false,
+                chorusLineVal: document.getElementById('chorus-line-val')?.value || '4'
             };
             
             return data;
@@ -1575,6 +1923,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 if (cit) cit.checked = data.layout.chorusIndentToggle;
                 if (civ) civ.value = data.layout.chorusIndentVal;
                 if (clt) clt.checked = data.layout.chorusLineToggle;
+                if (document.getElementById('chorus-line-val')) document.getElementById('chorus-line-val').value = data.layout.chorusLineVal || '4';
             }
             
             applyStyles();
@@ -1585,7 +1934,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         function saveCurrentSong() {
             const content = input.value;
             const titleMatch = content.match(/{title:\s*(.+)}/i) || content.match(/{t:\s*(.+)}/i);
-            const title = titleMatch ? titleMatch[1].trim() : "Unbenannter Song";
+            const title = titleMatch ? titleMatch[1].trim() : "Untitled Song";
             
             const songData = {
                 id: Date.now(),
@@ -1685,14 +2034,14 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             const library = JSON.parse(localStorage.getItem('chordpro_library') || '[]');
             
             if (library.length === 0) {
-                listEl.innerHTML = '<p class="text-[14px] text-slate-400 italic">Leer</p>';
+                listEl.innerHTML = '<p class="text-[14px] text-black italic">Empty</p>';
                 return;
             }
 
             listEl.innerHTML = library.map(song => `
                 <div class="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded px-4 py-2 cursor-pointer hover:bg-slate-100 shrink-0" onclick="loadSong(${song.id})">
-                    <span class="text-[14px] font-medium text-slate-700 truncate max-w-[160px]">${song.title}</span>
-                    <button onclick="event.stopPropagation(); deleteSong(${song.id})" class="text-slate-300 hover:text-red-500">
+                    <span class="text-[14px] font-medium text-black truncate max-w-[160px]">${song.title}</span>
+                    <button onclick="event.stopPropagation(); deleteSong(${song.id})" class="text-black hover:text-red-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -1844,11 +2193,11 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             const qualityContainer = document.getElementById('chord-qualities');
 
             rootContainer.innerHTML = roots.map(r => `
-                <button onclick="selectRoot('${r}')" class="chord-root-btn px-2 py-1 rounded text-[13px] border ${r === selectedRoot ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200'}">${r}</button>
+                <button onclick="selectRoot('${r}')" class="chord-root-btn px-2 py-1 rounded text-[13px] border ${r === selectedRoot ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-black border-slate-200'}">${r}</button>
             `).join('');
 
             qualityContainer.innerHTML = qualities.map(q => `
-                <button onclick="selectQuality('${q}')" class="chord-qual-btn px-2 py-1 rounded text-[13px] border ${q === selectedQuality ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200'}">${q || 'maj'}</button>
+                <button onclick="selectQuality('${q}')" class="chord-qual-btn px-2 py-1 rounded text-[13px] border ${q === selectedQuality ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-black border-slate-200'}">${q || 'maj'}</button>
             `).join('');
         }
 
@@ -1983,11 +2332,144 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             autoSaveSession();
         }
 
+        function scrollNavLeft() {
+            const topNav = document.getElementById('top-nav');
+            if (topNav) {
+                topNav.scrollBy({ left: -300, behavior: 'smooth' });
+            }
+        }
+
+        function scrollNavRight() {
+            const topNav = document.getElementById('top-nav');
+            if (topNav) {
+                topNav.scrollBy({ left: 300, behavior: 'smooth' });
+            }
+        }
+
+        // Strumming Pattern Logic
+        let currentStrummingPattern = Array(16).fill('.');
+        
+        function changeTimeSignature() {
+            const time = document.getElementById('strum-time').value;
+            let length = 16;
+            if (time === '3/4') length = 12;
+            if (time === '6/8') length = 12;
+            
+            currentStrummingPattern = Array(length).fill('.');
+            initStrummingGrid();
+        }
+
+        function initStrummingGrid() {
+            const grid = document.getElementById('strum-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            
+            const length = currentStrummingPattern.length;
+            const time = document.getElementById('strum-time').value;
+            
+            // Dynamic grid columns based on length
+            if (length === 16) grid.className = 'grid grid-cols-8 gap-x-1 gap-y-2 mb-2';
+            else if (length === 12) grid.className = 'grid grid-cols-6 gap-x-1 gap-y-2 mb-2';
+            else grid.className = 'grid grid-cols-4 gap-x-1 gap-y-2 mb-2';
+
+            let labels = [];
+            if (length === 16) labels = ['1', 'e', '&', 'e', '2', 'e', '&', 'e', '3', 'e', '&', 'e', '4', 'e', '&', 'e'];
+            else if (length === 12) {
+                if (time === '6/8') labels = ['1', '&', '2', '&', '3', '&', '4', '&', '5', '&', '6', '&'];
+                else labels = ['1', 'e', '&', 'e', '2', 'e', '&', 'e', '3', 'e', '&', 'e'];
+            }
+            else if (length === 6) labels = ['1', '2', '3', '4', '5', '6'];
+
+            for (let i = 0; i < length; i++) {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center gap-0.5';
+                
+                const label = document.createElement('span');
+                label.className = 'text-[8px] font-bold text-black uppercase';
+                label.innerText = labels[i] || '';
+                
+                const slot = document.createElement('div');
+                slot.className = 'w-6 h-6 border border-slate-300 rounded flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors text-[11px] font-bold';
+                slot.dataset.index = i;
+                slot.onclick = () => toggleStrumSlot(i);
+                updateStrumSlotUI(slot, i);
+                
+                container.appendChild(label);
+                container.appendChild(slot);
+                grid.appendChild(container);
+            }
+
+            // Hide the old labels container if it exists
+            const labelsContainer = document.getElementById('strum-labels');
+            if (labelsContainer) labelsContainer.style.display = 'none';
+        }
+
+        function toggleStrumSlot(index) {
+            const current = currentStrummingPattern[index];
+            if (current === '.') currentStrummingPattern[index] = 'D';
+            else if (current === 'D') currentStrummingPattern[index] = 'U';
+            else currentStrummingPattern[index] = '.';
+            
+            const slot = document.querySelector(`[data-index="${index}"]`);
+            updateStrumSlotUI(slot, index);
+        }
+
+        function updateStrumSlotUI(slot, index) {
+            const val = currentStrummingPattern[index];
+            slot.innerHTML = val === 'D' ? '↓' : (val === 'U' ? '↑' : '');
+            slot.className = `w-6 h-6 border rounded flex items-center justify-center cursor-pointer transition-colors text-[11px] font-bold ${val !== '.' ? 'bg-black text-white border-black' : 'bg-white text-black border-slate-300 hover:bg-slate-100'}`;
+        }
+
+        function insertStrumming() {
+            const bpm = document.getElementById('strum-bpm').value || '82';
+            const time = document.getElementById('strum-time').value || '4/4';
+            const pattern = currentStrummingPattern.join('');
+            const directive = `{strumming: bpm=${bpm}, time=${time}, pattern=${pattern}}\n`;
+            
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const text = input.value;
+            input.value = text.substring(0, start) + directive + text.substring(end);
+            updatePreview();
+            autoSaveSession();
+        }
+
+        function clearStrumming() {
+            const length = currentStrummingPattern.length;
+            currentStrummingPattern = Array(length).fill('.');
+            initStrummingGrid();
+        }
+
         // Initial render
         loadSession();
         renderSongList();
         initChordBuilder();
         initFretboard();
+        initStrummingGrid();
+        
+        // Scroll indicator listener
+        const topNav = document.getElementById('top-nav');
+        const scrollIndicatorLeft = document.querySelector('.scroll-indicator-left');
+        const scrollIndicatorRight = document.querySelector('.scroll-indicator-right');
+        
+        if (topNav && scrollIndicatorLeft && scrollIndicatorRight) {
+            const updateScrollIndicators = () => {
+                // Left indicator
+                const isAtStart = topNav.scrollLeft <= 10;
+                scrollIndicatorLeft.style.opacity = isAtStart ? '0' : '1';
+                scrollIndicatorLeft.style.pointerEvents = isAtStart ? 'none' : 'auto';
+                
+                // Right indicator
+                const isAtEnd = topNav.scrollLeft + topNav.clientWidth >= topNav.scrollWidth - 10;
+                scrollIndicatorRight.style.opacity = isAtEnd ? '0' : '1';
+                scrollIndicatorRight.style.pointerEvents = isAtEnd ? 'none' : 'auto';
+            };
+            
+            topNav.addEventListener('scroll', updateScrollIndicators);
+            window.addEventListener('resize', updateScrollIndicators);
+            // Initial check
+            setTimeout(updateScrollIndicators, 500);
+        }
         
         // Barre input listeners
         ['base-fret', 'barre-fret', 'barre-start', 'barre-end'].forEach(id => {

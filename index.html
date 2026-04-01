@@ -581,7 +581,7 @@
                                 <option value="Merriweather">Merriweather</option>
                             </optgroup>
                         </select>
-                        <input type="number" id="size-strum-title" value="22" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="updatePreview()">
+                        <input type="number" id="size-strum-title" value="14" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="updatePreview()">
                         <input type="color" id="color-strum-title" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="updatePreview()">
                     </div>
                     <div class="flex items-center gap-2">
@@ -597,7 +597,7 @@
                                 <option value="Merriweather">Merriweather</option>
                             </optgroup>
                         </select>
-                        <input type="number" id="size-strum-bpm" value="16" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="updatePreview()">
+                        <input type="number" id="size-strum-bpm" value="11" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="updatePreview()">
                         <input type="color" id="color-strum-bpm" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="updatePreview()">
                     </div>
                 </div>
@@ -1055,7 +1055,7 @@
             
             // Scale factor
             const scale = parseFloat(document.getElementById('strum-scale')?.value || '1');
-            let slotGap = 20 * scale; 
+            let slotGap = 22 * scale; 
             
             if (time === '3/4' || len === 12 && time !== '6/8') {
                 beats = 3;
@@ -1065,7 +1065,7 @@
                 beats = 6;
                 slotsPerBeat = 2;
                 subLabels = ['&'];
-                slotGap = 25 * scale;
+                slotGap = 28 * scale;
             } else if (len === 8) {
                 beats = 2;
                 slotsPerBeat = 4;
@@ -1079,34 +1079,34 @@
             }
             
             const rhythmGap = parseInt(document.getElementById('strum-gap')?.value || '15') * scale;
-            const startX = 60 * scale;
-            const width = Math.max(600 * scale, startX + beats * slotsPerBeat * slotGap * 1.3);
-            const height = (120 + rhythmGap) * scale;
+            const startX = 45 * scale;
+            const width = Math.max(450 * scale, startX + beats * slotsPerBeat * slotGap * 1.2);
+            const height = (110 + rhythmGap) * scale;
             
             // Font settings
             const titleFont = document.getElementById('font-strum-title')?.value || 'Inter';
-            const titleSize = (parseInt(document.getElementById('size-strum-title')?.value || '22')) * scale;
+            const titleSize = (parseInt(document.getElementById('size-strum-title')?.value || '14')) * scale;
             const titleColor = document.getElementById('color-strum-title')?.value || '#000000';
             
             const bpmFont = document.getElementById('font-strum-bpm')?.value || 'Inter';
-            const bpmSize = (parseInt(document.getElementById('size-strum-bpm')?.value || '16')) * scale;
+            const bpmSize = (parseInt(document.getElementById('size-strum-bpm')?.value || '11')) * scale;
             const bpmColor = document.getElementById('color-strum-bpm')?.value || '#000000';
 
-            let svg = `<div class="strumming-pattern-container my-8 no-print-break" style="font-family: 'Inter', sans-serif; page-break-inside: avoid;">`;
-            svg += `<div style="font-family: '${titleFont}'; font-size: ${titleSize}px; font-weight: 700; color: ${titleColor}; margin-bottom: ${8 * scale}px; letter-spacing: -0.01em;">STRUMMING PATTERN</div>`;
-            svg += `<div style="font-family: '${bpmFont}'; font-size: ${bpmSize}px; font-weight: 700; color: ${bpmColor}; margin-bottom: ${15 * scale}px;"><span style="font-weight: 400; text-transform: none;">${bpm} bpm</span></div>`;
+            let svg = `<div class="strumming-pattern-container my-6 no-print-break" style="font-family: 'Inter', sans-serif; page-break-inside: avoid;">`;
+            svg += `<div style="font-family: '${titleFont}'; font-size: ${titleSize}px; font-weight: 700; color: ${titleColor}; margin-bottom: ${4 * scale}px; letter-spacing: -0.01em;">STRUMMING PATTERN</div>`;
+            svg += `<div style="font-family: '${bpmFont}'; font-size: ${bpmSize}px; font-weight: 700; color: ${bpmColor}; margin-bottom: ${10 * scale}px;"><span style="font-weight: 400; text-transform: none;">${bpm} bpm</span></div>`;
             
             svg += `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
             
-            const arrowBottom = 60 * scale;
-            const labelY = arrowBottom + rhythmGap + (10 * scale);
-            const stemTop = labelY + (12 * scale);
-            const stemBottom = stemTop + (30 * scale);
-            const beam1Y = stemTop + (20 * scale);
-            const beam2Y = stemTop + (30 * scale);
+            const arrowBottom = 45 * scale;
+            const labelY = arrowBottom + rhythmGap + (12 * scale);
+            const stemTop = labelY + (10 * scale);
+            const stemBottom = stemTop + (25 * scale);
+            const beam1Y = stemTop + (16 * scale);
+            const beam2Y = stemTop + (24 * scale);
 
             for (let i = 0; i < beats; i++) {
-                const groupX = startX + i * slotGap * slotsPerBeat * 1.3;
+                const groupX = startX + i * slotGap * slotsPerBeat * 1.2;
                 
                 for (let j = 0; j < slotsPerBeat; j++) {
                     const x = groupX + j * slotGap;
@@ -1118,25 +1118,25 @@
                     if (j === 0) labelText = labels[i];
                     else if (subLabels.length > 0) labelText = subLabels[j-1];
                     
-                    svg += `<text x="${x}" y="${labelY}" text-anchor="middle" font-size="${16 * scale}" font-weight="700" fill="#000000">${labelText}</text>`;
+                    svg += `<text x="${x}" y="${labelY}" text-anchor="middle" font-size="${12 * scale}" font-weight="700" fill="#000000">${labelText}</text>`;
                     
                     // Arrow
                     if (char === 'D') {
-                        svg += `<path d="M${x},${20*scale} L${x},${60*scale} M${x-(6*scale)},${50*scale} L${x},${60*scale} L${x+(6*scale)},${50*scale}" stroke="black" stroke-width="${2.5*scale}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`;
+                        svg += `<path d="M${x},${15*scale} L${x},${45*scale} M${x-(6*scale)},${35*scale} L${x},${45*scale} L${x+(6*scale)},${35*scale}" stroke="black" stroke-width="${2.5*scale}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`;
                     } else if (char === 'U') {
-                        svg += `<path d="M${x},${60*scale} L${x},${20*scale} M${x-(6*scale)},${30*scale} L${x},${20*scale} L${x+(6*scale)},${30*scale}" stroke="black" stroke-width="${2.5*scale}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`;
+                        svg += `<path d="M${x},${45*scale} L${x},${15*scale} M${x-(6*scale)},${25*scale} L${x},${15*scale} L${x+(6*scale)},${25*scale}" stroke="black" stroke-width="${2.5*scale}" fill="none" stroke-linecap="round" stroke-linejoin="round" />`;
                     }
                     
                     // Stem
-                    svg += `<line x1="${x}" y1="${stemTop}" x2="${x}" y2="${stemBottom}" stroke="black" stroke-width="${2*scale}" />`;
+                    svg += `<line x1="${x}" y1="${stemTop}" x2="${x}" y2="${stemBottom}" stroke="black" stroke-width="${1.5*scale}" />`;
                 }
                 
                 // Beam for the group
                 if (slotsPerBeat > 1) {
                     const xStart = groupX;
                     const xEnd = groupX + (slotsPerBeat - 1) * slotGap;
-                    svg += `<line x1="${xStart}" y1="${beam1Y}" x2="${xEnd}" y2="${beam1Y}" stroke="black" stroke-width="${4*scale}" />`;
-                    svg += `<line x1="${xStart}" y1="${beam2Y}" x2="${xEnd}" y2="${beam2Y}" stroke="black" stroke-width="${4*scale}" />`;
+                    svg += `<line x1="${xStart}" y1="${beam1Y}" x2="${xEnd}" y2="${beam1Y}" stroke="black" stroke-width="${3.5*scale}" />`;
+                    svg += `<line x1="${xStart}" y1="${beam2Y}" x2="${xEnd}" y2="${beam2Y}" stroke="black" stroke-width="${3.5*scale}" />`;
                 }
             }
             
@@ -1463,6 +1463,8 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                         if (id.includes('title')) return '28';
                         if (id.includes('subtitle')) return '18';
                         if (id.includes('comment')) return '12';
+                        if (id.includes('strum-title')) return '14';
+                        if (id.includes('strum-bpm')) return '11';
                         return '14';
                     }
                     if (id.includes('color')) {
@@ -1821,6 +1823,36 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         input.addEventListener('input', () => {
             updatePreview();
             autoSaveSession();
+        });
+
+        // Keyboard Shortcuts for Chords
+        input.addEventListener('keydown', (e) => {
+            // Support both Ctrl and Alt for better compatibility
+            if (e.ctrlKey || e.altKey) {
+                const key = e.key.toLowerCase();
+                const chordMap = {
+                    'a': 'A',
+                    'b': 'B',
+                    'c': 'C',
+                    'd': 'D',
+                    'e': 'E',
+                    'f': 'F',
+                    'g': 'G'
+                };
+                
+                if (chordMap[key]) {
+                    e.preventDefault();
+                    const chord = `[${chordMap[key]}]`;
+                    const start = input.selectionStart;
+                    const end = input.selectionEnd;
+                    const text = input.value;
+                    input.value = text.substring(0, start) + chord + text.substring(end);
+                    // Place cursor after the chord letter (e.g., [C|])
+                    input.selectionStart = input.selectionEnd = start + 2;
+                    updatePreview();
+                    autoSaveSession();
+                }
+            }
         });
         
         const allInputs = document.querySelectorAll('select, input[type="number"], input[type="color"], input[type="range"]');

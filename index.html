@@ -24,7 +24,7 @@
         .editor-container {
             display: grid;
             grid-template-columns: 280px minmax(0, 1fr) minmax(0, 1fr);
-            height: calc(100vh - 64px - 130px); /* Adjust based on header (64px) and top-nav (130px) height */
+            height: calc(100vh - 64px - 10px); /* Adjust based on header (64px) and top-nav (130px) height */
             transition: all 0.3s ease;
             overflow-x: hidden;
             position: relative;
@@ -39,7 +39,7 @@
             padding: 1rem;
         }
         #top-nav {
-            height: 130px;
+            height: 150px;
             overflow-x: auto;
             overflow-y: hidden;
             position: relative;
@@ -159,7 +159,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: bold;
         }
         .fret-cell.active {
@@ -406,7 +406,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
-            <h1 class="text-xl font-bold text-black">ChordPro Studio</h1>
+            <h1 class="text-xl font-bold text-black">ACOUSTIX GUITAR'S ChordPro Studio</h1>
             <div class="flex items-center gap-2 ml-4">
                 <a href="help.html" class="text-[12px] font-bold text-blue-600 hover:underline">Help (EN)</a>
                 <span class="text-slate-300">|</span>
@@ -443,20 +443,20 @@
         </div>
         <!-- Style & Layout -->
         <div class="nav-section">
-            <h2 class="text-[11px] font-bold text-black uppercase mb-1">Style & Layout</h2>
+            <h2 class="text-[16px] font-bold text-black uppercase mb-1">Style & Layout</h2>
             <div class="flex items-center gap-3">
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-black font-bold uppercase">Line Spacing</span>
+                    <span class="text-[12px] text-black font-bold uppercase">Line Spacing</span>
                     <div class="flex items-center gap-2">
                         <input type="range" id="line-spacing" min="0.5" max="3" step="0.1" value="1.2" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('line-spacing', 'line-spacing-num'); applyStyles()">
-                        <input type="number" id="line-spacing-num" min="0.5" max="3" step="0.1" value="1.2" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('line-spacing-num', 'line-spacing'); applyStyles()">
+                        <input type="number" id="line-spacing-num" min="0.5" max="3" step="0.1" value="1.2" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="syncInputs('line-spacing-num', 'line-spacing'); applyStyles()">
                     </div>
                 </div>
                 
                 <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-black font-bold uppercase w-16">Title</span>
-                        <select id="font-title" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="applyStyles()">
+                        <span class="text-[12px] text-black font-bold uppercase w-16">Title</span>
+                        <select id="font-title" class="border border-slate-300 rounded p-1 text-[12px] w-32" onchange="applyStyles()">
                             <optgroup label="Sans-Serif">
                                 <option value="Inter">Inter</option>
                                 <option value="Montserrat" selected>Montserrat</option>
@@ -471,12 +471,12 @@
                                 <option value="Georgia">Georgia</option>
                             </optgroup>
                         </select>
-                        <input type="number" id="size-title" value="28" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="applyStyles()">
+                        <input type="number" id="size-title" value="28" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="applyStyles()">
                         <input type="color" id="color-title" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-black font-bold uppercase w-16">Artist</span>
-                        <select id="font-subtitle" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="applyStyles()">
+                        <span class="text-[12px] text-black font-bold uppercase w-16">Artist</span>
+                        <select id="font-subtitle" class="border border-slate-300 rounded p-1 text-[12px] w-32" onchange="applyStyles()">
                             <optgroup label="Sans-Serif">
                                 <option value="Inter" selected>Inter</option>
                                 <option value="Montserrat">Montserrat</option>
@@ -491,12 +491,12 @@
                                 <option value="Georgia">Georgia</option>
                             </optgroup>
                         </select>
-                        <input type="number" id="size-subtitle" value="18" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="applyStyles()">
+                        <input type="number" id="size-subtitle" value="18" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="applyStyles()">
                         <input type="color" id="color-subtitle" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-black font-bold uppercase w-16">Lyrics</span>
-                        <select id="font-lyrics" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="applyStyles()">
+                        <span class="text-[12px] text-black font-bold uppercase w-16">Lyrics</span>
+                        <select id="font-lyrics" class="border border-slate-300 rounded p-1 text-[12px] w-32" onchange="applyStyles()">
                             <optgroup label="Sans-Serif">
                                 <option value="Inter" selected>Inter</option>
                                 <option value="Roboto">Roboto</option>
@@ -511,43 +511,47 @@
                                 <option value="Georgia">Georgia</option>
                             </optgroup>
                         </select>
-                        <input type="number" id="size-lyrics" value="14" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="applyStyles()">
+                        <input type="number" id="size-lyrics" value="14" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="applyStyles()">
                         <input type="color" id="color-lyrics" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
                     </div>
                 </div>
  
                 <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-black font-bold uppercase w-16">Chord</span>
-                        <select id="font-chords" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="applyStyles()">
+                        <span class="text-[12px] text-black font-bold uppercase w-16">Chord</span>
+                        <select id="font-chords" class="border border-slate-300 rounded p-1 text-[12px] w-32" onchange="applyStyles()">
                             <optgroup label="Sans-Serif">
                                 <option value="Inter" selected>Inter</option>
                                 <option value="Montserrat">Montserrat</option>
                                 <option value="Roboto">Roboto</option>
                             </optgroup>
                             <optgroup label="Serif">
-                                <option value="Lora">Lora</option>
-                                <option value="Merriweather">Merriweather</option>
-                                <option value="Playfair Display">Playfair</option>
+                              <option value="Inter" selected>Inter</option>
+                                <option value="Roboto">Roboto</option>
+                                <option value="Lato">Lato</option>
+                                <option value="Open Sans">Open Sans</option>
                             </optgroup>
                             <optgroup label="Monospace">
-                                <option value="Roboto Mono">Roboto Mono</option>
-                                <option value="Courier New">Courier New</option>
+                             <option value="Lora">Lora</option>
+                                <option value="Merriweather">Merriweather</option>
+                                <option value="Playfair Display">Playfair</option>
+                                <option value="Crimson Text">Crimson Text</option>
+                                <option value="Georgia">Georgia</option>
                             </optgroup>
                         </select>
-                        <input type="number" id="size-chords" value="14" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="applyStyles()">
+                        <input type="number" id="size-chords" value="14" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="applyStyles()">
                         <input type="color" id="color-chords" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-black font-bold uppercase w-16">Chorus</span>
+                        <span class="text-[12px] text-black font-bold uppercase w-16">Chorus</span>
                         <input type="checkbox" id="chorus-indent-toggle" checked class="w-5 h-5 rounded border-slate-300 text-blue-600" onchange="applyStyles()">
-                        <input type="number" id="chorus-indent-val" value="20" class="w-16 border border-slate-300 rounded p-1 text-[10px]" oninput="applyStyles()">
+                        <input type="number" id="chorus-indent-val" value="20" class="w-16 border border-slate-300 rounded p-1 text-[12px]" oninput="applyStyles()">
                         <input type="checkbox" id="chorus-line-toggle" class="w-5 h-5 rounded border-slate-300 text-blue-600" onchange="applyStyles()">
-                        <input type="number" id="chorus-line-val" value="4" min="1" max="20" class="w-12 border border-slate-300 rounded p-1 text-[10px]" oninput="applyStyles()">
+                        <input type="number" id="chorus-line-val" value="4" min="1" max="20" class="w-12 border border-slate-300 rounded p-1 text-[12px]" oninput="applyStyles()">
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-black font-bold uppercase w-16">Comment</span>
-                        <select id="font-comment" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="applyStyles()">
+                        <span class="text-[12px] text-black font-bold uppercase w-16">Comment</span>
+                        <select id="font-comment" class="border border-slate-300 rounded p-1 text-[12px] w-32" onchange="applyStyles()">
                             <optgroup label="Sans-Serif">
                                 <option value="Inter" selected>Inter</option>
                                 <option value="Montserrat">Montserrat</option>
@@ -562,15 +566,15 @@
                                 <option value="Georgia">Georgia</option>
                             </optgroup>
                         </select>
-                        <input type="number" id="size-comment" value="12" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="applyStyles()">
+                        <input type="number" id="size-comment" value="12" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="applyStyles()">
                         <input type="color" id="color-comment" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
                     </div>
                 </div>
 
                 <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-black font-bold uppercase w-16">Strum Title</span>
-                        <select id="font-strum-title" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="updatePreview()">
+                        <span class="text-[12px] text-black font-bold uppercase w-16">Strum Title</span>
+                        <select id="font-strum-title" class="border border-slate-300 rounded p-1 text-[12px] w-32" onchange="updatePreview()">
                             <optgroup label="Sans-Serif">
                                 <option value="Inter" selected>Inter</option>
                                 <option value="Montserrat">Montserrat</option>
@@ -581,12 +585,12 @@
                                 <option value="Merriweather">Merriweather</option>
                             </optgroup>
                         </select>
-                        <input type="number" id="size-strum-title" value="14" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="updatePreview()">
+                        <input type="number" id="size-strum-title" value="14" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="updatePreview()">
                         <input type="color" id="color-strum-title" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="updatePreview()">
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-black font-bold uppercase w-16">Strum BPM</span>
-                        <select id="font-strum-bpm" class="border border-slate-300 rounded p-1 text-[10px] w-32" onchange="updatePreview()">
+                        <span class="text-[12px] text-black font-bold uppercase w-16">Strum BPM</span>
+                        <select id="font-strum-bpm" class="border border-slate-300 rounded p-1 text-[12px] w-32" onchange="updatePreview()">
                             <optgroup label="Sans-Serif">
                                 <option value="Inter" selected>Inter</option>
                                 <option value="Montserrat">Montserrat</option>
@@ -597,7 +601,7 @@
                                 <option value="Merriweather">Merriweather</option>
                             </optgroup>
                         </select>
-                        <input type="number" id="size-strum-bpm" value="11" class="border border-slate-300 rounded p-1 text-[11px] w-16" oninput="updatePreview()">
+                        <input type="number" id="size-strum-bpm" value="11" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="updatePreview()">
                         <input type="color" id="color-strum-bpm" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="updatePreview()">
                     </div>
                 </div>
@@ -606,38 +610,38 @@
 
         <!-- Chord Diagram Settings -->
         <div class="nav-section">
-            <h2 class="text-[11px] font-bold text-black uppercase mb-1">Chord Diagrams</h2>
+            <h2 class="text-[12px] font-bold text-black uppercase mb-1">Chord Diagrams</h2>
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-2">
                     <input type="checkbox" id="diag-toggle" checked class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="updatePreview()">
-                    <span class="text-[10px] text-black font-bold">Show</span>
+                    <span class="text-[12px] text-black font-bold">Show</span>
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-black font-bold uppercase">Size</span>
+                    <span class="text-[12px] text-black font-bold uppercase">Size</span>
                     <div class="flex items-center gap-2">
                         <input type="range" id="diag-size" min="40" max="150" step="5" value="80" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-size', 'diag-size-num'); applyStyles()">
-                        <input type="number" id="diag-size-num" min="40" max="150" step="5" value="80" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('diag-size-num', 'diag-size'); applyStyles()">
+                        <input type="number" id="diag-size-num" min="40" max="150" step="5" value="80" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="syncInputs('diag-size-num', 'diag-size'); applyStyles()">
                     </div>
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-black font-bold uppercase">Chord Gap</span>
+                    <span class="text-[12px] text-black font-bold uppercase">Chord Gap</span>
                     <div class="flex items-center gap-2">
                         <input type="range" id="diag-name-gap" min="0" max="30" step="1" value="12" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-name-gap', 'diag-name-gap-num'); applyStyles()">
-                        <input type="number" id="diag-name-gap-num" min="0" max="30" step="1" value="12" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('diag-name-gap-num', 'diag-name-gap'); applyStyles()">
+                        <input type="number" id="diag-name-gap-num" min="0" max="30" step="1" value="12" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="syncInputs('diag-name-gap-num', 'diag-name-gap'); applyStyles()">
                     </div>
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-black font-bold uppercase">Font Size</span>
+                    <span class="text-[12px] text-black font-bold uppercase">Font Size</span>
                     <div class="flex items-center gap-2">
                         <input type="range" id="diag-name-size" min="8" max="32" step="1" value="18" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-name-size', 'diag-name-size-num'); applyStyles()">
-                        <input type="number" id="diag-name-size-num" min="8" max="32" step="1" value="18" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('diag-name-size-num', 'diag-name-size'); applyStyles()">
+                        <input type="number" id="diag-name-size-num" min="8" max="32" step="1" value="18" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="syncInputs('diag-name-size-num', 'diag-name-size'); applyStyles()">
                     </div>
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-black font-bold uppercase">Diagram Spacing</span>
+                    <span class="text-[12px] text-black font-bold uppercase">Diagram Spacing</span>
                     <div class="flex items-center gap-2">
                         <input type="range" id="diag-spacing" min="0" max="40" step="1" value="16" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-spacing', 'diag-spacing-num'); applyStyles()">
-                        <input type="number" id="diag-spacing-num" min="0" max="40" step="1" value="16" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="syncInputs('diag-spacing-num', 'diag-spacing'); applyStyles()">
+                        <input type="number" id="diag-spacing-num" min="0" max="40" step="1" value="16" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="syncInputs('diag-spacing-num', 'diag-spacing'); applyStyles()">
                     </div>
                 </div>
             </div>
@@ -645,32 +649,32 @@
 
         <!-- Page Margins -->
         <div class="nav-section">
-            <h2 class="text-[11px] font-bold text-black uppercase mb-1">Page Margins (mm)</h2>
+            <h2 class="text-[12px] font-bold text-black uppercase mb-1">Page Margins (mm)</h2>
             <div class="grid grid-cols-2 gap-x-2 gap-y-1">
                 <div class="flex items-center gap-1">
-                    <span class="text-[10px] text-black font-bold uppercase w-10">Top</span>
-                    <input type="number" id="margin-top" value="25" min="0" max="100" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="applyStyles(); autoSaveSession()">
+                    <span class="text-[12px] text-black font-bold uppercase w-10">Top</span>
+                    <input type="number" id="margin-top" value="25" min="0" max="100" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="applyStyles(); autoSaveSession()">
                 </div>
                 <div class="flex items-center gap-1">
-                    <span class="text-[10px] text-black font-bold uppercase w-10">Bottom</span>
-                    <input type="number" id="margin-bottom" value="25" min="0" max="100" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="applyStyles(); autoSaveSession()">
+                    <span class="text-[12px] text-black font-bold uppercase w-10">Bottom</span>
+                    <input type="number" id="margin-bottom" value="25" min="0" max="100" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="applyStyles(); autoSaveSession()">
                 </div>
                 <div class="flex items-center gap-1">
-                    <span class="text-[10px] text-black font-bold uppercase w-10">Left</span>
-                    <input type="number" id="margin-left" value="20" min="0" max="100" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="applyStyles(); autoSaveSession()">
+                    <span class="text-[12px] text-black font-bold uppercase w-10">Left</span>
+                    <input type="number" id="margin-left" value="20" min="0" max="100" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="applyStyles(); autoSaveSession()">
                 </div>
                 <div class="flex items-center gap-1">
-                    <span class="text-[10px] text-black font-bold uppercase w-10">Right</span>
-                    <input type="number" id="margin-right" value="20" min="0" max="100" class="border border-slate-300 rounded p-1 text-[10px] w-12" oninput="applyStyles(); autoSaveSession()">
+                    <span class="text-[12px] text-black font-bold uppercase w-10">Right</span>
+                    <input type="number" id="margin-right" value="20" min="0" max="100" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="applyStyles(); autoSaveSession()">
                 </div>
             </div>
         </div>
 
         <!-- Song Library -->
         <div class="nav-section">
-            <h2 class="text-[11px] font-bold text-black uppercase mb-1">Song Library</h2>
+            <h2 class="text-[12px] font-bold text-black uppercase mb-1">Song Library</h2>
             <div class="flex items-center gap-3">
-                <button onclick="saveCurrentSong()" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded text-[10px] font-medium transition-colors">
+                <button onclick="saveCurrentSong()" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded text-[12px] font-medium transition-colors">
                     Save
                 </button>
                 <div id="song-list" class="flex gap-2 overflow-x-auto max-w-[300px] no-scrollbar">
@@ -681,11 +685,11 @@
 
         <!-- File Transfer -->
         <div class="nav-section">
-            <h2 class="text-[11px] font-bold text-black uppercase mb-1">File</h2>
+            <h2 class="text-[12px] font-bold text-black uppercase mb-1">File</h2>
             <div class="flex items-center gap-2">
-                <button onclick="downloadFile('cho')" class="bg-slate-100 hover:bg-slate-200 text-black px-3 py-1.5 rounded text-[10px] font-bold">.cho</button>
-                <button onclick="downloadFile('txt')" class="bg-slate-100 hover:bg-slate-200 text-black px-3 py-1.5 rounded text-[10px] font-bold">.txt</button>
-                <button onclick="document.getElementById('file-upload').click()" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded text-[10px] font-bold flex items-center gap-1.5">
+                <button onclick="downloadFile('cho')" class="bg-slate-100 hover:bg-slate-200 text-black px-3 py-1.5 rounded text-[1px] font-bold">.cho</button>
+                <button onclick="downloadFile('txt')" class="bg-slate-100 hover:bg-slate-200 text-black px-3 py-1.5 rounded text-[12px] font-bold">.txt</button>
+                <button onclick="document.getElementById('file-upload').click()" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded text-[12px] font-bold flex items-center gap-1.5">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
@@ -732,24 +736,24 @@
                 <div class="flex flex-col gap-2">
                     <div id="fretboard-ui" class="fretboard w-full mx-auto"></div>
                     <div class="bg-slate-50 p-2 rounded border border-slate-200">
-                        <div class="text-[10px] font-bold text-black uppercase mb-1">Options</div>
+                        <div class="text-[12px] font-bold text-black uppercase mb-1">Options</div>
                         <div class="grid grid-cols-2 gap-2 mb-2">
                             <div class="flex flex-col">
-                                <label class="text-[9px] text-black font-bold">Base Fret</label>
+                                <label class="text-[12px] text-black font-bold">Base Fret</label>
                                 <input type="number" id="base-fret" min="1" max="20" value="1" class="border border-slate-300 rounded p-1 text-[11px]">
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-[9px] text-black font-bold">Barre Fret (Rel.)</label>
+                                <label class="text-[12px] text-black font-bold">Barre Fret (Rel.)</label>
                                 <input type="number" id="barre-fret" min="0" max="5" value="0" class="border border-slate-300 rounded p-1 text-[11px]">
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div class="flex flex-col">
-                                <label class="text-[9px] text-black font-bold">Barre From</label>
+                                <label class="text-[12px] text-black font-bold">Barre From</label>
                                 <input type="number" id="barre-start" min="1" max="6" value="1" class="border border-slate-300 rounded p-1 text-[11px]">
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-[9px] text-black font-bold">Barre To</label>
+                                <label class="text-[12px] text-black font-bold">Barre To</label>
                                 <input type="number" id="barre-end" min="1" max="6" value="6" class="border border-slate-300 rounded p-1 text-[11px]">
                             </div>
                         </div>
@@ -767,33 +771,33 @@
                 <div class="flex flex-col gap-2">
                     <div class="grid grid-cols-2 gap-2">
                         <div class="flex flex-col">
-                            <label class="text-[9px] text-black font-bold uppercase">BPM</label>
-                            <input type="number" id="strum-bpm" value="82" class="border border-slate-300 rounded p-1 text-[11px]" oninput="updatePreview()">
+                            <label class="text-[12px] text-black font-bold uppercase">BPM</label>
+                            <input type="number" id="strum-bpm" value="82" class="border border-slate-300 rounded p-1 text-[12px]" oninput="updatePreview()">
                         </div>
                         <div class="flex flex-col">
-                            <label class="text-[9px] text-black font-bold uppercase">Rhythm Gap</label>
+                            <label class="text-[12px] text-black font-bold uppercase">Rhythm Gap</label>
                             <div class="flex items-center gap-1">
                                 <input type="range" id="strum-gap" min="5" max="60" step="1" value="15" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('strum-gap', 'strum-gap-num'); updatePreview()">
-                                <input type="number" id="strum-gap-num" min="5" max="60" step="1" value="15" class="border border-slate-300 rounded p-0.5 text-[9px] w-8" oninput="syncInputs('strum-gap-num', 'strum-gap'); updatePreview()">
+                                <input type="number" id="strum-gap-num" min="5" max="60" step="1" value="15" class="border border-slate-300 rounded p-0.5 text-[12px] w-8" oninput="syncInputs('strum-gap-num', 'strum-gap'); updatePreview()">
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <label class="text-[9px] text-black font-bold uppercase">Strum Scale</label>
+                            <label class="text-[12px] text-black font-bold uppercase">Strum Scale</label>
                             <div class="flex items-center gap-1">
                                 <input type="range" id="strum-scale" min="0.5" max="2" step="0.1" value="1" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('strum-scale', 'strum-scale-num'); updatePreview()">
-                                <input type="number" id="strum-scale-num" min="0.5" max="2" step="0.1" value="1" class="border border-slate-300 rounded p-0.5 text-[9px] w-8" oninput="syncInputs('strum-scale-num', 'strum-scale'); updatePreview()">
+                                <input type="number" id="strum-scale-num" min="0.5" max="2" step="0.1" value="1" class="border border-slate-300 rounded p-0.5 text-[12px] w-8" oninput="syncInputs('strum-scale-num', 'strum-scale'); updatePreview()">
                             </div>
                         </div>
                         <div class="flex flex-col justify-center">
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" id="strum-colorized" class="w-3 h-3 accent-blue-600" onchange="updatePreview()">
-                                <span class="text-[9px] text-black font-bold uppercase">Colorized</span>
+                                <span class="text-[12px] text-black font-bold uppercase">Colorized</span>
                             </label>
                         </div>
                     </div>
                     
                     <div class="flex flex-col">
-                        <label class="text-[9px] text-black font-bold uppercase">Time Signature</label>
+                        <label class="text-[12px] text-black font-bold uppercase">Time Signature</label>
                         <select id="strum-time" onchange="changeTimeSignature()" class="border border-slate-300 rounded p-1 text-[11px]">
                             <option value="4/4">4/4 (16 slots)</option>
                             <option value="3/4">3/4 (12 slots)</option>
@@ -802,22 +806,22 @@
                     </div>
                     
                     <div class="bg-slate-50 p-2 rounded border border-slate-200">
-                        <div class="text-[10px] font-bold text-black uppercase mb-2">Pattern</div>
+                        <div class="text-[12px] font-bold text-black uppercase mb-2">Pattern</div>
                         <div id="strum-grid" class="grid grid-cols-8 gap-x-1 gap-y-3 mb-2">
                             <!-- Slots injected here -->
                         </div>
                         <div class="flex items-center gap-3 mt-2 px-1">
                             <div class="flex items-center gap-1">
                                 <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
-                                <span class="text-[8px] font-bold uppercase text-slate-500">Down</span>
+                                <span class="text-[12px] font-bold uppercase text-slate-500">Down</span>
                             </div>
                             <div class="flex items-center gap-1">
                                 <div class="w-2 h-2 bg-amber-500 rounded-full"></div>
-                                <span class="text-[8px] font-bold uppercase text-slate-500">Up</span>
+                                <span class="text-[12px] font-bold uppercase text-slate-500">Up</span>
                             </div>
                             <div class="flex items-center gap-1">
                                 <div class="w-2 h-2 bg-white border border-slate-300 rounded-full"></div>
-                                <span class="text-[8px] font-bold uppercase text-slate-500">None</span>
+                                <span class="text-[12px] font-bold uppercase text-slate-500">None</span>
                             </div>
                         </div>
                     </div>
@@ -1856,7 +1860,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         // Keyboard Shortcuts for Chords
         input.addEventListener('keydown', (e) => {
             // Support both Ctrl and Alt for better compatibility
-            if (e.ctrlKey || e.altKey) {
+            if (e.altKey || e.altKey) {
                 const key = e.key.toLowerCase();
                 const chordMap = {
                     'a': 'A',
@@ -2450,11 +2454,11 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 container.className = 'flex flex-col items-center gap-0.5';
                 
                 const label = document.createElement('span');
-                label.className = 'text-[8px] font-bold text-black uppercase';
+                label.className = 'text-[12px] font-bold text-black lowercase';
                 label.innerText = labels[i] || '';
                 
                 const slot = document.createElement('div');
-                slot.className = 'w-6 h-6 border border-slate-300 rounded flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors text-[11px] font-bold';
+                slot.className = 'w-6 h-6 border border-slate-300 rounded flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors text-[12px] font-bold';
                 slot.dataset.index = i;
                 slot.onclick = () => toggleStrumSlot(i);
                 updateStrumSlotUI(slot, i);
@@ -2490,7 +2494,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 colorClasses = 'bg-amber-500 text-white border-amber-600';
             }
             
-            slot.className = `w-6 h-6 border rounded flex items-center justify-center cursor-pointer transition-colors text-[11px] font-bold ${colorClasses}`;
+            slot.className = `w-6 h-6 border rounded flex items-center justify-center cursor-pointer transition-colors text-[12px] font-bold ${colorClasses}`;
         }
 
         function insertStrumming() {

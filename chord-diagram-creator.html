@@ -364,18 +364,22 @@
                 onlyFingers = false
             } = options;
 
-            // Internal coordinate system (width 100)
-            const width = 100;
-            const margin = 15;
-            const gridWidth = width - (margin * 2);
+            // Internal coordinate system
+            const width = 120;
+            const marginLeft = 35;
+            const marginRight = 15;
+            const marginTop = 15;
+            const marginBottom = 15;
+            
+            const gridWidth = width - marginLeft - marginRight;
             const stringSpacing = gridWidth / 5;
             const fretSpacing = gridWidth / 4.5; // Slightly taller than wide
             const gridHeight = fretSpacing * 5;
             
             // Calculate total height based on nameGap and nameSize
-            const textY = margin + nameSize;
+            const textY = marginTop + nameSize;
             const gridTop = textY + nameGap;
-            const totalHeight = gridTop + gridHeight + margin;
+            const totalHeight = gridTop + gridHeight + marginBottom;
             
             const color = '#000000';
             
@@ -383,11 +387,12 @@
             svg += `<rect width="100%" height="100%" fill="white" />`;
             
             // Chord Name
-            svg += `<text x="${width / 2}" y="${textY}" text-anchor="middle" font-family="${font}" font-size="${nameSize}" font-weight="bold" fill="${color}">${name}</text>`;
+            const gridCenterX = marginLeft + (gridWidth / 2);
+            svg += `<text x="${gridCenterX}" y="${textY}" text-anchor="middle" font-family="${font}" font-size="${nameSize}" font-weight="bold" fill="${color}">${name}</text>`;
             
             // Vertical lines (strings)
             for (let i = 0; i < 6; i++) {
-                const x = margin + i * stringSpacing;
+                const x = marginLeft + i * stringSpacing;
                 svg += `<line x1="${x}" y1="${gridTop}" x2="${x}" y2="${gridTop + gridHeight}" stroke="${color}" stroke-width="1" />`;
             }
             
@@ -395,12 +400,12 @@
             for (let i = 0; i <= 5; i++) {
                 const y = gridTop + i * fretSpacing;
                 const strokeWidth = (i === 0 && baseFret === 1) ? 3 : 1;
-                svg += `<line x1="${margin}" y1="${y}" x2="${width - margin}" y2="${y}" stroke="${color}" stroke-width="${strokeWidth}" />`;
+                svg += `<line x1="${marginLeft}" y1="${y}" x2="${width - marginRight}" y2="${y}" stroke="${color}" stroke-width="${strokeWidth}" />`;
             }
             
             // Base Fret Number
             if (baseFret > 1) {
-                svg += `<text x="${margin - 4}" y="${gridTop + 0.7 * fretSpacing}" text-anchor="end" font-family="${font}" font-size="12" font-weight="bold" fill="${color}">${baseFret}fr</text>`;
+                svg += `<text x="${marginLeft - 5}" y="${gridTop + 0.7 * fretSpacing}" text-anchor="end" font-family="${font}" font-size="12" font-weight="bold" fill="${color}">${baseFret}fr</text>`;
             }
             
             // Barre
@@ -408,8 +413,8 @@
                 const relativeFret = barreInfo.fret; // Already relative
                 if (relativeFret >= 1 && relativeFret <= 5) {
                     const y = gridTop + (relativeFret - 0.5) * fretSpacing;
-                    const x1 = margin + (barreInfo.start - 1) * stringSpacing;
-                    const x2 = margin + (barreInfo.end - 1) * stringSpacing;
+                    const x1 = marginLeft + (barreInfo.start - 1) * stringSpacing;
+                    const x2 = marginLeft + (barreInfo.end - 1) * stringSpacing;
                     svg += `<rect x="${x1 - 3}" y="${y - 2}" width="${x2 - x1 + 6}" height="4" rx="2" fill="${color}" />`;
                 }
             }
@@ -418,7 +423,7 @@
             fretsData.forEach((state, s) => {
                 const f = state.fret;
                 const finger = state.finger;
-                const x = margin + s * stringSpacing;
+                const x = marginLeft + s * stringSpacing;
                 const isCoveredByBarre = barreInfo && barreInfo.fret > 0 && (s + 1) >= barreInfo.start && (s + 1) <= barreInfo.end;
 
                 if (f === -1) {

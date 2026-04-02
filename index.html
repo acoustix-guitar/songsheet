@@ -24,7 +24,7 @@
         .editor-container {
             display: grid;
             grid-template-columns: 280px minmax(0, 1fr) minmax(0, 1fr);
-            height: calc(100vh - 64px - 10px); /* Adjust based on header (64px) and top-nav (130px) height */
+            height: calc(100vh - 64px - 130px); /* Adjust based on header (64px) and top-nav (130px) height */
             transition: all 0.3s ease;
             overflow-x: hidden;
             position: relative;
@@ -401,16 +401,16 @@
 <body class="flex flex-col">
 
     <!-- Header -->
-    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 no-print shrink-0 relative z-30">
+    <header class="h-[84px] bg-white border-b border-slate-200 flex items-center justify-between px-6 no-print shrink-0 relative z-30">
         <div class="flex items-center gap-3">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
-            <h1 class="text-xl font-bold text-black">ACOUSTIX GUITAR'S ChordPro Studio</h1>
+            <h1 class="text-xl font-bold text-black">ChordPro Studio</h1>
             <div class="flex items-center gap-2 ml-4">
-                <a href="help.html" class="text-[12px] font-bold text-blue-600 hover:underline">Help (EN)</a>
-                <span class="text-slate-300">|</span>
-                <a href="hilfe.html" class="text-[12px] font-bold text-blue-600 hover:underline">Hilfe (DE)</a>
+                <a href="help.html" class="text-[12px] font-bold text-black hover:underline">Help (EN)</a>
+                <span class="text-black">|</span>
+                <a href="hilfe.html" class="text-[12px] font-bold text-black hover:underline">Hilfe (DE)</a>
             </div>
         </div>
         <div class="flex items-center gap-4">
@@ -443,7 +443,7 @@
         </div>
         <!-- Style & Layout -->
         <div class="nav-section">
-            <h2 class="text-[16px] font-bold text-black uppercase mb-1">Style & Layout</h2>
+            <h2 class="text-[12px] font-bold text-black uppercase mb-1">Style & Layout</h2>
             <div class="flex items-center gap-3">
                 <div class="flex flex-col">
                     <span class="text-[12px] text-black font-bold uppercase">Line Spacing</span>
@@ -526,17 +526,13 @@
                                 <option value="Roboto">Roboto</option>
                             </optgroup>
                             <optgroup label="Serif">
-                              <option value="Inter" selected>Inter</option>
-                                <option value="Roboto">Roboto</option>
-                                <option value="Lato">Lato</option>
-                                <option value="Open Sans">Open Sans</option>
-                            </optgroup>
-                            <optgroup label="Monospace">
-                             <option value="Lora">Lora</option>
+                                <option value="Lora">Lora</option>
                                 <option value="Merriweather">Merriweather</option>
                                 <option value="Playfair Display">Playfair</option>
-                                <option value="Crimson Text">Crimson Text</option>
-                                <option value="Georgia">Georgia</option>
+                            </optgroup>
+                            <optgroup label="Monospace">
+                                <option value="Roboto Mono">Roboto Mono</option>
+                                <option value="Courier New">Courier New</option>
                             </optgroup>
                         </select>
                         <input type="number" id="size-chords" value="14" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="applyStyles()">
@@ -570,7 +566,7 @@
                         <input type="color" id="color-comment" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
                     </div>
                 </div>
-
+ 
                 <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2">
                         <span class="text-[12px] text-black font-bold uppercase w-16">Strum Title</span>
@@ -601,7 +597,7 @@
                                 <option value="Merriweather">Merriweather</option>
                             </optgroup>
                         </select>
-                        <input type="number" id="size-strum-bpm" value="11" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="updatePreview()">
+                        <input type="number" id="size-strum-bpm" value="12" class="border border-black rounded p-1 text-[12px] w-16" oninput="updatePreview()">
                         <input type="color" id="color-strum-bpm" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="updatePreview()">
                     </div>
                 </div>
@@ -687,7 +683,7 @@
         <div class="nav-section">
             <h2 class="text-[12px] font-bold text-black uppercase mb-1">File</h2>
             <div class="flex items-center gap-2">
-                <button onclick="downloadFile('cho')" class="bg-slate-100 hover:bg-slate-200 text-black px-3 py-1.5 rounded text-[1px] font-bold">.cho</button>
+                <button onclick="downloadFile('cho')" class="bg-slate-100 hover:bg-slate-200 text-black px-3 py-1.5 rounded text-[12px] font-bold">.cho</button>
                 <button onclick="downloadFile('txt')" class="bg-slate-100 hover:bg-slate-200 text-black px-3 py-1.5 rounded text-[12px] font-bold">.txt</button>
                 <button onclick="document.getElementById('file-upload').click()" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded text-[12px] font-bold flex items-center gap-1.5">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -709,12 +705,28 @@
     <main class="editor-container flex-1 overflow-hidden">
         <!-- Sidebar -->
         <aside id="sidebar" class="no-print">
+            <!-- Song Part Helper -->
+            <div class="sidebar-section">
+                <h2 class="text-[12px] font-bold text-black uppercase">Song Part Helper</h2>
+                <div class="grid grid-cols-1 gap-1">
+                    <div class="grid grid-cols-2 gap-1">
+                        <button onclick="insertDirective('title')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Title</button>
+                        <button onclick="insertDirective('subtitle')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Subtitle</button>
+                    </div>
+                    <button onclick="insertDirective('comment')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Comment</button>
+                    <div class="grid grid-cols-2 gap-1">
+                        <button onclick="insertDirective('verse')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Verse</button>
+                        <button onclick="insertDirective('chorus')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Chorus</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Transpose -->
             <div class="sidebar-section">
                 <h2 class="text-[12px] font-bold text-black uppercase">Transpose</h2>
                 <div class="flex gap-1">
-                    <button onclick="transposeSong(-1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-black py-1.5 rounded text-[13px] font-bold">-1 Semitone</button>
-                    <button onclick="transposeSong(1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-black py-1.5 rounded text-[13px] font-bold">+1 Semitone</button>
+                    <button onclick="transposeSong(-1)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">-1 Semitone</button>
+                    <button onclick="transposeSong(1)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">+1 Semitone</button>
                 </div>
             </div>
 
@@ -732,12 +744,15 @@
 
             <!-- Diagram Creator -->
             <div class="sidebar-section">
-                <h2 class="text-[12px] font-bold text-black uppercase">Diagram Creator</h2>
-                <a href="chord-diagram-creator.html" target="_blank" class="text-[16px] text-blue-600 hover:underline font-bold flex items-center gap-1">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-[12px] font-bold text-black uppercase">Diagram Creator</h2>
+                    <a href="chord-diagram-creator.html" target="_blank" class="text-[12px] text-black hover:underline font-bold flex items-center gap-1">
                         Standalone App
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg></a>
+                        </svg>
+                    </a>
+                </div>
                 <div class="flex flex-col gap-2">
                     <div id="fretboard-ui" class="fretboard w-full mx-auto"></div>
                     <div class="bg-slate-50 p-2 rounded border border-slate-200">
@@ -745,21 +760,21 @@
                         <div class="grid grid-cols-2 gap-2 mb-2">
                             <div class="flex flex-col">
                                 <label class="text-[12px] text-black font-bold">Base Fret</label>
-                                <input type="number" id="base-fret" min="1" max="20" value="1" class="border border-slate-300 rounded p-1 text-[11px]">
+                                <input type="number" id="base-fret" min="1" max="20" value="1" class="border border-slate-300 rounded p-1 text-[12px]">
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-[12px] text-black font-bold">Barre Fret (Rel.)</label>
-                                <input type="number" id="barre-fret" min="0" max="5" value="0" class="border border-slate-300 rounded p-1 text-[11px]">
+                                <input type="number" id="barre-fret" min="0" max="5" value="0" class="border border-slate-300 rounded p-1 text-[12px]">
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div class="flex flex-col">
                                 <label class="text-[12px] text-black font-bold">Barre From</label>
-                                <input type="number" id="barre-start" min="1" max="6" value="1" class="border border-slate-300 rounded p-1 text-[11px]">
+                                <input type="number" id="barre-start" min="1" max="6" value="1" class="border border-slate-300 rounded p-1 text-[12px]">
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-[12px] text-black font-bold">Barre To</label>
-                                <input type="number" id="barre-end" min="1" max="6" value="6" class="border border-slate-300 rounded p-1 text-[11px]">
+                                <input type="number" id="barre-end" min="1" max="6" value="6" class="border border-slate-300 rounded p-1 text-[12px]">
                             </div>
                         </div>
                     </div>
@@ -772,7 +787,15 @@
 
             <!-- Strumming Pattern Editor -->
             <div class="sidebar-section">
-                <h2 class="text-[12px] font-bold text-black uppercase">Strumming Pattern</h2>
+                <div class="flex justify-between items-center">
+                    <h2 class="text-[12px] font-bold text-black uppercase">Strumming Pattern</h2>
+                    <a href="strumming-pattern-editor.html" target="_blank" class="text-[12px] text-black hover:underline font-bold flex items-center gap-1">
+                        Standalone App
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                    </a>
+                </div>
                 <div class="flex flex-col gap-2">
                     <div class="grid grid-cols-2 gap-2">
                         <div class="flex flex-col">
@@ -803,7 +826,7 @@
                     
                     <div class="flex flex-col">
                         <label class="text-[12px] text-black font-bold uppercase">Time Signature</label>
-                        <select id="strum-time" onchange="changeTimeSignature()" class="border border-slate-300 rounded p-1 text-[11px]">
+                        <select id="strum-time" onchange="changeTimeSignature()" class="border border-slate-300 rounded p-1 text-[12px]">
                             <option value="4/4">4/4 (16 slots)</option>
                             <option value="3/4">3/4 (12 slots)</option>
                             <option value="6/8">6/8 (12 slots)</option>
@@ -818,15 +841,15 @@
                         <div class="flex items-center gap-3 mt-2 px-1">
                             <div class="flex items-center gap-1">
                                 <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
-                                <span class="text-[12px] font-bold uppercase text-slate-500">Down</span>
+                                <span class="text-[12px] font-bold uppercase text-black">Down</span>
                             </div>
                             <div class="flex items-center gap-1">
                                 <div class="w-2 h-2 bg-amber-500 rounded-full"></div>
-                                <span class="text-[12px] font-bold uppercase text-slate-500">Up</span>
+                                <span class="text-[12px] font-bold uppercase text-black">Up</span>
                             </div>
                             <div class="flex items-center gap-1">
                                 <div class="w-2 h-2 bg-white border border-slate-300 rounded-full"></div>
-                                <span class="text-[12px] font-bold uppercase text-slate-500">None</span>
+                                <span class="text-[12px] font-bold uppercase text-black">None</span>
                             </div>
                         </div>
                     </div>
@@ -1028,7 +1051,7 @@
 
             // Base Fret Number
             if (baseFret > 1) {
-                svg += `<text x="${margin - 8}" y="${margin + 10 + 0.7 * fretSpacing}" text-anchor="end" font-family="Arial" font-size="10" font-weight="bold" fill="${color}">${baseFret}fr</text>`;
+                svg += `<text x="${margin - 8}" y="${margin + 10 + 0.7 * fretSpacing}" text-anchor="end" font-family="Arial" font-size="12" font-weight="bold" fill="${color}">${baseFret}fr</text>`;
             }
             
             // Barre
@@ -1038,14 +1061,15 @@
                     const y = margin + 10 + (relativeFret - 0.5) * fretSpacing;
                     const x1 = margin + (barreInfo.start - 1) * stringSpacing;
                     const x2 = margin + (barreInfo.end - 1) * stringSpacing;
-                    svg += `<rect x="${x1 - 5}" y="${y - 2}" width="${x2 - x1 + 10}" height="4" rx="2" fill="${color}" />`;
+                    svg += `<rect x="${x1 - 3}" y="${y - 2}" width="${x2 - x1 + 6}" height="4" rx="2" fill="${color}" />`;
                 }
             }
 
             // Dots
             frets.forEach((f, s) => {
                 const x = margin + s * stringSpacing;
-                const isCoveredByBarre = barreInfo && barreInfo.fret > 0 && (s + 1) >= barreInfo.start && (s + 1) <= barreInfo.end;
+                const relativeBarreFret = barreInfo ? (barreInfo.fret - baseFret + 1) : -1;
+                const isCoveredByBarre = barreInfo && relativeBarreFret === 1 && (s + 1) >= barreInfo.start && (s + 1) <= barreInfo.end;
 
                 if (f === -1) {
                     // X for muted
@@ -1118,7 +1142,7 @@
             const titleColor = document.getElementById('color-strum-title')?.value || '#000000';
             
             const bpmFont = document.getElementById('font-strum-bpm')?.value || 'Inter';
-            const bpmSize = (parseInt(document.getElementById('size-strum-bpm')?.value || '11')) * scale;
+            const bpmSize = (parseInt(document.getElementById('size-strum-bpm')?.value || '12')) * scale;
             const bpmColor = document.getElementById('color-strum-bpm')?.value || '#000000';
             
             const isColorized = document.getElementById('strum-colorized')?.checked || false;
@@ -1501,7 +1525,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                         if (id.includes('subtitle')) return '18';
                         if (id.includes('comment')) return '12';
                         if (id.includes('strum-title')) return '14';
-                        if (id.includes('strum-bpm')) return '11';
+                        if (id.includes('strum-bpm')) return '12';
                         return '14';
                     }
                     if (id.includes('color')) {
@@ -1865,7 +1889,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         // Keyboard Shortcuts for Chords
         input.addEventListener('keydown', (e) => {
             // Support both Ctrl and Alt for better compatibility
-            if (e.altKey || e.altKey) {
+            if (e.ctrlKey || e.altKey) {
                 const key = e.key.toLowerCase();
                 const chordMap = {
                     'a': 'A',
@@ -2308,6 +2332,52 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             insertChord(selectedRoot + selectedQuality);
         }
 
+        function insertDirective(type) {
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const text = input.value;
+            const before = text.substring(0, start);
+            const after = text.substring(end);
+            
+            let textToInsert = '';
+            let newCursorStart = start;
+            let newCursorEnd = start;
+            
+            switch(type) {
+                case 'title':
+                    textToInsert = '{title: Name}\n';
+                    newCursorStart = start + 8;
+                    newCursorEnd = start + 12;
+                    break;
+                case 'subtitle':
+                    textToInsert = '{subtitle: Name}\n';
+                    newCursorStart = start + 11;
+                    newCursorEnd = start + 15;
+                    break;
+                case 'comment':
+                    textToInsert = '{comment: Name}\n';
+                    newCursorStart = start + 10;
+                    newCursorEnd = start + 14;
+                    break;
+                case 'verse':
+                    textToInsert = '{start_of_verse:Verse X}\n\n{end_of_verse:}\n';
+                    newCursorStart = start + 16;
+                    newCursorEnd = start + 23;
+                    break;
+                case 'chorus':
+                    textToInsert = '{start_of_chorus:}\n\n{end_of_chorus:}\n';
+                    newCursorStart = start + 18; // In the empty line between start and end
+                    newCursorEnd = start + 18;
+                    break;
+            }
+            
+            input.value = before + textToInsert + after;
+            input.setSelectionRange(newCursorStart, newCursorEnd);
+            input.focus();
+            updatePreview();
+            autoSaveSession();
+        }
+
         // Fretboard Logic
         let fretboardState = [0, 0, 0, 0, 0, 0]; // 0 = open, -1 = muted, 1-5 = fret
         function initFretboard() {
@@ -2459,7 +2529,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 container.className = 'flex flex-col items-center gap-0.5';
                 
                 const label = document.createElement('span');
-                label.className = 'text-[12px] font-bold text-black lowercase';
+                label.className = 'text-[12px] font-bold text-black uppercase';
                 label.innerText = labels[i] || '';
                 
                 const slot = document.createElement('div');

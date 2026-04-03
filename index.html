@@ -278,6 +278,7 @@
             gap: 1rem;
             margin-bottom: 0.5rem;
             margin-top: 0.5rem;
+            justify-content: center;
         }
         .diagram-item {
             display: inline-block;
@@ -692,6 +693,7 @@
                     Load
                 </button>
                 <input type="file" id="file-upload" class="hidden" accept=".cho,.txt,.chordpro" onchange="handleFileUpload(event)">
+                <input type="file" id="image-upload" class="hidden" accept="image/*" onchange="handleImageUpload(event)">
             </div>
         </div>
 
@@ -718,6 +720,12 @@
                         <button onclick="insertDirective('verse')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Verse</button>
                         <button onclick="insertDirective('chorus')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Chorus</button>
                     </div>
+                    <button onclick="insertDirective('image')" title="Insert Image Block" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h14a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Image
+                    </button>
                 </div>
             </div>
 
@@ -980,6 +988,23 @@
         const input = document.getElementById('chordpro-input');
         const preview = document.getElementById('preview-pane');
         
+        let imageStore = {};
+
+        function processIncomingText(text) {
+            if (!text) return text;
+            const regex = /\{start_of_image\}([\s\S]*?)\{end_of_image\}/g;
+            return text.replace(regex, (match, data) => {
+                const lines = data.trim().split('\n');
+                const firstLine = lines[0].trim();
+                // If it's raw data (not an ID reference)
+                if (firstLine && !firstLine.startsWith('id=')) {
+                    const id = 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    imageStore[id] = firstLine; // Store the base64 data
+                    return `{start_of_image: id=${id}}\n{end_of_image}`;
+                }
+                return match;
+            });
+        }
         const commonChords = {
             'C': 'x 3 2 0 1 0',
             'G': '3 2 0 0 0 3',
@@ -1286,6 +1311,9 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             let usedChords = new Set();
             let customChords = new Map();
             let explicitDiagrams = null;
+            let inImageBlock = false;
+            let currentImageData = '';
+            let imageBlockIndex = 0;
 
             const diagEnabled = document.getElementById('diag-toggle')?.checked ?? true;
             const diagPos = 'bottom';
@@ -1394,6 +1422,46 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                         }
                         mainHtml += '<div class="page-break"></div>';
                     }
+                    else if (key === 'start_of_image') {
+                        inImageBlock = true;
+                        currentImageData = '';
+                        // Check for ID reference
+                        const idMatch = line.match(/id=([^}\s]+)/);
+                        if (idMatch) {
+                            const id = idMatch[1];
+                            if (imageStore[id]) {
+                                currentImageData = imageStore[id];
+                            }
+                        }
+                    }
+                    else if (key === 'end_of_image') {
+                        inImageBlock = false;
+                        const idx = imageBlockIndex++;
+                        if (!currentImageData.trim()) {
+                            mainHtml += `
+                                <div class="image-placeholder border-2 border-dashed border-slate-300 rounded-lg p-4 my-4 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors" onclick="triggerImageUpload(${idx})">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h14a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span class="text-slate-500 font-bold uppercase text-[12px]">Insert Image</span>
+                                </div>
+                            `;
+                        } else {
+                            mainHtml += `
+                                <div class="image-container my-4 relative group cursor-pointer" onclick="triggerImageUpload(${idx})">
+                                    <img src="${currentImageData.trim()}" class="max-w-full h-auto rounded shadow-sm mx-auto" referrerPolicy="no-referrer" />
+                                    <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded">
+                                        <span class="text-white font-bold text-[12px] uppercase bg-black/50 px-3 py-1 rounded">Change Image</span>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+                    return;
+                }
+
+                if (inImageBlock) {
+                    currentImageData += line + '\n';
                     return;
                 }
 
@@ -1888,8 +1956,15 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
 
         // Keyboard Shortcuts for Chords
         input.addEventListener('keydown', (e) => {
-            // Support both Ctrl and Alt for better compatibility
-            if (e.ctrlKey || e.altKey) {
+            // Shortcut Alt+1 for Image Insertion
+            if (e.altKey && e.key === '1') {
+                e.preventDefault();
+                insertDirective('image');
+                return;
+            }
+
+            // Support Alt for chord shortcuts (Ctrl removed as per request)
+            if (e.altKey) {
                 const key = e.key.toLowerCase();
                 const chordMap = {
                     'a': 'A',
@@ -2038,6 +2113,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 id: Date.now(),
                 title: title,
                 content: content,
+                imageStore: imageStore,
                 settings: getSettings(),
                 updatedAt: new Date().toISOString()
             };
@@ -2121,7 +2197,8 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             const library = JSON.parse(localStorage.getItem('chordpro_library') || '[]');
             const song = library.find(s => s.id === id);
             if (song) {
-                input.value = song.content;
+                if (song.imageStore) imageStore = song.imageStore;
+                input.value = processIncomingText(song.content);
                 setSettings(song.settings);
                 updatePreview();
             }
@@ -2152,6 +2229,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             const spacingEl = document.getElementById('line-spacing');
             const session = {
                 content: input.value,
+                imageStore: imageStore,
                 settings: getSettings(),
                 lineSpacing: spacingEl ? spacingEl.value : '1.2',
                 margins: {
@@ -2167,7 +2245,8 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         function loadSession() {
             const session = JSON.parse(localStorage.getItem('chordpro_session'));
             if (session) {
-                input.value = session.content;
+                if (session.imageStore) imageStore = session.imageStore;
+                input.value = processIncomingText(session.content);
                 setSettings(session.settings);
                 const spacingEl = document.getElementById('line-spacing');
                 if (session.lineSpacing && spacingEl) spacingEl.value = session.lineSpacing;
@@ -2203,7 +2282,16 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
 
         // File Transfer Logic
         function downloadFile(ext) {
-            const content = input.value;
+            let content = input.value;
+            
+            // Replace image IDs with actual data for export
+            content = content.replace(/\{start_of_image: id=([^}]+)\}/g, (match, id) => {
+                if (imageStore[id]) {
+                    return `{start_of_image}\n${imageStore[id]}`;
+                }
+                return match;
+            });
+
             const titleMatch = content.match(/{title:\s*(.+)}/i) || content.match(/{t:\s*(.+)}/i);
             const title = titleMatch ? titleMatch[1].trim() : "song";
             const filename = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${ext}`;
@@ -2217,13 +2305,54 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             URL.revokeObjectURL(url);
         }
 
+        let currentImageBlockIndex = -1;
+
+        function triggerImageUpload(index) {
+            currentImageBlockIndex = index;
+            document.getElementById('image-upload').click();
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                updateImageInText(currentImageBlockIndex, base64Data);
+                event.target.value = ''; // Reset for next time
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateImageInText(index, base64Data) {
+            const text = input.value;
+            const regex = /\{start_of_image(?::\s*id=([^}]+))?\}[\s\S]*?\{end_of_image\}/g;
+            let count = 0;
+            
+            const newText = text.replace(regex, (match, existingId) => {
+                if (count === index) {
+                    count++;
+                    const id = existingId || 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    imageStore[id] = base64Data;
+                    return `{start_of_image: id=${id}}\n{end_of_image}`;
+                }
+                count++;
+                return match;
+            });
+
+            input.value = newText;
+            updatePreview();
+            autoSaveSession();
+        }
+
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = (e) => {
-                input.value = e.target.result;
+                input.value = processIncomingText(e.target.result);
                 updatePreview();
                 autoSaveSession();
                 // Reset file input so same file can be uploaded again
@@ -2368,6 +2497,11 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                     textToInsert = '{start_of_chorus:}\n\n{end_of_chorus:}\n';
                     newCursorStart = start + 18; // In the empty line between start and end
                     newCursorEnd = start + 18;
+                    break;
+                case 'image':
+                    textToInsert = '{start_of_image}\n{end_of_image}\n';
+                    newCursorStart = start + 16;
+                    newCursorEnd = start + 16;
                     break;
             }
             

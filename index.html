@@ -10,6 +10,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- html2pdf.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
             --bg-light: #f8fafc;
@@ -20,17 +22,101 @@
             background-color: var(--bg-light);
             height: 100vh;
             overflow: hidden;
+            color: #000000;
+            font-size: 12px;
         }
         .editor-container {
-            display: grid;
-            grid-template-columns: 280px minmax(0, 1fr) minmax(0, 1fr);
-            height: calc(100vh - 64px - 130px); /* Adjust based on header (64px) and top-nav (130px) height */
-            transition: all 0.3s ease;
-            overflow-x: hidden;
+            display: flex;
+            height: calc(100vh - 48px);
+            overflow: hidden;
             position: relative;
             z-index: 10;
         }
+        .app-sidebar {
+            width: 72px;
+            background-color: #0f172a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 0;
+            gap: 8px;
+            z-index: 60;
+            flex-shrink: 0;
+        }
+        .app-icon-btn {
+            width: 56px;
+            height: 56px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            border-radius: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+            gap: 4px;
+        }
+        .app-icon-btn:hover {
+            background-color: #1e293b;
+            color: #f8fafc;
+        }
+        .app-icon-btn.active {
+            background-color: #334155;
+            color: #ffffff;
+        }
+        .app-icon-btn span {
+            font-size: 9px;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1;
+        }
+        .app-panel {
+            width: 300px;
+            background-color: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+            z-index: 55;
+            flex-shrink: 0;
+            animation: slideIn 0.2s ease-out;
+        }
+        .app-panel.show {
+            display: flex;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .app-panel-header {
+            padding: 16px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .app-panel-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            text-transform: uppercase;
+        }
+        .app-panel-content {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .editor-column {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e2e8f0;
+        }
         .preview-column {
+            flex: 1;
+            min-width: 0;
             background: white;
             overflow-y: auto;
             display: flex;
@@ -39,15 +125,77 @@
             padding: 1rem;
         }
         #top-nav {
-            height: 150px;
-            overflow-x: auto;
-            overflow-y: hidden;
+            height: 48px;
+            overflow: visible;
             position: relative;
-            z-index: 20;
-            background-color: #f1f5f9; /* slate-100 */
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
-            border-bottom: 1px solid #cbd5e1;
-            padding: 0 10px;
+            z-index: 50;
+            background-color: #ffffff;
+            border-bottom: 1px solid #000000;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .nav-dropdown-trigger {
+            height: 32px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #000000;
+            border-radius: 6px;
+            transition: all 0.2s;
+            cursor: pointer;
+            user-select: none;
+        }
+        .nav-dropdown-trigger:hover {
+            background-color: #f1f5f9;
+        }
+        .nav-dropdown-trigger.active {
+            background-color: #eff6ff;
+            color: #2563eb;
+        }
+        .nav-dropdown-content {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            background-color: #ffffff;
+            min-width: 320px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #000000;
+            border-radius: 8px;
+            padding: 16px;
+            z-index: 100;
+        }
+        .nav-dropdown-content.show {
+            display: block;
+            animation: dropdownFadeIn 0.2s ease-out;
+        }
+        @keyframes dropdownFadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .nav-dropdown-section {
+            margin-bottom: 16px;
+        }
+        .nav-dropdown-section:last-child {
+            margin-bottom: 0;
+        }
+        .nav-dropdown-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+            display: block;
         }
         .scroll-indicator {
             position: sticky;
@@ -117,12 +265,46 @@
             color: black !important;
         }
         textarea {
-            font-family: 'Roboto Mono', monospace;
+            font-family: 'Roboto Mono', monospace !important;
             resize: none;
             outline: none;
+            color: #000000;
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* TAB Creator Scroll Arrows */
+        .tab-scroll-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #000000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            color: #000000;
+        }
+        .tab-scroll-btn:hover {
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            color: #ef4444;
+            border-color: #000000;
+        }
+        .tab-scroll-left { left: -8px; }
+        .tab-scroll-right { right: -8px; }
+        
+        .tab-creator-wrapper {
+            position: relative;
+            margin-bottom: 8px;
+        }
         
         @keyframes bounce-x {
             0%, 100% { transform: translateX(0); }
@@ -218,6 +400,161 @@
             display: block;
             width: 100%;
         }
+        .tab-block {
+            font-family: 'Roboto Mono', monospace;
+            margin-bottom: 1.5rem;
+            font-size: 14px;
+            overflow-x: auto;
+            width: fit-content;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            background: white;
+            padding: 12px 0;
+            border-radius: 4px;
+        }
+        .tab-string-line {
+            display: flex;
+            align-items: stretch;
+            height: 1.6em;
+            position: relative;
+            width: fit-content;
+        }
+        .tab-label {
+            width: 2em;
+            font-weight: bold;
+            font-size: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: white;
+            z-index: 10;
+            color: #000000;
+        }
+        .tab-content-wrapper {
+            display: flex;
+            position: relative;
+            align-items: center;
+            width: fit-content;
+        }
+        /* The horizontal string line - using real element for PDF compatibility */
+        .tab-horizontal-line {
+            position: absolute;
+            left: 0.5em;
+            right: 0.5em;
+            top: 50%;
+            height: 0;
+            border-top: 1.5px solid #000;
+            z-index: 1;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        .tab-dash, .tab-note, .tab-bar, .tab-space {
+            width: 1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            height: 100%;
+            position: relative;
+        }
+        .tab-note {
+            background-color: #ffffff;
+            z-index: 10;
+            font-weight: bold;
+            color: #000000;
+            padding: 0 0.15em;
+            font-size: inherit;
+            position: relative;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        /* Vertical bar line - using real element for PDF compatibility */
+        .tab-bar-inner {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            border-left: 1.5px solid #000;
+            transform: translateX(-50%);
+            z-index: 5;
+        }
+        .tab-string-line:first-of-type .tab-bar-inner {
+            top: 50%;
+        }
+        .tab-string-line:last-of-type .tab-bar-inner {
+            bottom: 50%;
+        }
+        .tab-bar {
+            z-index: 5;
+            flex-shrink: 0;
+            height: 100%;
+        }
+        .tab-text-line {
+            display: flex;
+            margin-bottom: 0.4em;
+            font-weight: bold;
+            color: #000000;
+            padding-left: 2em;
+            font-size: inherit;
+        }
+        .tab-text-char {
+            width: 1em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            white-space: pre;
+        }
+        .tab-space {
+            background: white;
+            z-index: 2;
+        }
+        
+        .tab-creator-row {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .tab-creator-string-label {
+            width: 14px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #000000;
+            text-align: center;
+        }
+        .tab-creator-cell {
+            width: 22px;
+            height: 22px;
+            border: 1px solid #000000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s;
+            color: #000000;
+        }
+        .tab-creator-cell:hover {
+            background: #f1f5f9;
+            border-color: #000000;
+        }
+        .tab-creator-cell.active {
+            background: #2563eb;
+            color: white;
+            border-color: #000000;
+        }
+        .tab-creator-cell.bar {
+            background: #cbd5e1;
+            border-color: #000000;
+            font-weight: bold;
+            color: #000000;
+        }
         /* Keep chords and lyrics together on the same line */
         .line {
             break-inside: avoid;
@@ -226,9 +563,36 @@
         .page-break {
             break-before: page;
             page-break-before: always;
-            height: 0;
-            margin: 0;
-            padding: 0;
+            height: 40px;
+            margin: 0 -20mm;
+            background: #f8fafc;
+            border-top: 2px dashed #ef4444;
+            border-bottom: 2px dashed #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
+        }
+        .page-break::after {
+            content: 'MANUAL PAGE BREAK';
+            font-weight: bold;
+            color: #ef4444;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        
+        @media print {
+            .page-break {
+                height: 0;
+                margin: 0;
+                border: none;
+                background: transparent;
+            }
+            .page-break::after {
+                content: none;
+            }
         }
         .section-header { font-weight: bold; }
         .word-group { 
@@ -364,6 +728,44 @@
             align-items: flex-end !important;
             font-weight: bold !important;
         }
+        .pdf-export-mode .tab-block {
+            font-family: 'Roboto Mono', monospace !important;
+            height: auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+            margin-bottom: 1.5rem !important;
+            background: #ffffff !important;
+        }
+        .pdf-export-mode .tab-note {
+            background-color: #ffffff !important;
+            z-index: 10 !important;
+            position: relative !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .pdf-export-mode .tab-horizontal-line {
+            z-index: 1 !important;
+        }
+        .pdf-export-mode .tab-text-line {
+            color: #000000 !important;
+            font-size: inherit !important;
+            font-weight: bold !important;
+            display: flex !important;
+        }
+        .pdf-export-mode .tab-text-char {
+            width: 1em !important;
+            display: inline-flex !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+        }
+        .pdf-export-mode .tab-string-line:first-of-type .tab-bar-inner {
+            top: 50% !important;
+        }
+        .pdf-export-mode .tab-string-line:last-of-type .tab-bar-inner {
+            bottom: 50% !important;
+        }
         .pdf-export-mode .songsheet-container {
             max-width: 100% !important;
             width: 100% !important;
@@ -402,7 +804,7 @@
 <body class="flex flex-col">
 
     <!-- Header -->
-    <header class="h-[84px] bg-white border-b border-slate-200 flex items-center justify-between px-6 no-print shrink-0 relative z-30">
+    <header class="h-[84px] bg-white border-b border-black flex items-center justify-between px-6 no-print shrink-0 relative z-30">
         <div class="flex items-center gap-3">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
@@ -436,392 +838,590 @@
     </header>
 
     <!-- Top Navigation Menu -->
-    <nav id="top-nav" class="bg-white border-b border-slate-200 flex no-print shrink-0 no-scrollbar relative">
-        <div class="scroll-indicator scroll-indicator-left" onclick="scrollNavLeft()" title="Scroll left">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 animate-bounce-x-reverse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+    <nav id="top-nav" class="bg-white border-b border-slate-200 flex items-center px-4 gap-2 overflow-x-auto no-scrollbar relative">
+        <!-- Style Dropdown -->
+        <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger" onclick="toggleDropdown('dropdown-style')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+                Style & Layout
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            <div id="dropdown-style" class="nav-dropdown-content">
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="nav-dropdown-section">
+                        <span class="nav-dropdown-label">Global Spacing</span>
+                        <div class="flex items-center gap-3">
+                            <div class="flex flex-col flex-1">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase">Line Spacing</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="range" id="line-spacing" min="0.5" max="3" step="0.1" value="1.2" class="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('line-spacing', 'line-spacing-num'); applyStyles()">
+                                    <input type="number" id="line-spacing-num" min="0.5" max="3" step="0.1" value="1.2" class="border border-black rounded p-1 text-[12px] w-12" oninput="syncInputs('line-spacing-num', 'line-spacing'); applyStyles()">
+                                </div>
+                            </div>
+                            <div class="flex flex-col flex-1">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase">Editor Size</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="range" id="size-editor-range" min="10" max="24" step="1" value="14" class="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('size-editor-range', 'size-editor'); applyStyles()">
+                                    <input type="number" id="size-editor" value="14" class="border border-black rounded p-1 text-[12px] w-12" oninput="syncInputs('size-editor', 'size-editor-range'); applyStyles()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nav-dropdown-section">
+                        <span class="nav-dropdown-label">Typography</span>
+                        <div class="grid grid-cols-1 gap-2">
+                            <!-- Title -->
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Title</span>
+                                <select id="font-title" class="border border-black rounded p-1 text-[12px] flex-1" onchange="applyStyles()">
+                                    <optgroup label="Sans-Serif">
+                                        <option value="Inter">Inter</option>
+                                        <option value="Montserrat" selected>Montserrat</option>
+                                        <option value="Open Sans">Open Sans</option>
+                                        <option value="Roboto">Roboto</option>
+                                    </optgroup>
+                                    <optgroup label="Serif">
+                                        <option value="Merriweather">Merriweather</option>
+                                        <option value="Playfair Display">Playfair</option>
+                                        <option value="Lora">Lora</option>
+                                        <option value="Crimson Text">Crimson Text</option>
+                                        <option value="Georgia">Georgia</option>
+                                    </optgroup>
+                                </select>
+                                <input type="number" id="size-title" value="28" class="border border-black rounded p-1 text-[12px] w-12" oninput="applyStyles()">
+                                <input type="color" id="color-title" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
+                            </div>
+                            <!-- Artist -->
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Artist</span>
+                                <select id="font-subtitle" class="border border-black rounded p-1 text-[12px] flex-1" onchange="applyStyles()">
+                                    <optgroup label="Sans-Serif">
+                                        <option value="Inter" selected>Inter</option>
+                                        <option value="Montserrat">Montserrat</option>
+                                        <option value="Open Sans">Open Sans</option>
+                                        <option value="Roboto">Roboto</option>
+                                    </optgroup>
+                                    <optgroup label="Serif">
+                                        <option value="Merriweather">Merriweather</option>
+                                        <option value="Playfair Display">Playfair</option>
+                                        <option value="Lora">Lora</option>
+                                        <option value="Crimson Text">Crimson Text</option>
+                                        <option value="Georgia">Georgia</option>
+                                    </optgroup>
+                                </select>
+                                <input type="number" id="size-subtitle" value="18" class="border border-black rounded p-1 text-[12px] w-12" oninput="applyStyles()">
+                                <input type="color" id="color-subtitle" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
+                            </div>
+                            <!-- Lyrics -->
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Lyrics</span>
+                                <select id="font-lyrics" class="border border-black rounded p-1 text-[12px] flex-1" onchange="applyStyles()">
+                                    <optgroup label="Sans-Serif">
+                                        <option value="Inter" selected>Inter</option>
+                                        <option value="Roboto">Roboto</option>
+                                        <option value="Lato">Lato</option>
+                                        <option value="Open Sans">Open Sans</option>
+                                    </optgroup>
+                                    <optgroup label="Serif">
+                                        <option value="Lora">Lora</option>
+                                        <option value="Merriweather">Merriweather</option>
+                                        <option value="Playfair Display">Playfair</option>
+                                        <option value="Crimson Text">Crimson Text</option>
+                                        <option value="Georgia">Georgia</option>
+                                    </optgroup>
+                                </select>
+                                <input type="number" id="size-lyrics" value="14" class="border border-black rounded p-1 text-[12px] w-12" oninput="applyStyles()">
+                                <input type="color" id="color-lyrics" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
+                            </div>
+                            <!-- Chords -->
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Chords</span>
+                                <select id="font-chords" class="border border-black rounded p-1 text-[12px] flex-1" onchange="applyStyles()">
+                                    <optgroup label="Sans-Serif">
+                                        <option value="Inter" selected>Inter</option>
+                                        <option value="Montserrat">Montserrat</option>
+                                        <option value="Roboto">Roboto</option>
+                                    </optgroup>
+                                    <optgroup label="Serif">
+                                        <option value="Lora">Lora</option>
+                                        <option value="Merriweather">Merriweather</option>
+                                        <option value="Playfair Display">Playfair</option>
+                                    </optgroup>
+                                    <optgroup label="Monospace">
+                                        <option value="Roboto Mono">Roboto Mono</option>
+                                        <option value="Courier New">Courier New</option>
+                                    </optgroup>
+                                </select>
+                                <input type="number" id="size-chords" value="14" class="border border-black rounded p-1 text-[12px] w-12" oninput="applyStyles()">
+                                <input type="color" id="color-chords" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nav-dropdown-section">
+                        <span class="nav-dropdown-label">Special Blocks</span>
+                        <div class="grid grid-cols-1 gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Chorus</span>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" id="chorus-indent-toggle" checked class="w-4 h-4 rounded border-black text-blue-600" onchange="applyStyles()">
+                                    <span class="text-[11px] font-bold">Indent</span>
+                                </label>
+                                <input type="number" id="chorus-indent-val" value="20" class="w-12 border border-black rounded p-1 text-[12px]" oninput="applyStyles()">
+                                <label class="flex items-center gap-1 cursor-pointer ml-2">
+                                    <input type="checkbox" id="chorus-line-toggle" class="w-4 h-4 rounded border-black text-blue-600" onchange="applyStyles()">
+                                    <span class="text-[11px] font-bold">Line</span>
+                                </label>
+                                <input type="number" id="chorus-line-val" value="4" min="1" max="20" class="w-10 border border-black rounded p-1 text-[12px]" oninput="applyStyles()">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Comment</span>
+                                <select id="font-comment" class="border border-black rounded p-1 text-[12px] flex-1" onchange="applyStyles()">
+                                    <optgroup label="Sans-Serif">
+                                        <option value="Inter" selected>Inter</option>
+                                        <option value="Montserrat">Montserrat</option>
+                                        <option value="Open Sans">Open Sans</option>
+                                        <option value="Roboto">Roboto</option>
+                                    </optgroup>
+                                    <optgroup label="Serif">
+                                        <option value="Merriweather">Merriweather</option>
+                                        <option value="Playfair Display">Playfair</option>
+                                        <option value="Lora">Lora</option>
+                                        <option value="Crimson Text">Crimson Text</option>
+                                        <option value="Georgia">Georgia</option>
+                                    </optgroup>
+                                </select>
+                                <input type="number" id="size-comment" value="12" class="border border-black rounded p-1 text-[12px] w-12" oninput="applyStyles()">
+                                <input type="color" id="color-comment" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagrams Dropdown -->
+        <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger" onclick="toggleDropdown('dropdown-diagrams')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+                Diagrams & TABs
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            <div id="dropdown-diagrams" class="nav-dropdown-content">
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="nav-dropdown-section">
+                        <span class="nav-dropdown-label">Chord Diagrams</span>
+                        <div class="grid grid-cols-1 gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Size</span>
+                                <input type="range" id="diag-size" min="40" max="250" step="5" value="100" class="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-size', 'diag-size-num'); applyStyles()">
+                                <input type="number" id="diag-size-num" value="100" class="border border-black rounded p-1 text-[12px] w-12" oninput="syncInputs('diag-size-num', 'diag-size'); applyStyles()">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Spacing</span>
+                                <input type="range" id="diag-spacing" min="0" max="100" step="1" value="16" class="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-spacing', 'diag-spacing-num'); applyStyles()">
+                                <input type="number" id="diag-spacing-num" value="16" class="border border-black rounded p-1 text-[12px] w-12" oninput="syncInputs('diag-spacing-num', 'diag-spacing'); applyStyles()">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Name Gap</span>
+                                <input type="range" id="diag-name-gap" min="0" max="40" step="1" value="12" class="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-name-gap', 'diag-name-gap-num'); applyStyles()">
+                                <input type="number" id="diag-name-gap-num" value="12" class="border border-black rounded p-1 text-[12px] w-12" oninput="syncInputs('diag-name-gap-num', 'diag-name-gap'); applyStyles()">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Name Size</span>
+                                <input type="range" id="diag-name-size" min="8" max="40" step="1" value="18" class="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-name-size', 'diag-name-size-num'); applyStyles()">
+                                <input type="number" id="diag-name-size-num" value="18" class="border border-black rounded p-1 text-[12px] w-12" oninput="syncInputs('diag-name-size-num', 'diag-name-size'); applyStyles()">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Show</span>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="diag-toggle" class="w-3 h-3 accent-blue-600" onchange="updatePreview()">
+                                    <span class="text-[12px] text-black font-bold uppercase">At Bottom</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nav-dropdown-section">
+                        <span class="nav-dropdown-label">TAB Settings</span>
+                        <div class="grid grid-cols-1 gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Size</span>
+                                <input type="range" id="size-tab-range" min="8" max="32" step="1" value="14" class="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('size-tab-range', 'size-tab'); applyStyles()">
+                                <input type="number" id="size-tab" value="14" class="border border-black rounded p-1 text-[12px] w-12" oninput="syncInputs('size-tab', 'size-tab-range'); applyStyles()">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Spacing</span>
+                                <input type="range" id="tab-spacing-range" min="0" max="40" step="1" value="12" class="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('tab-spacing-range', 'tab-spacing'); applyStyles()">
+                                <input type="number" id="tab-spacing" value="12" class="border border-black rounded p-1 text-[12px] w-12" oninput="syncInputs('tab-spacing', 'tab-spacing-range'); applyStyles()">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Color</span>
+                                <input type="color" id="color-tab" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Dropdown -->
+        <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger" onclick="toggleDropdown('dropdown-page')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Page & Margins
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            <div id="dropdown-page" class="nav-dropdown-content">
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="nav-dropdown-section">
+                        <span class="nav-dropdown-label">Page Layout</span>
+                        <div class="grid grid-cols-1 gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Format</span>
+                                <select id="page-format" class="border border-black rounded p-1 text-[12px] flex-1" onchange="applyStyles()">
+                                    <option value="a4">A4</option>
+                                    <option value="letter">Letter</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Columns</span>
+                                <select id="columns" class="border border-black rounded p-1 text-[12px] flex-1" onchange="applyStyles()">
+                                    <option value="1">1 Column</option>
+                                    <option value="2">2 Columns</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nav-dropdown-section">
+                        <span class="nav-dropdown-label">Margins (mm)</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-slate-500 font-bold uppercase">Top</span>
+                                <input type="number" id="margin-top" value="20" class="border border-black rounded p-1 text-[12px]" oninput="applyStyles()">
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-slate-500 font-bold uppercase">Bottom</span>
+                                <input type="number" id="margin-bottom" value="20" class="border border-black rounded p-1 text-[12px]" oninput="applyStyles()">
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-slate-500 font-bold uppercase">Left</span>
+                                <input type="number" id="margin-left" value="20" class="border border-black rounded p-1 text-[12px]" oninput="applyStyles()">
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-slate-500 font-bold uppercase">Right</span>
+                                <input type="number" id="margin-right" value="20" class="border border-black rounded p-1 text-[12px]" oninput="applyStyles()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Song Library Dropdown -->
+        <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger" onclick="toggleDropdown('dropdown-library')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                Song Library
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            <div id="dropdown-library" class="nav-dropdown-content">
+                <div class="nav-dropdown-section">
+                    <span class="nav-dropdown-label">Examples</span>
+                    <div class="grid grid-cols-1 gap-1">
+                        <button onclick="loadExample('hotel-california')" class="text-left px-3 py-2 text-[12px] hover:bg-slate-100 rounded transition-colors">Hotel California</button>
+                        <button onclick="loadExample('imagine')" class="text-left px-3 py-2 text-[12px] hover:bg-slate-100 rounded transition-colors">Imagine</button>
+                        <button onclick="loadExample('let-it-be')" class="text-left px-3 py-2 text-[12px] hover:bg-slate-100 rounded transition-colors">Let It Be</button>
+                        <button onclick="loadExample('wonderwall')" class="text-left px-3 py-2 text-[12px] hover:bg-slate-100 rounded transition-colors">Wonderwall</button>
+                    </div>
+                </div>
+                <div class="nav-dropdown-section">
+                    <span class="nav-dropdown-label">My Library</span>
+                    <div id="song-list" class="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1">
+                        <!-- Song list will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Dropdown -->
+        <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger" onclick="toggleDropdown('dropdown-file')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                File
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            <div id="dropdown-file" class="nav-dropdown-content">
+                <div class="grid grid-cols-1 gap-2">
+                    <button onclick="downloadFile('cho')" class="flex items-center gap-2 px-3 py-2 text-[12px] hover:bg-slate-100 rounded transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download .cho
+                    </button>
+                    <button onclick="downloadFile('txt')" class="flex items-center gap-2 px-3 py-2 text-[12px] hover:bg-slate-100 rounded transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download .txt
+                    </button>
+                    <div class="border-t border-slate-100 my-1"></div>
+                    <label class="flex items-center gap-2 px-3 py-2 text-[12px] hover:bg-slate-100 rounded transition-colors cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Load File
+                        <input type="file" id="load-file" class="hidden" onchange="loadFile(event)">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll Indicators -->
+        <div class="scroll-indicator-left" onclick="scrollNavLeft()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
         </div>
-        <!-- Style & Layout -->
-        <div class="nav-section">
-            <h2 class="text-[12px] font-bold text-black uppercase mb-1">Style & Layout</h2>
-            <div class="flex items-center gap-3">
-                <div class="flex flex-col">
-                    <span class="text-[12px] text-black font-bold uppercase">Line Spacing</span>
-                    <div class="flex items-center gap-2">
-                        <input type="range" id="line-spacing" min="0.5" max="3" step="0.1" value="1.2" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('line-spacing', 'line-spacing-num'); applyStyles()">
-                        <input type="number" id="line-spacing-num" min="0.5" max="3" step="0.1" value="1.2" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="syncInputs('line-spacing-num', 'line-spacing'); applyStyles()">
-                    </div>
-                </div>
-                
-                <div class="flex flex-col gap-1">
-                    <div class="flex items-center gap-2">
-                        <span class="text-[12px] text-black font-bold uppercase w-16">Title</span>
-                        <select id="font-title" class="border border-slate-300 rounded p-1 text-[12px] w-32" onchange="applyStyles()">
-                            <optgroup label="Sans-Serif">
-                                <option value="Inter">Inter</option>
-                                <option value="Montserrat" selected>Montserrat</option>
-                                <option value="Open Sans">Open Sans</option>
-                                <option value="Roboto">Roboto</option>
-                            </optgroup>
-                            <optgroup label="Serif">
-                                <option value="Merriweather">Merriweather</option>
-                                <option value="Playfair Display">Playfair</option>
-                                <option value="Lora">Lora</option>
-                                <option value="Crimson Text">Crimson Text</option>
-                                <option value="Georgia">Georgia</option>
-                            </optgroup>
-                        </select>
-                        <input type="number" id="size-title" value="28" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="applyStyles()">
-                        <input type="color" id="color-title" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-[12px] text-black font-bold uppercase w-16">Artist</span>
-                        <select id="font-subtitle" class="border border-slate-300 rounded p-1 text-[12px] w-32" onchange="applyStyles()">
-                            <optgroup label="Sans-Serif">
-                                <option value="Inter" selected>Inter</option>
-                                <option value="Montserrat">Montserrat</option>
-                                <option value="Open Sans">Open Sans</option>
-                                <option value="Roboto">Roboto</option>
-                            </optgroup>
-                            <optgroup label="Serif">
-                                <option value="Merriweather">Merriweather</option>
-                                <option value="Playfair Display">Playfair</option>
-                                <option value="Lora">Lora</option>
-                                <option value="Crimson Text">Crimson Text</option>
-                                <option value="Georgia">Georgia</option>
-                            </optgroup>
-                        </select>
-                        <input type="number" id="size-subtitle" value="18" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="applyStyles()">
-                        <input type="color" id="color-subtitle" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-[12px] text-black font-bold uppercase w-16">Lyrics</span>
-                        <select id="font-lyrics" class="border border-slate-300 rounded p-1 text-[12px] w-32" onchange="applyStyles()">
-                            <optgroup label="Sans-Serif">
-                                <option value="Inter" selected>Inter</option>
-                                <option value="Roboto">Roboto</option>
-                                <option value="Lato">Lato</option>
-                                <option value="Open Sans">Open Sans</option>
-                            </optgroup>
-                            <optgroup label="Serif">
-                                <option value="Lora">Lora</option>
-                                <option value="Merriweather">Merriweather</option>
-                                <option value="Playfair Display">Playfair</option>
-                                <option value="Crimson Text">Crimson Text</option>
-                                <option value="Georgia">Georgia</option>
-                            </optgroup>
-                        </select>
-                        <input type="number" id="size-lyrics" value="14" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="applyStyles()">
-                        <input type="color" id="color-lyrics" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
-                    </div>
-                </div>
- 
-                <div class="flex flex-col gap-1">
-                    <div class="flex items-center gap-2">
-                        <span class="text-[12px] text-black font-bold uppercase w-16">Chord</span>
-                        <select id="font-chords" class="border border-slate-300 rounded p-1 text-[12px] w-32" onchange="applyStyles()">
-                            <optgroup label="Sans-Serif">
-                                <option value="Inter" selected>Inter</option>
-                                <option value="Montserrat">Montserrat</option>
-                                <option value="Roboto">Roboto</option>
-                            </optgroup>
-                            <optgroup label="Serif">
-                                <option value="Lora">Lora</option>
-                                <option value="Merriweather">Merriweather</option>
-                                <option value="Playfair Display">Playfair</option>
-                            </optgroup>
-                            <optgroup label="Monospace">
-                                <option value="Roboto Mono">Roboto Mono</option>
-                                <option value="Courier New">Courier New</option>
-                            </optgroup>
-                        </select>
-                        <input type="number" id="size-chords" value="14" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="applyStyles()">
-                        <input type="color" id="color-chords" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-[12px] text-black font-bold uppercase w-16">Chorus</span>
-                        <input type="checkbox" id="chorus-indent-toggle" checked class="w-5 h-5 rounded border-slate-300 text-blue-600" onchange="applyStyles()">
-                        <input type="number" id="chorus-indent-val" value="20" class="w-16 border border-slate-300 rounded p-1 text-[12px]" oninput="applyStyles()">
-                        <input type="checkbox" id="chorus-line-toggle" class="w-5 h-5 rounded border-slate-300 text-blue-600" onchange="applyStyles()">
-                        <input type="number" id="chorus-line-val" value="4" min="1" max="20" class="w-12 border border-slate-300 rounded p-1 text-[12px]" oninput="applyStyles()">
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-[12px] text-black font-bold uppercase w-16">Comment</span>
-                        <select id="font-comment" class="border border-slate-300 rounded p-1 text-[12px] w-32" onchange="applyStyles()">
-                            <optgroup label="Sans-Serif">
-                                <option value="Inter" selected>Inter</option>
-                                <option value="Montserrat">Montserrat</option>
-                                <option value="Open Sans">Open Sans</option>
-                                <option value="Roboto">Roboto</option>
-                            </optgroup>
-                            <optgroup label="Serif">
-                                <option value="Merriweather">Merriweather</option>
-                                <option value="Playfair Display">Playfair</option>
-                                <option value="Lora">Lora</option>
-                                <option value="Crimson Text">Crimson Text</option>
-                                <option value="Georgia">Georgia</option>
-                            </optgroup>
-                        </select>
-                        <input type="number" id="size-comment" value="12" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="applyStyles()">
-                        <input type="color" id="color-comment" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="applyStyles()">
-                    </div>
-                </div>
- 
-                <div class="flex flex-col gap-1">
-                    <div class="flex items-center gap-2">
-                        <span class="text-[12px] text-black font-bold uppercase w-16">Strum Title</span>
-                        <select id="font-strum-title" class="border border-slate-300 rounded p-1 text-[12px] w-32" onchange="updatePreview()">
-                            <optgroup label="Sans-Serif">
-                                <option value="Inter" selected>Inter</option>
-                                <option value="Montserrat">Montserrat</option>
-                                <option value="Roboto">Roboto</option>
-                            </optgroup>
-                            <optgroup label="Serif">
-                                <option value="Playfair Display">Playfair</option>
-                                <option value="Merriweather">Merriweather</option>
-                            </optgroup>
-                        </select>
-                        <input type="number" id="size-strum-title" value="14" class="border border-slate-300 rounded p-1 text-[12px] w-16" oninput="updatePreview()">
-                        <input type="color" id="color-strum-title" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="updatePreview()">
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-[12px] text-black font-bold uppercase w-16">Strum BPM</span>
-                        <select id="font-strum-bpm" class="border border-slate-300 rounded p-1 text-[12px] w-32" onchange="updatePreview()">
-                            <optgroup label="Sans-Serif">
-                                <option value="Inter" selected>Inter</option>
-                                <option value="Montserrat">Montserrat</option>
-                                <option value="Roboto">Roboto</option>
-                            </optgroup>
-                            <optgroup label="Serif">
-                                <option value="Playfair Display">Playfair</option>
-                                <option value="Merriweather">Merriweather</option>
-                            </optgroup>
-                        </select>
-                        <input type="number" id="size-strum-bpm" value="12" class="border border-black rounded p-1 text-[12px] w-16" oninput="updatePreview()">
-                        <input type="color" id="color-strum-bpm" value="#000000" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" oninput="updatePreview()">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chord Diagram Settings -->
-        <div class="nav-section">
-            <h2 class="text-[12px] font-bold text-black uppercase mb-1">Chord Diagrams</h2>
-            <div class="flex items-center gap-3">
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" id="diag-toggle" checked class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" onchange="updatePreview()">
-                    <span class="text-[12px] text-black font-bold">Show</span>
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-[12px] text-black font-bold uppercase">Size</span>
-                    <div class="flex items-center gap-2">
-                        <input type="range" id="diag-size" min="40" max="150" step="5" value="80" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-size', 'diag-size-num'); applyStyles()">
-                        <input type="number" id="diag-size-num" min="40" max="150" step="5" value="80" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="syncInputs('diag-size-num', 'diag-size'); applyStyles()">
-                    </div>
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-[12px] text-black font-bold uppercase">Chord Gap</span>
-                    <div class="flex items-center gap-2">
-                        <input type="range" id="diag-name-gap" min="0" max="30" step="1" value="12" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-name-gap', 'diag-name-gap-num'); applyStyles()">
-                        <input type="number" id="diag-name-gap-num" min="0" max="30" step="1" value="12" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="syncInputs('diag-name-gap-num', 'diag-name-gap'); applyStyles()">
-                    </div>
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-[12px] text-black font-bold uppercase">Font Size</span>
-                    <div class="flex items-center gap-2">
-                        <input type="range" id="diag-name-size" min="8" max="32" step="1" value="18" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-name-size', 'diag-name-size-num'); applyStyles()">
-                        <input type="number" id="diag-name-size-num" min="8" max="32" step="1" value="18" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="syncInputs('diag-name-size-num', 'diag-name-size'); applyStyles()">
-                    </div>
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-[12px] text-black font-bold uppercase">Diagram Spacing</span>
-                    <div class="flex items-center gap-2">
-                        <input type="range" id="diag-spacing" min="0" max="40" step="1" value="16" class="w-24 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('diag-spacing', 'diag-spacing-num'); applyStyles()">
-                        <input type="number" id="diag-spacing-num" min="0" max="40" step="1" value="16" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="syncInputs('diag-spacing-num', 'diag-spacing'); applyStyles()">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Page Margins -->
-        <div class="nav-section">
-            <h2 class="text-[12px] font-bold text-black uppercase mb-1">Page Margins (mm)</h2>
-            <div class="grid grid-cols-2 gap-x-2 gap-y-1">
-                <div class="flex items-center gap-1">
-                    <span class="text-[12px] text-black font-bold uppercase w-10">Top</span>
-                    <input type="number" id="margin-top" value="25" min="0" max="100" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="applyStyles(); autoSaveSession()">
-                </div>
-                <div class="flex items-center gap-1">
-                    <span class="text-[12px] text-black font-bold uppercase w-10">Bottom</span>
-                    <input type="number" id="margin-bottom" value="25" min="0" max="100" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="applyStyles(); autoSaveSession()">
-                </div>
-                <div class="flex items-center gap-1">
-                    <span class="text-[12px] text-black font-bold uppercase w-10">Left</span>
-                    <input type="number" id="margin-left" value="20" min="0" max="100" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="applyStyles(); autoSaveSession()">
-                </div>
-                <div class="flex items-center gap-1">
-                    <span class="text-[12px] text-black font-bold uppercase w-10">Right</span>
-                    <input type="number" id="margin-right" value="20" min="0" max="100" class="border border-slate-300 rounded p-1 text-[12px] w-12" oninput="applyStyles(); autoSaveSession()">
-                </div>
-            </div>
-        </div>
-
-        <!-- Song Library -->
-        <div class="nav-section">
-            <h2 class="text-[12px] font-bold text-black uppercase mb-1">Song Library</h2>
-            <div class="flex items-center gap-3">
-                <button onclick="saveCurrentSong()" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded text-[12px] font-medium transition-colors">
-                    Save
-                </button>
-                <div id="song-list" class="flex gap-2 overflow-x-auto max-w-[300px] no-scrollbar">
-                    <!-- Saved songs -->
-                </div>
-            </div>
-        </div>
-
-        <!-- File Transfer -->
-        <div class="nav-section">
-            <h2 class="text-[12px] font-bold text-black uppercase mb-1">File</h2>
-            <div class="flex items-center gap-2">
-                <button onclick="downloadFile('cho')" class="bg-slate-100 hover:bg-slate-200 text-black px-3 py-1.5 rounded text-[12px] font-bold">.cho</button>
-                <button onclick="downloadFile('txt')" class="bg-slate-100 hover:bg-slate-200 text-black px-3 py-1.5 rounded text-[12px] font-bold">.txt</button>
-                <button onclick="document.getElementById('file-upload').click()" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded text-[12px] font-bold flex items-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
-                    Load
-                </button>
-                <input type="file" id="file-upload" class="hidden" accept=".cho,.txt,.chordpro" onchange="handleFileUpload(event)">
-                <input type="file" id="image-upload" class="hidden" accept="image/*" onchange="handleImageUpload(event)">
-            </div>
-        </div>
-
-        <div class="scroll-indicator scroll-indicator-right" onclick="scrollNavRight()" title="Scroll right">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 animate-bounce-x" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
+        <div class="scroll-indicator-right" onclick="scrollNavRight()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </div>
     </nav>
 
     <main class="editor-container flex-1 overflow-hidden">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="no-print">
-            <!-- Song Part Helper -->
-            <div class="sidebar-section">
-                <h2 class="text-[12px] font-bold text-black uppercase">Song Part Helper</h2>
-                <div class="grid grid-cols-1 gap-1">
-                    <div class="grid grid-cols-2 gap-1">
-                        <button onclick="insertDirective('title')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Title</button>
-                        <button onclick="insertDirective('subtitle')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Subtitle</button>
-                    </div>
-                    <button onclick="insertDirective('comment')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Comment</button>
-                    <div class="grid grid-cols-2 gap-1">
-                        <button onclick="insertDirective('verse')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Verse</button>
-                        <button onclick="insertDirective('chorus')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Chorus</button>
-                    </div>
-                    <button onclick="insertDirective('image')" title="Insert Image Block" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h14a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        Image
-                    </button>
+        <!-- App Sidebar (Canva-style) -->
+        <aside class="app-sidebar no-print">
+            <div class="app-icon-btn" onclick="openApp('song-part-helper')" id="btn-song-part-helper">
+                <i data-lucide="layout-template" class="w-6 h-6"></i>
+                <span>Song Parts</span>
+            </div>
+            <div class="app-icon-btn" onclick="openApp('chord-helper')" id="btn-chord-helper">
+                <i data-lucide="music" class="w-6 h-6"></i>
+                <span>Chords</span>
+            </div>
+            <div class="app-icon-btn" onclick="openApp('diagram-creator')" id="btn-diagram-creator">
+                <i data-lucide="grid-3x3" class="w-6 h-6"></i>
+                <span>Diagrams</span>
+            </div>
+            <div class="app-icon-btn" onclick="openApp('tab-creator')" id="btn-tab-creator">
+                <i data-lucide="list-music" class="w-6 h-6"></i>
+                <span>TABs</span>
+            </div>
+            <div class="app-icon-btn" onclick="openApp('strumming-pattern')" id="btn-strumming-pattern">
+                <i data-lucide="waves" class="w-6 h-6"></i>
+                <span>Strumming</span>
+            </div>
+            <div class="mt-auto">
+                <div class="app-icon-btn" onclick="openApp('editor-tools')" id="btn-editor-tools">
+                    <i data-lucide="wrench" class="w-6 h-6"></i>
+                    <span>Tools</span>
                 </div>
             </div>
+        </aside>
 
-            <!-- Transpose -->
-            <div class="sidebar-section">
-                <h2 class="text-[12px] font-bold text-black uppercase">Transpose</h2>
-                <div class="flex gap-1">
-                    <button onclick="transposeSong(-1)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">-1 Semitone</button>
-                    <button onclick="transposeSong(1)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">+1 Semitone</button>
-                </div>
+        <!-- App Panels -->
+        <div id="panel-song-part-helper" class="app-panel no-print">
+            <div class="app-panel-header">
+                <span class="app-panel-title">Song Part Helper</span>
+                <button onclick="closeApp()" class="p-1 hover:bg-slate-100 rounded-full">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
             </div>
-
-            <!-- Chord Helper -->
-            <div class="sidebar-section">
-                <h2 class="text-[12px] font-bold text-black uppercase">Chord Helper</h2>
-                <div class="flex flex-col gap-2">
-                    <div class="flex flex-wrap gap-1" id="chord-roots"></div>
-                    <div class="flex flex-wrap gap-1" id="chord-qualities"></div>
-                    <button onclick="insertCustomChord()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">
-                        Insert Chord [<span id="custom-chord-preview">C</span>]
-                    </button>
-                </div>
-            </div>
-
-            <!-- Diagram Creator -->
-            <div class="sidebar-section">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-[12px] font-bold text-black uppercase">Diagram Creator</h2>
-                    <a href="chord-diagram-creator.html" target="_blank" class="text-[12px] text-black hover:underline font-bold flex items-center gap-1">
-                        Standalone App
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                    </a>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <div id="fretboard-ui" class="fretboard w-full mx-auto"></div>
-                    <div class="bg-slate-50 p-2 rounded border border-slate-200">
-                        <div class="text-[12px] font-bold text-black uppercase mb-1">Options</div>
-                        <div class="grid grid-cols-2 gap-2 mb-2">
-                            <div class="flex flex-col">
-                                <label class="text-[12px] text-black font-bold">Base Fret</label>
-                                <input type="number" id="base-fret" min="1" max="20" value="1" class="border border-slate-300 rounded p-1 text-[12px]">
-                            </div>
-                            <div class="flex flex-col">
-                                <label class="text-[12px] text-black font-bold">Barre Fret (Rel.)</label>
-                                <input type="number" id="barre-fret" min="0" max="5" value="0" class="border border-slate-300 rounded p-1 text-[12px]">
-                            </div>
+            <div class="app-panel-content">
+                <div class="sidebar-section">
+                    <div class="grid grid-cols-1 gap-1">
+                        <div class="grid grid-cols-2 gap-1">
+                            <button onclick="insertDirective('title')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Title</button>
+                            <button onclick="insertDirective('subtitle')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Subtitle</button>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div class="flex flex-col">
-                                <label class="text-[12px] text-black font-bold">Barre From</label>
-                                <input type="number" id="barre-start" min="1" max="6" value="1" class="border border-slate-300 rounded p-1 text-[12px]">
-                            </div>
-                            <div class="flex flex-col">
-                                <label class="text-[12px] text-black font-bold">Barre To</label>
-                                <input type="number" id="barre-end" min="1" max="6" value="6" class="border border-slate-300 rounded p-1 text-[12px]">
-                            </div>
+                        <button onclick="insertDirective('comment')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Comment</button>
+                        <div class="grid grid-cols-2 gap-1">
+                            <button onclick="insertDirective('verse')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Verse</button>
+                            <button onclick="insertDirective('chorus')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">Chorus</button>
                         </div>
+                        <div class="grid grid-cols-2 gap-1">
+                            <button onclick="insertDirective('tab')" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">TAB</button>
+                            <button onclick="insertDirective('image')" title="Insert Image Block" class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold flex items-center justify-center gap-2">
+                                <i data-lucide="image" class="w-4 h-4"></i>
+                                Image
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebar-section">
+                    <h2 class="text-[12px] font-bold text-black uppercase">Transpose</h2>
+                    <div class="flex gap-1">
+                        <button onclick="transposeSong(-1)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">-1 Semitone</button>
+                        <button onclick="transposeSong(1)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">+1 Semitone</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-chord-helper" class="app-panel no-print">
+            <div class="app-panel-header">
+                <span class="app-panel-title">Chord Helper</span>
+                <button onclick="closeApp()" class="p-1 hover:bg-slate-100 rounded-full">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="app-panel-content">
+                <div class="sidebar-section">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex flex-wrap gap-1" id="chord-roots"></div>
+                        <div class="flex flex-wrap gap-1" id="chord-qualities"></div>
+                        <button onclick="insertCustomChord()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold">
+                            Insert Chord [<span id="custom-chord-preview">C</span>]
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-diagram-creator" class="app-panel no-print">
+            <div class="app-panel-header">
+                <span class="app-panel-title">Diagram Creator</span>
+                <button onclick="closeApp()" class="p-1 hover:bg-slate-100 rounded-full">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="app-panel-content">
+                <div class="sidebar-section">
+                    <div class="flex justify-between items-center mb-2">
+                        <a href="chord-diagram-creator.html" target="_blank" class="text-[12px] text-blue-600 hover:underline font-bold flex items-center gap-1">
+                            Open Standalone App
+                            <i data-lucide="external-link" class="w-3 h-3"></i>
+                        </a>
                     </div>
                     <div class="flex flex-col gap-2">
-                        <input type="text" id="diag-name" placeholder="Name" class="w-full border border-slate-300 rounded p-1.5 text-[13px]">
-                        <button onclick="insertDiagram()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded text-[13px] font-bold transition-colors">Define</button>
+                        <div id="fretboard-ui" class="fretboard w-full mx-auto"></div>
+                        <div class="bg-slate-50 p-2 rounded border border-black">
+                            <div class="text-[12px] font-bold text-black uppercase mb-1">Options</div>
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <div class="flex flex-col">
+                                    <label class="text-[12px] text-black font-bold">Base Fret</label>
+                                    <input type="number" id="base-fret" min="1" max="20" value="1" class="border border-black rounded p-1 text-[12px]">
+                                </div>
+                                <div class="flex flex-col">
+                                    <label class="text-[12px] text-black font-bold">Barre Fret (Rel.)</label>
+                                    <input type="number" id="barre-fret" min="0" max="5" value="0" class="border border-black rounded p-1 text-[12px]">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="flex flex-col">
+                                    <label class="text-[12px] text-black font-bold">Barre From</label>
+                                    <input type="number" id="barre-start" min="1" max="6" value="1" class="border border-black rounded p-1 text-[12px]">
+                                </div>
+                                <div class="flex flex-col">
+                                    <label class="text-[12px] text-black font-bold">Barre To</label>
+                                    <input type="number" id="barre-end" min="1" max="6" value="6" class="border border-black rounded p-1 text-[12px]">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <input type="text" id="diag-name" placeholder="Name" class="w-full border border-black rounded p-1.5 text-[13px]">
+                            <button onclick="insertDiagram()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded text-[13px] font-bold transition-colors">Define</button>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Strumming Pattern Editor -->
-            <div class="sidebar-section">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-[12px] font-bold text-black uppercase">Strumming Pattern</h2>
-                    <a href="strumming-pattern-editor.html" target="_blank" class="text-[12px] text-black hover:underline font-bold flex items-center gap-1">
-                        Standalone App
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                    </a>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <div class="grid grid-cols-2 gap-2">
-                        <div class="flex flex-col">
-                            <label class="text-[12px] text-black font-bold uppercase">BPM</label>
-                            <input type="number" id="strum-bpm" value="82" class="border border-slate-300 rounded p-1 text-[12px]" oninput="updatePreview()">
+        <div id="panel-tab-creator" class="app-panel no-print">
+            <div class="app-panel-header">
+                <span class="app-panel-title">TAB Creator</span>
+                <button onclick="closeApp()" class="p-1 hover:bg-slate-100 rounded-full">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="app-panel-content">
+                <div class="sidebar-section">
+                    <div class="flex flex-col gap-2">
+                        <div class="tab-creator-wrapper">
+                            <button onclick="scrollTab('left')" class="tab-scroll-btn tab-scroll-left" title="Scroll Left">
+                                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                            </button>
+                            <div id="tab-creator-ui" class="bg-slate-50 p-2 rounded border border-black overflow-x-auto no-scrollbar scroll-smooth">
+                                <div class="flex flex-col gap-1 min-w-max" id="tab-grid">
+                                    <!-- TAB grid will be generated here -->
+                                </div>
+                            </div>
+                            <button onclick="scrollTab('right')" class="tab-scroll-btn tab-scroll-right" title="Scroll Right">
+                                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                            </button>
                         </div>
-                        <div class="flex flex-col">
-                            <label class="text-[12px] text-black font-bold uppercase">Rhythm Gap</label>
-                            <div class="flex items-center gap-1">
-                                <input type="range" id="strum-gap" min="5" max="60" step="1" value="15" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('strum-gap', 'strum-gap-num'); updatePreview()">
-                                <input type="number" id="strum-gap-num" min="5" max="60" step="1" value="15" class="border border-slate-300 rounded p-0.5 text-[12px] w-8" oninput="syncInputs('strum-gap-num', 'strum-gap'); updatePreview()">
+                        <div class="flex gap-1">
+                            <button onclick="addTabColumn()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-black py-1 rounded text-[12px] font-bold">+ Col</button>
+                            <button onclick="removeTabColumn()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-black py-1 rounded text-[12px] font-bold">- Col</button>
+                            <button onclick="addTabBar()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-black py-1 rounded text-[12px] font-bold">Bar</button>
+                            <button onclick="clearTabCreator()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-black py-1 rounded text-[12px] font-bold">Clear</button>
+                        </div>
+                        <button onclick="insertTabFromCreator()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded text-[13px] font-bold transition-colors">Insert TAB</button>
+                        <p class="text-[12px] text-black text-center">Click to cycle fret numbers. Right-click to clear.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-strumming-pattern" class="app-panel no-print">
+            <div class="app-panel-header">
+                <span class="app-panel-title">Strumming Pattern</span>
+                <button onclick="closeApp()" class="p-1 hover:bg-slate-100 rounded-full">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="app-panel-content">
+                <div class="sidebar-section">
+                    <div class="flex justify-between items-center mb-2">
+                        <a href="strumming-pattern-editor.html" target="_blank" class="text-[12px] text-blue-600 hover:underline font-bold flex items-center gap-1">
+                            Open Standalone App
+                            <i data-lucide="external-link" class="w-3 h-3"></i>
+                        </a>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="flex flex-col">
+                                <label class="text-[12px] text-black font-bold uppercase">BPM</label>
+                                <input type="number" id="strum-bpm" value="82" class="border border-black rounded p-1 text-[12px]" oninput="updatePreview()">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[12px] text-black font-bold uppercase">Rhythm Gap</label>
+                                <div class="flex items-center gap-1">
+                                    <input type="range" id="strum-gap" min="5" max="60" step="1" value="15" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('strum-gap', 'strum-gap-num'); updatePreview()">
+                                    <input type="number" id="strum-gap-num" min="5" max="60" step="1" value="15" class="border border-black rounded p-0.5 text-[12px] w-8" oninput="syncInputs('strum-gap-num', 'strum-gap'); updatePreview()">
+                                </div>
                             </div>
                         </div>
+                        
                         <div class="flex flex-col">
                             <label class="text-[12px] text-black font-bold uppercase">Strum Scale</label>
                             <div class="flex items-center gap-1">
                                 <input type="range" id="strum-scale" min="0.5" max="2" step="0.1" value="1" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('strum-scale', 'strum-scale-num'); updatePreview()">
-                                <input type="number" id="strum-scale-num" min="0.5" max="2" step="0.1" value="1" class="border border-slate-300 rounded p-0.5 text-[12px] w-8" oninput="syncInputs('strum-scale-num', 'strum-scale'); updatePreview()">
+                                <input type="number" id="strum-scale-num" min="0.5" max="2" step="0.1" value="1" class="border border-black rounded p-0.5 text-[12px] w-8" oninput="syncInputs('strum-scale-num', 'strum-scale'); updatePreview()">
                             </div>
                         </div>
                         <div class="flex flex-col justify-center">
@@ -834,14 +1434,14 @@
                     
                     <div class="flex flex-col">
                         <label class="text-[12px] text-black font-bold uppercase">Time Signature</label>
-                        <select id="strum-time" onchange="changeTimeSignature()" class="border border-slate-300 rounded p-1 text-[12px]">
+                        <select id="strum-time" onchange="changeTimeSignature()" class="border border-black rounded p-1 text-[12px]">
                             <option value="4/4">4/4 (16 slots)</option>
                             <option value="3/4">3/4 (12 slots)</option>
                             <option value="6/8">6/8 (12 slots)</option>
                         </select>
                     </div>
                     
-                    <div class="bg-slate-50 p-2 rounded border border-slate-200">
+                    <div class="bg-slate-50 p-2 rounded border border-black">
                         <div class="text-[12px] font-bold text-black uppercase mb-2">Pattern</div>
                         <div id="strum-grid" class="grid grid-cols-8 gap-x-1 gap-y-3 mb-2">
                             <!-- Slots injected here -->
@@ -856,48 +1456,53 @@
                                 <span class="text-[12px] font-bold uppercase text-black">Up</span>
                             </div>
                             <div class="flex items-center gap-1">
-                                <div class="w-2 h-2 bg-white border border-slate-300 rounded-full"></div>
+                                <div class="w-2 h-2 bg-white border border-black rounded-full"></div>
                                 <span class="text-[12px] font-bold uppercase text-black">None</span>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="flex gap-2">
-                        <button onclick="insertStrumming()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-[13px] font-bold transition-colors">
-                            Insert Pattern
-                        </button>
-                        <button onclick="clearStrumming()" class="px-3 bg-slate-100 hover:bg-slate-200 text-black rounded text-[13px] font-bold transition-colors">
-                            Clear
-                        </button>
+                        
+                        <div class="flex gap-2">
+                            <button onclick="insertStrumming()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-[13px] font-bold transition-colors">
+                                Insert Pattern
+                            </button>
+                            <button onclick="clearStrumming()" class="px-3 bg-slate-100 hover:bg-slate-200 text-black rounded text-[13px] font-bold transition-colors">
+                                Clear
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Editor Tools -->
-            <div class="sidebar-section">
-                <h2 class="text-[12px] font-bold text-black uppercase">Editor Tools</h2>
-                <button onclick="insertPageBreak()" class="w-full bg-slate-100 hover:bg-slate-200 text-black py-2 rounded text-[13px] font-bold flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7" />
-                    </svg>
-                    Insert Page Break
+        <div id="panel-editor-tools" class="app-panel no-print">
+            <div class="app-panel-header">
+                <span class="app-panel-title">Editor Tools</span>
+                <button onclick="closeApp()" class="p-1 hover:bg-slate-100 rounded-full">
+                    <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
-        </aside>
+            <div class="app-panel-content">
+                <div class="sidebar-section">
+                    <button onclick="insertPageBreak()" class="w-full bg-slate-100 hover:bg-slate-200 text-black py-2 rounded text-[13px] font-bold flex items-center justify-center gap-2">
+                        <i data-lucide="arrow-down-to-line" class="w-4 h-4"></i>
+                        Insert Page Break
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Editor Spalte -->
-        <section id="editor-section" class="border-r border-slate-200 flex flex-col no-print overflow-hidden">
-            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-[13px] font-semibold text-black uppercase">ChordPro Editor</div>
-            <textarea id="chordpro-input" class="flex-1 p-4 text-[15px] leading-relaxed text-black bg-white" placeholder="Enter your ChordPro text here..."></textarea>
+        <section id="editor-section" class="editor-column no-print">
+            <div class="bg-slate-50 px-4 py-2 border-b border-black text-[13px] font-semibold text-black uppercase">ChordPro Editor</div>
+            <textarea id="chordpro-input" class="flex-1 p-4 text-[15px] leading-relaxed text-black bg-white font-mono whitespace-pre overflow-x-auto" placeholder="Enter your ChordPro text here..." wrap="off"></textarea>
         </section>
 
         <!-- Preview Spalte -->
-        <section id="preview-section" class="flex flex-col bg-slate-100 overflow-hidden">
-            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 text-[13px] font-semibold text-black uppercase no-print">Live Preview</div>
-            <div class="preview-column flex-1 overflow-auto p-4">
-                <div id="preview-pane">
-                    <!-- Songsheet content will be injected here -->
-                </div>
+        <section id="preview-section" class="preview-column">
+            <div class="bg-slate-50 w-full px-4 py-2 border-b border-black text-[13px] font-semibold text-black uppercase no-print sticky top-0 z-10">Live Preview</div>
+            <div id="preview-pane" class="w-full">
+                <!-- Songsheet content will be injected here -->
             </div>
         </section>
     </main>
@@ -922,7 +1527,7 @@
             <div class="space-y-4 mb-6">
                 <div>
                     <label class="block text-sm font-medium text-black mb-1">Paper Format</label>
-                    <select id="pdf-format" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <select id="pdf-format" class="w-full border border-black rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                         <option value="a4">A4 (210 x 297 mm)</option>
                         <option value="a3">A3 (297 x 420 mm)</option>
                         <option value="a5">A5 (148 x 210 mm)</option>
@@ -934,7 +1539,7 @@
                 <div>
                     <label class="block text-sm font-medium text-black mb-1">Orientation</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <label class="flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition-all border-blue-600 bg-blue-50" id="label-portrait">
+                        <label class="flex items-center justify-center p-3 border-2 border-blue-600 bg-blue-50 rounded-lg cursor-pointer transition-all hover:bg-slate-50" id="label-portrait">
                             <input type="radio" name="pdf-orientation" value="portrait" checked class="hidden" onchange="updateOrientationUI()">
                             <div class="flex flex-col items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -943,7 +1548,7 @@
                                 <span class="text-xs font-bold text-black">Portrait</span>
                             </div>
                         </label>
-                        <label class="flex items-center justify-center p-3 border-2 border-slate-200 rounded-lg cursor-pointer transition-all hover:border-slate-300" id="label-landscape">
+                        <label class="flex items-center justify-center p-3 border-2 border-black rounded-lg cursor-pointer transition-all hover:bg-slate-50" id="label-landscape">
                             <input type="radio" name="pdf-orientation" value="landscape" class="hidden" onchange="updateOrientationUI()">
                             <div class="flex flex-col items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -965,7 +1570,7 @@
 
     <!-- Full Preview Overlay -->
     <div id="full-preview-overlay" class="fixed inset-0 bg-white z-[100] hidden flex-col no-print">
-        <div class="h-14 border-b border-slate-200 flex items-center justify-between px-6 bg-white shrink-0">
+        <div class="h-14 border-b border-black flex items-center justify-between px-6 bg-white shrink-0">
             <div class="flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -985,6 +1590,81 @@
     </div>
 
     <script>
+        // App Panel Management
+        function openApp(appId) {
+            // Hide all panels
+            document.querySelectorAll('.app-panel').forEach(p => p.classList.remove('show'));
+            // Deactivate all buttons
+            document.querySelectorAll('.app-icon-btn').forEach(b => b.classList.remove('active'));
+            
+            // Show selected panel
+            const panel = document.getElementById('panel-' + appId);
+            const btn = document.getElementById('btn-' + appId);
+            
+            if (panel && btn) {
+                panel.classList.add('show');
+                btn.classList.add('active');
+            }
+            
+            // Refresh Lucide icons in case any were added
+            lucide.createIcons();
+        }
+
+        function closeApp() {
+            document.querySelectorAll('.app-panel').forEach(p => p.classList.remove('show'));
+            document.querySelectorAll('.app-icon-btn').forEach(b => b.classList.remove('active'));
+        }
+
+        // Initialize Lucide
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            // Open first app by default
+            openApp('song-part-helper');
+        });
+
+        function renderGraphicalTab(tabText) {
+            const lines = tabText.trim().split('\n');
+            let html = '<div class="tab-block">';
+            
+            lines.forEach(line => {
+                // Improved regex to capture label and content including the first bar
+                const match = line.match(/^([A-G]?[#b]?)\|(.*)/);
+                if (match) {
+                    const label = match[1];
+                    const content = '|' + match[2]; // Re-include the bar
+                    
+                    html += `<div class="tab-string-line">`;
+                    html += `<span class="tab-label">${label}</span>`;
+                    html += `<div class="tab-content-wrapper">`;
+                    html += `<div class="tab-horizontal-line"></div>`;
+                    
+                    for (let char of content) {
+                        if (char === '-') {
+                            html += '<span class="tab-dash"></span>';
+                        } else if (char === '|') {
+                            html += '<span class="tab-bar"><span class="tab-bar-inner"></span></span>';
+                        } else if (char === ' ') {
+                            html += '<span class="tab-space"></span>';
+                        } else {
+                            html += `<span class="tab-note">${char}</span>`;
+                        }
+                    }
+                    
+                    html += `</div></div>`;
+                } else {
+                    // Probably chord names or comments
+                    // Wrap each character in a span to match the 14px grid
+                    html += `<div class="tab-text-line">`;
+                    for (let char of line) {
+                        html += `<span class="tab-text-char">${char}</span>`;
+                    }
+                    html += `</div>`;
+                }
+            });
+            
+            html += '</div>';
+            return html;
+        }
         const input = document.getElementById('chordpro-input');
         const preview = document.getElementById('preview-pane');
         
@@ -1308,6 +1988,8 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             let mainHtml = '';
             let metadata = { title: '', subtitle: '', info: [] };
             let inBlock = false;
+            let inTabBlock = false;
+            let currentTabData = '';
             let usedChords = new Set();
             let customChords = new Map();
             let explicitDiagrams = null;
@@ -1315,9 +1997,9 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             let currentImageData = '';
             let imageBlockIndex = 0;
 
-            const diagEnabled = document.getElementById('diag-toggle')?.checked ?? true;
+            const diagEnabled = document.getElementById('diag-toggle')?.checked ?? false;
             const diagPos = 'bottom';
-            const diagSize = parseInt(document.getElementById('diag-size')?.value || '80');
+            const diagSize = parseInt(document.getElementById('diag-size')?.value || '100');
             const diagNameGap = parseInt(document.getElementById('diag-name-gap')?.value || '12');
             const diagNameSize = parseInt(document.getElementById('diag-name-size')?.value || '18');
             const chordColor = document.getElementById('color-chords')?.value || 'currentColor';
@@ -1422,6 +2104,14 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                         }
                         mainHtml += '<div class="page-break"></div>';
                     }
+                    else if (key === 'start_of_tab' || key === 'sot') {
+                        inTabBlock = true;
+                        currentTabData = '';
+                    }
+                    else if (key === 'end_of_tab' || key === 'eot') {
+                        inTabBlock = false;
+                        mainHtml += renderGraphicalTab(currentTabData);
+                    }
                     else if (key === 'start_of_image') {
                         inImageBlock = true;
                         currentImageData = '';
@@ -1439,11 +2129,11 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                         const idx = imageBlockIndex++;
                         if (!currentImageData.trim()) {
                             mainHtml += `
-                                <div class="image-placeholder border-2 border-dashed border-slate-300 rounded-lg p-4 my-4 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors" onclick="triggerImageUpload(${idx})">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="image-placeholder border-2 border-dashed border-black rounded-lg p-4 my-4 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors" onclick="triggerImageUpload(${idx})">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-black mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h14a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    <span class="text-slate-500 font-bold uppercase text-[12px]">Insert Image</span>
+                                    <span class="text-black font-bold uppercase text-[12px]">Insert Image</span>
                                 </div>
                             `;
                         } else {
@@ -1457,6 +2147,11 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                             `;
                         }
                     }
+                    return;
+                }
+
+                if (inTabBlock) {
+                    currentTabData += line + '\n';
                     return;
                 }
 
@@ -1510,6 +2205,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             });
 
             if (inBlock) mainHtml += '</div>';
+            if (inTabBlock) mainHtml += renderGraphicalTab(currentTabData);
 
             // Generate Diagrams
             let diagramsHtml = '';
@@ -1589,17 +2285,21 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 if (!el) {
                     if (id.includes('font')) return 'Inter';
                     if (id.includes('size')) {
+                        if (id === 'diag-size') return '100';
                         if (id.includes('title')) return '28';
                         if (id.includes('subtitle')) return '18';
                         if (id.includes('comment')) return '12';
                         if (id.includes('strum-title')) return '14';
                         if (id.includes('strum-bpm')) return '12';
+                        if (id.includes('tab')) return '13';
+                        if (id.includes('editor')) return '14';
                         return '14';
                     }
                     if (id.includes('color')) {
                         if (id.includes('chords')) return '#000000';
                         if (id.includes('subtitle')) return '#000000';
                         if (id.includes('comment')) return '#000000';
+                        if (id.includes('tab')) return '#000000';
                         return '#000000';
                     }
                     if (id === 'line-spacing') return '1.2';
@@ -1620,39 +2320,86 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 return el.value;
             };
 
+            // Editor font size
+            const editorSize = getVal('size-editor');
+            if (input) input.style.fontSize = editorSize + 'px';
+
             // Margins & Page Guides
-            const marginTop = getVal('margin-top');
-            const marginBottom = getVal('margin-bottom');
-            const marginLeft = getVal('margin-left');
-            const marginRight = getVal('margin-right');
+            const marginTop = parseFloat(getVal('margin-top') || '25');
+            const marginBottom = parseFloat(getVal('margin-bottom') || '25');
+            const marginLeft = parseFloat(getVal('margin-left') || '20');
+            const marginRight = parseFloat(getVal('margin-right') || '20');
+
+            const format = document.getElementById('pdf-format')?.value || 'a4';
+            const orientation = document.querySelector('input[name="pdf-orientation"]:checked')?.value || 'portrait';
+            
+            const paperWidths = { 'a4': 210, 'a3': 297, 'a5': 148, 'letter': 215.9, 'legal': 215.9 };
+            const paperHeights = { 'a4': 297, 'a3': 420, 'a5': 210, 'letter': 279.4, 'legal': 355.6 };
+            
+            let pageWidth = paperWidths[format];
+            let pageHeight = paperHeights[format];
+            if (orientation === 'landscape') {
+                [pageWidth, pageHeight] = [pageHeight, pageWidth];
+            }
 
             const previewPane = document.getElementById('preview-pane');
             const fullPreviewContent = document.getElementById('full-preview-content');
 
             [previewPane, fullPreviewContent].forEach(el => {
                 if (el) {
+                    el.style.width = `${pageWidth}mm`;
                     el.style.padding = `${marginTop}mm ${marginRight}mm ${marginBottom}mm ${marginLeft}mm`;
                     
-                    // Update background guides
-                    const guides = [
-                        /* Horizontal Page Break (Bottom of Page) */
-                        `linear-gradient(to bottom, transparent 296.5mm, #cbd5e1 296.5mm, #cbd5e1 297mm, transparent 297mm)`,
-                        /* Top Margin */
-                        `linear-gradient(to bottom, transparent ${parseFloat(marginTop)-0.1}mm, #e2e8f0 ${parseFloat(marginTop)-0.1}mm, #e2e8f0 ${parseFloat(marginTop)+0.1}mm, transparent ${parseFloat(marginTop)+0.1}mm)`,
-                        /* Bottom Margin */
-                        `linear-gradient(to bottom, transparent ${297 - parseFloat(marginBottom)-0.1}mm, #e2e8f0 ${297 - parseFloat(marginBottom)-0.1}mm, #e2e8f0 ${297 - parseFloat(marginBottom)+0.1}mm, transparent ${297 - parseFloat(marginBottom)+0.1}mm)`,
-                        /* Left Margin */
-                        `linear-gradient(to right, transparent ${parseFloat(marginLeft)-0.1}mm, #e2e8f0 ${parseFloat(marginLeft)-0.1}mm, #e2e8f0 ${parseFloat(marginLeft)+0.1}mm, transparent ${parseFloat(marginLeft)+0.1}mm)`,
-                        /* Right Margin */
-                        `linear-gradient(to left, transparent ${parseFloat(marginRight)-0.1}mm, #e2e8f0 ${parseFloat(marginRight)-0.1}mm, #e2e8f0 ${parseFloat(marginRight)+0.1}mm, transparent ${parseFloat(marginRight)+0.1}mm)`
-                    ];
-
                     if (document.body.classList.contains('pdf-export-mode-active')) {
                         el.style.backgroundImage = 'none';
                         el.style.backgroundSize = '0 0';
+                        el.style.height = 'auto';
+                        el.style.minHeight = '0';
                     } else {
-                        el.style.backgroundImage = guides.join(', ');
-                        el.style.backgroundSize = '100% 297mm, 100% 297mm, 100% 297mm, 100% 297mm, 100% 297mm';
+                        // Create SVG for repeating page guides
+                        const svg = `
+                        <svg xmlns='http://www.w3.org/2000/svg' width='${pageWidth}mm' height='${pageHeight}mm' viewBox='0 0 ${pageWidth} ${pageHeight}'>
+                            <!-- Left Margin -->
+                            <line x1='${marginLeft}' y1='0' x2='${marginLeft}' y2='${pageHeight}' stroke='#ef4444' stroke-width='0.5' stroke-dasharray='2,2' />
+                            <!-- Right Margin -->
+                            <line x1='${pageWidth - marginRight}' y1='0' x2='${pageWidth - marginRight}' y2='${pageHeight}' stroke='#ef4444' stroke-width='0.5' stroke-dasharray='2,2' />
+                            <!-- Top Margin -->
+                            <line x1='0' y1='${marginTop}' x2='${pageWidth}' y2='${marginTop}' stroke='#ef4444' stroke-width='0.5' stroke-dasharray='2,2' />
+                            <!-- Bottom Margin -->
+                            <line x1='0' y1='${pageHeight - marginBottom}' x2='${pageWidth}' y2='${pageHeight - marginBottom}' stroke='#ef4444' stroke-width='0.5' stroke-dasharray='2,2' />
+                            <!-- Page Break Indicator -->
+                            <line x1='0' y1='${pageHeight - 0.25}' x2='${pageWidth}' y2='${pageHeight - 0.25}' stroke='#cbd5e1' stroke-width='0.5' />
+                        </svg>
+                        `.trim();
+                        
+                        const encodedSvg = btoa(svg);
+                        el.style.backgroundImage = `url('data:image/svg+xml;base64,${encodedSvg}')`;
+                        el.style.backgroundSize = `${pageWidth}mm ${pageHeight}mm`;
+                        el.style.backgroundRepeat = 'repeat-y';
+                        el.style.backgroundPosition = 'center top';
+
+                        // Ensure container height is a multiple of pageHeight
+                        // We use a small delay to allow content to settle
+                        setTimeout(() => {
+                            const pxPerMm = el.offsetWidth / pageWidth;
+                            
+                            // Adjust manual page breaks to fill the rest of the page in preview
+                            const pageBreaks = el.querySelectorAll('.page-break');
+                            pageBreaks.forEach(pb => {
+                                pb.style.height = '40px'; // Reset to default for measurement
+                                const relativeY = pb.offsetTop; 
+                                const relativeYMm = relativeY / pxPerMm;
+                                const spaceUsedOnPage = relativeYMm % pageHeight;
+                                const spaceToFill = pageHeight - spaceUsedOnPage;
+                                // If spaceToFill is very small, it might mean we are already at the start of a page
+                                // but we want to force a break anyway.
+                                pb.style.height = `${spaceToFill}mm`;
+                            });
+
+                            const contentHeightMm = el.scrollHeight / pxPerMm;
+                            const numPages = Math.max(1, Math.ceil(contentHeightMm / pageHeight));
+                            el.style.minHeight = `${numPages * pageHeight}mm`;
+                        }, 0);
                     }
                 }
             });
@@ -1711,6 +2458,23 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 el.style.fontFamily = getVal('font-lyrics');
                 el.style.fontSize = getVal('size-lyrics') + 'px';
                 el.style.color = getVal('color-lyrics');
+            });
+
+            // TABs
+            const tabs = document.querySelectorAll('.tab-block');
+            const tabSize = getVal('size-tab') || '14';
+            const tabSpacing = getVal('tab-spacing') || '12';
+            const tabColor = getVal('color-tab') || '#000000';
+
+            tabs.forEach(el => {
+                el.style.fontFamily = "'Roboto Mono', monospace";
+                el.style.fontSize = tabSize + 'px';
+                el.style.color = tabColor;
+                el.style.paddingTop = tabSpacing + 'px';
+                el.style.paddingBottom = tabSpacing + 'px';
+                
+                // Force internal elements to respect the font size if they have fixed widths/heights
+                // We'll update the CSS to use em, but this helps for any existing inline styles
             });
 
             // Blocks (Chorus and Section)
@@ -1866,10 +2630,14 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                             style.innerHTML = `
                                 #preview-pane, #preview-pane * { 
                                     background-image: none !important; 
-                                    background-color: transparent !important;
                                 }
                                 #preview-pane {
                                     background-color: white !important;
+                                }
+                                .tab-note {
+                                    background-color: #ffffff !important;
+                                    z-index: 10 !important;
+                                    -webkit-print-color-adjust: exact !important;
                                 }
                             `;
                             clonedDoc.head.appendChild(style);
@@ -2029,11 +2797,11 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             // Add layout settings
             data.layout = {
                 lineSpacing: document.getElementById('line-spacing')?.value || '1.2',
-                diagSize: document.getElementById('diag-size')?.value || '80',
+                diagSize: document.getElementById('diag-size')?.value || '100',
                 diagNameGap: document.getElementById('diag-name-gap')?.value || '12',
                 diagNameSize: document.getElementById('diag-name-size')?.value || '18',
                 diagSpacing: document.getElementById('diag-spacing')?.value || '16',
-                diagToggle: document.getElementById('diag-toggle')?.checked ?? true,
+                diagToggle: document.getElementById('diag-toggle')?.checked ?? false,
                 chorusIndentToggle: document.getElementById('chorus-indent-toggle')?.checked ?? true,
                 chorusIndentVal: document.getElementById('chorus-indent-val')?.value || '20',
                 chorusLineToggle: document.getElementById('chorus-line-toggle')?.checked ?? false,
@@ -2164,14 +2932,14 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             
             if (portrait) {
                 portraitLabel.classList.add('border-blue-600', 'bg-blue-50');
-                portraitLabel.classList.remove('border-slate-200');
+                portraitLabel.classList.remove('border-black');
                 landscapeLabel.classList.remove('border-blue-600', 'bg-blue-50');
-                landscapeLabel.classList.add('border-slate-200');
+                landscapeLabel.classList.add('border-black');
             } else {
                 landscapeLabel.classList.add('border-blue-600', 'bg-blue-50');
-                landscapeLabel.classList.remove('border-slate-200');
+                landscapeLabel.classList.remove('border-black');
                 portraitLabel.classList.remove('border-blue-600', 'bg-blue-50');
-                portraitLabel.classList.add('border-slate-200');
+                portraitLabel.classList.add('border-black');
             }
         }
 
@@ -2214,7 +2982,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             }
 
             listEl.innerHTML = library.map(song => `
-                <div class="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded px-4 py-2 cursor-pointer hover:bg-slate-100 shrink-0" onclick="loadSong(${song.id})">
+                <div class="flex items-center gap-3 bg-slate-50 border border-black rounded px-4 py-2 cursor-pointer hover:bg-slate-100 shrink-0" onclick="loadSong(${song.id})">
                     <span class="text-[14px] font-medium text-black truncate max-w-[160px]">${song.title}</span>
                     <button onclick="event.stopPropagation(); deleteSong(${song.id})" class="text-black hover:text-red-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2240,6 +3008,36 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 }
             };
             localStorage.setItem('chordpro_session', JSON.stringify(session));
+        }
+
+        function toggleDropdown(id) {
+            const dropdown = document.getElementById(id);
+            const allDropdowns = document.querySelectorAll('.nav-dropdown-content');
+            const allTriggers = document.querySelectorAll('.nav-dropdown-trigger');
+            
+            allDropdowns.forEach(d => {
+                if (d.id !== id) d.classList.remove('show');
+            });
+            
+            allTriggers.forEach(t => {
+                if (t.getAttribute('onclick').includes(id)) {
+                    t.classList.toggle('active');
+                } else {
+                    t.classList.remove('active');
+                }
+            });
+            
+            dropdown.classList.toggle('show');
+        }
+
+        // Close dropdowns when clicking outside
+        window.onclick = function(event) {
+            if (!event.target.closest('.nav-dropdown')) {
+                const dropdowns = document.querySelectorAll('.nav-dropdown-content');
+                const triggers = document.querySelectorAll('.nav-dropdown-trigger');
+                dropdowns.forEach(d => d.classList.remove('show'));
+                triggers.forEach(t => t.classList.remove('active'));
+            }
         }
 
         function loadSession() {
@@ -2420,11 +3218,11 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             const qualityContainer = document.getElementById('chord-qualities');
 
             rootContainer.innerHTML = roots.map(r => `
-                <button onclick="selectRoot('${r}')" class="chord-root-btn px-2 py-1 rounded text-[13px] border ${r === selectedRoot ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-black border-slate-200'}">${r}</button>
+                <button onclick="selectRoot('${r}')" class="chord-root-btn px-2 py-1 rounded text-[13px] border ${r === selectedRoot ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-black border-black'}">${r}</button>
             `).join('');
 
             qualityContainer.innerHTML = qualities.map(q => `
-                <button onclick="selectQuality('${q}')" class="chord-qual-btn px-2 py-1 rounded text-[13px] border ${q === selectedQuality ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-black border-slate-200'}">${q || 'maj'}</button>
+                <button onclick="selectQuality('${q}')" class="chord-qual-btn px-2 py-1 rounded text-[13px] border ${q === selectedQuality ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-black border-black'}">${q || 'maj'}</button>
             `).join('');
         }
 
@@ -2459,6 +3257,146 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
 
         function insertCustomChord() {
             insertChord(selectedRoot + selectedQuality);
+        }
+
+        // TAB Creator Logic
+        let tabState = Array(6).fill(0).map(() => Array(16).fill('-'));
+        const stringLabels = ['E', 'B', 'G', 'D', 'A', 'E'];
+
+        function initTabCreator() {
+            const grid = document.getElementById('tab-grid');
+            if (!grid) return;
+            
+            let html = '';
+            
+            for (let s = 0; s < 6; s++) {
+                html += `<div class="tab-creator-row">`;
+                html += `<div class="tab-creator-string-label">${stringLabels[s]}</div>`;
+                for (let c = 0; c < tabState[s].length; c++) {
+                    const val = tabState[s][c];
+                    const isActive = val !== '-' && val !== '|';
+                    const isBar = val === '|';
+                    html += `
+                        <div class="tab-creator-cell ${isActive ? 'active' : ''} ${isBar ? 'bar' : ''}" 
+                             onclick="handleTabCellClick(${s}, ${c})"
+                             oncontextmenu="handleTabCellRightClick(event, ${s}, ${c})">
+                            ${val === '|' ? '|' : val}
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        function handleChordInputChange(c, val) {
+            tabChords[c] = val;
+            initTabCreator();
+        }
+
+        function handleTabCellClick(s, c) {
+            const current = tabState[s][c];
+            if (current === '|') return; // Don't cycle bars
+            if (current === '-') {
+                tabState[s][c] = '0';
+            } else {
+                let num = parseInt(current);
+                if (isNaN(num)) num = 0;
+                num = (num + 1) % 25;
+                tabState[s][c] = num.toString();
+            }
+            initTabCreator();
+        }
+
+        function handleTabCellRightClick(e, s, c) {
+            e.preventDefault();
+            tabState[s][c] = '-';
+            initTabCreator();
+        }
+
+        function scrollTab(direction) {
+            const container = document.getElementById('tab-creator-ui');
+            const scrollAmount = 150;
+            if (direction === 'left') {
+                container.scrollLeft -= scrollAmount;
+            } else {
+                container.scrollLeft += scrollAmount;
+            }
+        }
+
+        function addTabColumn() {
+            for (let s = 0; s < 6; s++) {
+                tabState[s].push('-');
+            }
+            initTabCreator();
+        }
+
+        function removeTabColumn() {
+            if (tabState[0].length > 1) {
+                for (let s = 0; s < 6; s++) {
+                    tabState[s].pop();
+                }
+                initTabCreator();
+            }
+        }
+
+        function addTabBar() {
+            for (let s = 0; s < 6; s++) {
+                tabState[s].push('|');
+            }
+            initTabCreator();
+        }
+
+        function clearTabCreator() {
+            const cols = tabState[0].length;
+            tabState = Array(6).fill(0).map(() => Array(cols).fill('-'));
+            initTabCreator();
+        }
+
+        function insertTabFromCreator() {
+            let tabText = '{start_of_tab}\n';
+            const numCols = tabState[0].length;
+            
+            // Pre-calculate column widths
+            const colWidths = Array(numCols).fill(1);
+            for (let c = 0; c < numCols; c++) {
+                for (let s = 0; s < 6; s++) {
+                    if (tabState[s][c] !== '-' && tabState[s][c] !== '|' && tabState[s][c].length > colWidths[c]) {
+                        colWidths[c] = tabState[s][c].length;
+                    }
+                }
+            }
+
+            for (let s = 0; s < 6; s++) {
+                tabText += stringLabels[s] + '|';
+                for (let c = 0; c < numCols; c++) {
+                    const val = tabState[s][c];
+                    const width = colWidths[c];
+                    
+                    if (val === '|') {
+                        tabText += '|';
+                    } else if (val === '-') {
+                        tabText += '-'.repeat(width);
+                    } else {
+                        // Pad with dashes to match column width
+                        tabText += val.padEnd(width, '-');
+                    }
+                }
+                tabText += '|\n';
+            }
+            tabText += '{end_of_tab}\n';
+
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const text = input.value;
+            const before = text.substring(0, start);
+            const after = text.substring(end);
+            
+            input.value = before + tabText + after;
+            input.selectionStart = input.selectionEnd = start + tabText.length;
+            input.focus();
+            updatePreview();
+            autoSaveSession();
         }
 
         function insertDirective(type) {
@@ -2502,6 +3440,11 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                     textToInsert = '{start_of_image}\n{end_of_image}\n';
                     newCursorStart = start + 16;
                     newCursorEnd = start + 16;
+                    break;
+                case 'tab':
+                    textToInsert = '{start_of_tab}\nE|------------------|\nB|------------------|\nG|------------------|\nD|------------------|\nA|------------------|\nE|------------------|\n{end_of_tab}\n';
+                    newCursorStart = start + 15;
+                    newCursorEnd = start + 15;
                     break;
             }
             
@@ -2667,7 +3610,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
                 label.innerText = labels[i] || '';
                 
                 const slot = document.createElement('div');
-                slot.className = 'w-6 h-6 border border-slate-300 rounded flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors text-[12px] font-bold';
+                slot.className = 'w-6 h-6 border border-black rounded flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors text-[12px] font-bold';
                 slot.dataset.index = i;
                 slot.onclick = () => toggleStrumSlot(i);
                 updateStrumSlotUI(slot, i);
@@ -2696,7 +3639,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
             const val = currentStrummingPattern[index];
             slot.innerHTML = val === 'D' ? '↓' : (val === 'U' ? '↑' : '');
             
-            let colorClasses = 'bg-white text-black border-slate-300 hover:bg-slate-100';
+            let colorClasses = 'bg-white text-black border-black hover:bg-slate-100';
             if (val === 'D') {
                 colorClasses = 'bg-blue-600 text-white border-blue-700';
             } else if (val === 'U') {
@@ -2732,6 +3675,7 @@ Jo[Am]lene, Jo[C]lene, Jo[G]lene, Jo[Am]lene
         initChordBuilder();
         initFretboard();
         initStrummingGrid();
+        initTabCreator();
         
         // Scroll indicator listener
         const topNav = document.getElementById('top-nav');
